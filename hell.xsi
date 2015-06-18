@@ -1,0 +1,8 @@
+class name=hello
+  handler name=open
+    p:    we have recieived yout requests. in xml, it reads
+      pre:
+         xse:copyelement xse:from=/form;
+    p: we will handle it with;   
+         xse:copyelement xse:from=!handler
+      

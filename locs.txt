@@ -1,0 +1,34 @@
+#   File locking, databases or action queues
+
+
+
+= Details =
+
+==File locking==
+I've been working on a file locking mechanism. I wrote quite an overkill compared to what it has so far been doing which is basically
+
+ * Disallow opening the htmi (object) file by other processess until the current handler has finished.
+ * ability to free the file if no changes are planned from the current handler
+ * ability to override the locks by other processes after waiting for sufficiently long
+
+The framework I wrote will allow to later add stuff like
+ * Types of locks (read/write access, locks persisting after the handler is done)
+ * priorities (who can override which types of locks)
+ * different actions associated with being locked out by different types of locks
+
+While writing the stuff I started to feel that file locking is not the best answer to system integrity issues.
+
+==Subtree locking==
+Ideally, locks should not work on file-bases, but on xml-subtrees. This can actually be quite easy to implement. Except when you start to think about ways of specifying the subtrees. 
+
+To make things simple, we could restrict locking to elements with ID's. So locking with file-name (url) and ID would lock an element and all its sub-elements. I'll start with that. However, I have a feeling that we could work magic with different types of locks. I'll try to work out some issues (maybe) related to this in next session.
+
+==Canonical and non-canonical xpaths, and element identity==
+
+I think I'm stipulating a meaning for canonical paths different from w3.orgs'. Sorry, but here goes. By canonical path I mean full path in the form /root/subnodetype/ord]/sub..... Something like "the third P of the second DIV in the third DIV of the BODY of the HTML. HTML/BODY/DIV[2]/P[3]And let's relax this by stating that the full path from the top can be left out it the element has a unique ID. If the third div has ID="CONTENT" then the path could be #CONTENT/P2.
+
+Perhaps we should leave out the node-types as well and use pathts like /1/1/2/3 or #CONTENT/3 (note: text-nodes pose a problem as essentially the same XML can have different numbers of text nodes. But I'll ignore that for the moment).
+
+If someone is working on a part of text and wants to lock that text while allowing all other changes we run into complications if the part in question does not have an id (someone may insert nodes before it, so the numbering would change). A simple, and perhaps sufficient solution would be to allow locking only for nodes that have ID's. Before sub
+
+

@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="7">
+      <Unit0>
+        <Filename Value="clips.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="clips"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="19" Y="10"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="clip.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="clip"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="5" Y="9"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="myclips.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="myclips"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="44" Y="6"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="clipbrd.inc"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="722"/>
+        <CursorPos X="1" Y="778"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="clipbrd.pp"/>
+        <UnitName Value="Clipbrd"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="207"/>
+        <CursorPos X="14" Y="210"/>
+        <UsageCount Value="12"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/include/clipbrd.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="722"/>
+        <CursorPos X="1" Y="778"/>
+        <UsageCount Value="12"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <UnitName Value="Menus"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="430"/>
+        <CursorPos X="3" Y="458"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit6>
+    </Units>
+    <General>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <JumpHistory Count="14" HistoryIndex="13">
+      <Position1>
+        <Filename Value="clip.pas"/>
+        <Caret Line="18" Column="19" TopLine="1"/>
+      </Position1>
+      <Position2>
+        <Filename Value="clip.pas"/>
+        <Caret Line="55" Column="1" TopLine="20"/>
+      </Position2>
+      <Position3>
+        <Filename Value="clip.pas"/>
+        <Caret Line="56" Column="1" TopLine="14"/>
+      </Position3>
+      <Position4>
+        <Filename Value="clip.pas"/>
+        <Caret Line="53" Column="24" TopLine="24"/>
+      </Position4>
+      <Position5>
+        <Filename Value="clip.pas"/>
+        <Caret Line="63" Column="8" TopLine="12"/>
+      </Position5>
+      <Position6>
+        <Filename Value="clip.pas"/>
+        <Caret Line="55" Column="32" TopLine="12"/>
+      </Position6>
+      <Position7>
+        <Filename Value="clip.pas"/>
+        <Caret Line="75" Column="7" TopLine="27"/>
+      </Position7>
+      <Position8>
+        <Filename Value="clip.pas"/>
+        <Caret Line="69" Column="24" TopLine="29"/>
+      </Position8>
+      <Position9>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <Caret Line="458" Column="3" TopLine="1"/>
+      </Position9>
+      <Position10>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <Caret Line="1" Column="3" TopLine="1"/>
+      </Position10>
+      <Position11>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <Caret Line="458" Column="3" TopLine="430"/>
+      </Position11>
+      <Position12>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <Caret Line="434" Column="43" TopLine="412"/>
+      </Position12>
+      <Position13>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <Caret Line="457" Column="3" TopLine="430"/>
+      </Position13>
+      <Position14>
+        <Filename Value="/usr/lib/lazarus/1.0.10/lcl/menus.pp"/>
+        <Caret Line="458" Column="3" TopLine="430"/>
+      </Position14>
+    </JumpHistory>
+  </ProjectSession>
+</CONFIG>

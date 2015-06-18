@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Compiler Value="/usr/bin/ppcx64" Date="1363520124"/>
+  <Params Value=" -MObjFPC -Scghi -O1 -Tlinux -Px86_64 -g -gl -vewnhi -Fu/home/t/xseus/synapse -Fu/home/t/xseus/ -l ux4.pas"/>
+  <Complete Value="False"/>
+</CONFIG>

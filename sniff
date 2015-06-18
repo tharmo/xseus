@@ -1,0 +1,4 @@
+sudo tcpdump ip host 37.139.30.171 and not port 5901 -q>xse.log
+
+
+

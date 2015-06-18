@@ -1,0 +1,526 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <General>
+      <Flags>
+        <MainUnitHasUsesSectionForAllUnits Value="False"/>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+      </Flags>
+      <MainUnit Value="0"/>
+      <Title Value="xseus"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+      <Icon Value="0"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <i18n>
+      <EnableI18N LFM="False"/>
+    </i18n>
+    <VersionInfo>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="1" Active="Default">
+      <Item1 Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <CommandLineParams Value="-r"/>
+        <LaunchingApplication PathPlusParams="/usr/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="2">
+      <Item1>
+        <PackageName Value="lazdaemon"/>
+        <MinVersion Valid="True"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+    </RequiredPackages>
+    <Units Count="33">
+      <Unit0>
+        <Filename Value="xseus.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xseus"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="5" Y="42"/>
+        <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="xsesvc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="xsesvc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="28"/>
+        <CursorPos X="5" Y="29"/>
+        <UsageCount Value="202"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="xseftp.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xseftp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="28"/>
+        <UsageCount Value="202"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="xsesmtp.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsesmtp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="309"/>
+        <CursorPos X="1" Y="360"/>
+        <UsageCount Value="202"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="xseproxy.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="xseproxy"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="15" Y="26"/>
+        <UsageCount Value="202"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="xserdf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xserdf"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="17" Y="6"/>
+        <UsageCount Value="202"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="xsecgi.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsecgi"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="635"/>
+        <CursorPos X="89" Y="654"/>
+        <UsageCount Value="216"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="xsefun.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsefun"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4424"/>
+        <CursorPos X="52" Y="4446"/>
+        <UsageCount Value="216"/>
+        <Bookmarks Count="1">
+          <Item0 X="39" Y="1385" ID="0"/>
+        </Bookmarks>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="xsexml.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsexml"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="254"/>
+        <CursorPos X="17" Y="306"/>
+        <UsageCount Value="216"/>
+        <Bookmarks Count="1">
+          <Item0 X="58" Y="378" ID="9"/>
+        </Bookmarks>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="xsexse.pas"/>
+        <UnitName Value="xsexse"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="7472"/>
+        <CursorPos X="9" Y="7500"/>
+        <UsageCount Value="102"/>
+        <Bookmarks Count="1">
+          <Item0 X="1" Y="1" ID="1"/>
+        </Bookmarks>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="xserver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="xseusform"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="xserver"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="516"/>
+        <CursorPos X="35" Y="632"/>
+        <UsageCount Value="217"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="xsecomp.pas"/>
+        <UnitName Value="xsecomp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2058"/>
+        <CursorPos X="11" Y="2086"/>
+        <UsageCount Value="117"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="xsesta.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsesta"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="16"/>
+        <CursorPos X="30" Y="57"/>
+        <UsageCount Value="206"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="xseexp.pas"/>
+        <UnitName Value="xseexp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="488"/>
+        <CursorPos X="61" Y="511"/>
+        <UsageCount Value="106"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="uhashedstringlist.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uHashedStringList"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="218"/>
+        <CursorPos X="31" Y="247"/>
+        <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="xsedae.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsedae"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="46"/>
+        <CursorPos X="7" Y="70"/>
+        <UsageCount Value="201"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="xsecmd.pas"/>
+        <UnitName Value="xsecmd"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="104"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="xsereg.pas"/>
+        <UnitName Value="xsereg"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2725"/>
+        <CursorPos X="24" Y="2767"/>
+        <UsageCount Value="124"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="indy/IdHTTPProxyServer.pas"/>
+        <UnitName Value="IdHTTPProxyServer"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="136"/>
+        <CursorPos X="12" Y="256"/>
+        <UsageCount Value="81"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="/usr/share/fpcsrc/2.4.4/packages/fcl-extra/src/daemonapp.pp"/>
+        <UnitName Value="daemonapp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="391"/>
+        <CursorPos X="10" Y="406"/>
+        <UsageCount Value="19"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="idhttp.pas"/>
+        <UnitName Value="IdHTTP"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2603"/>
+        <CursorPos X="20" Y="2642"/>
+        <UsageCount Value="87"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="xsemuu.pas"/>
+        <UnitName Value="xsemuu"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="127"/>
+        <CursorPos X="2" Y="154"/>
+        <UsageCount Value="89"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="synapse/blcksock.pas"/>
+        <UnitName Value="blcksock"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="709"/>
+        <CursorPos X="14" Y="730"/>
+        <UsageCount Value="64"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="ssl_libssh2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ssl_libssh2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="3" Y="23"/>
+        <UsageCount Value="399"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="xsynser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="xseusform"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="xsynser"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1354"/>
+        <CursorPos X="30" Y="1371"/>
+        <UsageCount Value="525"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="xsedb.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xsedb"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="38" Y="21"/>
+        <UsageCount Value="249"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="synapse/httpsend.pas"/>
+        <UnitName Value="httpsend"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="38"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="xsetimers.pas"/>
+        <UnitName Value="xsetimers"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="28"/>
+        <CursorPos X="4" Y="78"/>
+        <UsageCount Value="15"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="/usr/lib/lazarus/0.9.30.2/lcl/forms.pp"/>
+        <UnitName Value="Forms"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1294"/>
+        <CursorPos X="15" Y="1320"/>
+        <UsageCount Value="10"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="xserver.lfm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="12" Y="1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="indy/IdGlobal.pas"/>
+        <UnitName Value="IdGlobal"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4185"/>
+        <CursorPos X="3" Y="4229"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="xseindy.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="xseindy"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="19"/>
+        <CursorPos X="39" Y="29"/>
+        <UsageCount Value="26"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="trashedcode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="trashedcode"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="86"/>
+        <CursorPos X="19" Y="128"/>
+        <UsageCount Value="22"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit32>
+    </Units>
+    <JumpHistory Count="11" HistoryIndex="10">
+      <Position1>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="617" Column="13" TopLine="602"/>
+      </Position1>
+      <Position2>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position2>
+      <Position3>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="696" Column="35" TopLine="650"/>
+      </Position3>
+      <Position4>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="697" Column="30" TopLine="651"/>
+      </Position4>
+      <Position5>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="729" Column="34" TopLine="683"/>
+      </Position5>
+      <Position6>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="743" Column="33" TopLine="697"/>
+      </Position6>
+      <Position7>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="751" Column="37" TopLine="705"/>
+      </Position7>
+      <Position8>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="63" Column="15" TopLine="36"/>
+      </Position8>
+      <Position9>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="617" Column="23" TopLine="509"/>
+      </Position9>
+      <Position10>
+        <Filename Value="xserver.pas"/>
+        <Caret Line="660" Column="1" TopLine="544"/>
+      </Position10>
+      <Position11>
+        <Filename Value="xseus.lpr"/>
+        <Caret Line="11" Column="6" TopLine="1"/>
+      </Position11>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <SearchPaths>
+      <IncludeFiles Value="xindy;$(ProjOutDir)"/>
+      <OtherUnitFiles Value="indy;synapse"/>
+      <UnitOutputDirectory Value="bin"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="Delphi"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="linux"/>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <UseExternalDbgSyms Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+      <Options>
+        <PassLinkerOptions Value="True"/>
+      </Options>
+    </Linking>
+    <Other>
+      <Verbosity>
+        <ShowWarn Value="False"/>
+        <ShowHints Value="False"/>
+        <ShowAllProcsOnError Value="True"/>
+        <ShowSummary Value="True"/>
+      </Verbosity>
+      <WriteFPCLogo Value="False"/>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
+      <CompilerPath Value="$(CompPath)"/>
+      <ExecuteBefore>
+        <ScanForMakeMsgs Value="True"/>
+      </ExecuteBefore>
+      <ExecuteAfter>
+        <ScanForMakeMsgs Value="True"/>
+        <ShowAllMessages Value="True"/>
+      </ExecuteAfter>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsGlobal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="dae.pas"/>
+        <Line Value="132"/>
+      </Item1>
+    </BreakPoints>
+    <Watches Count="5">
+      <Item1>
+        <Expression Value="appta"/>
+      </Item1>
+      <Item2>
+        <Expression Value="DOELEMENTS"/>
+        <Enabled Value="False"/>
+      </Item2>
+      <Item3>
+        <Expression Value="inihead"/>
+        <Enabled Value="False"/>
+      </Item3>
+      <Item4>
+        <Expression Value="xs.x_connections"/>
+        <Enabled Value="False"/>
+      </Item4>
+      <Item5>
+        <Expression Value="didparsepath"/>
+        <Enabled Value="False"/>
+      </Item5>
+    </Watches>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

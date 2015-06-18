@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="12">
+      <Unit0>
+        <Filename Value="uusxseus.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uusxseus"/>
+        <TopLine Value="1"/>
+        <CursorPos X="27" Y="12"/>
+        <FoldState Value=" TM hK1102233 TIQ22 TLZ09 T0iW2dr"/>
+        <UsageCount Value="108"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="xserver.pas"/>
+        <ComponentName Value="xseusform"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="xserver"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="607"/>
+        <CursorPos X="3" Y="613"/>
+        <UsageCount Value="54"/>
+        <Bookmarks Count="1">
+          <Item0 X="1" Y="143" ID="1"/>
+        </Bookmarks>
+      </Unit1>
+      <Unit2>
+        <Filename Value="xsefun.pas"/>
+        <UnitName Value="xsefun"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="123"/>
+        <CursorPos X="1" Y="150"/>
+        <UsageCount Value="54"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="xsexse.pas"/>
+        <UnitName Value="xsexse"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="5653"/>
+        <CursorPos X="27" Y="5658"/>
+        <UsageCount Value="54"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="synapse/blcksock.pas"/>
+        <UnitName Value="blcksock"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="962"/>
+        <CursorPos X="14" Y="986"/>
+        <UsageCount Value="54"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="synapse/synsock.pas"/>
+        <UnitName Value="synsock"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="10" Y="68"/>
+        <UsageCount Value="54"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="synapse/ssl_openssl.pas"/>
+        <UnitName Value="ssl_openssl"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="73"/>
+        <CursorPos X="3" Y="99"/>
+        <UsageCount Value="54"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="xseexp.pas"/>
+        <UnitName Value="xseexp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="2" Y="22"/>
+        <UsageCount Value="54"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="xsexml.pas"/>
+        <UnitName Value="xsexml"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="143"/>
+        <CursorPos X="3" Y="197"/>
+        <UsageCount Value="54"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="synapse/ssfpc.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="554"/>
+        <CursorPos X="47" Y="605"/>
+        <UsageCount Value="33"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="xsecgi.pas"/>
+        <UnitName Value="xsecgi"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="25"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="ux3.lpr"/>
+        <UnitName Value="ux3"/>
+        <IsVisibleTab Value="True"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="17" Y="12"/>
+        <UsageCount Value="10"/>
+      </Unit11>
+    </Units>
+    <JumpHistory Count="0" HistoryIndex="-1"/>
+  </ProjectSession>
+</CONFIG>

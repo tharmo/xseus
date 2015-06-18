@@ -1,0 +1,34 @@
+ Xseus alkaa olla pian jonkinlaisessa tuotantokunnossa. Tein aika paljon muutoksia perustuksiin, ja kaikenlaista jäi huomaamatta, mutta pikkuhiljaa alkaa olla muistivuodot yms tukittu.  Aattelin kuitenkin kiiruhtaa hitaasti ja vielä pitää auki jotain asioita joten ei kannata vielä ruveta yrittämään sillä mitään tuotantoon .
+-------------------
+Itse yritän kuitenkin siirtyä xseun rakentamisesta xseulla rakentamiseen.
+Kirjoittamistyökalu ehkä ekaksi. Prosessikirjoittaminen: Prewriting (käsitekarttoja,  ontologioita, outliningia, ehkä xseus proxy joka laittaa surffaushistoriaa talteen...); Writing (ADHD-markup, eli ideoiden ja tagien merkkausta ilman että tarttee irroittaa sormia näppikselta); Review (some-kaluja, keltalappukommentteja, reverse outlining-ideall jotain); Rewriting (versiointia  -xml dif olis kiva); Process control (6 hats, somekaluja)
+
+-------------------
+Rakentaminen olis kiva tehdä bootstrappaamalla niin että sitä tehtäisiin sillä itsellään. Pitäisi saada  serveri pystyyn.  Näyttää olevan cloud serverit niin halpoja ettei kannata omalle koneelle hankkia serveripiuhoja.
+
+Melkein kaikki hostauspalvelut (vps, cloud vps) mitä alkuun katselin osoittautuivat 
+saman jätin, http://en.wikipedia.org/wiki/Endurance_International_Group , salanimiksi.  Ehkä jätän ne suosiosta väliin
+
+Jäljellä olis mm. tällaisia
+
+www.digitalocean.com
+http://www.edis.at  
+www.arvixe.com/
+www.1and1.com
+
+Olin katsovinani että kymmenkunta euroa/kk sais ihan kohtuullisen palvelun.
+
+--------------------
+
+
+Tietokantajuttuja aattelin jossain vaiheessa rakennella, mutta koitan nyt kovasti tapella tuota haluani vastaan. Triplestoret kiehtoavat, siis sellaisen integroiminen zseuhun. http://en.wikipedia.org/wiki/Triplestore. Tai vielä hullumpaa, oman sellaisen rakentaminen.
+
+Yks syy miksi triplet kiinnostavat juontaa siihen että rupesin opiskelemaan venäjää ja sitten aattelin rakennella jotain yleisempää kieltenopiskelusysteemiä. Sitä miettiessäni törmäsin wordnettiin (tsekatkaa http://wordnet.rkbexplorer.com/), ja tuontyyppinen data vaatis jotain tuollaisia työkaluja.  
+
+Tolla vois sitten tehdä myös runokoneen, ja miksei kirjoittamissysteemiin palikkaa jossa ohjelma vois vilautella  aiheeseen liittyviä sanoja pyydettäessä.
+
+__________________
+Mulla alkaa remontti olla vasta nyt valmistumassa. Jotain bilettä siinä tyhteydessä järjestelen, ja pienimuotoisen xseus-seminaarin varmaan pidän samalla myymälässä, jahka saan tänne tykin ja kankaan. Lähiaikoina lisää tästä.
+
+ -Timo
+

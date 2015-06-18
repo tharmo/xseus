@@ -1,0 +1,1435 @@
+unit xseexp;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+{After adding support for infix-operators, this got to be very confusing.
+Needs some refactoring - probably starting with the infix-part.
+
+}
+interface
+uses
+  {$IFNDEF LCL} //Windows,
+  Messages, {$ELSE} LclIntf, LMessages, LclType, {$ENDIF}
+  xseglob, xsexml,xsexse,
+  //xsesta,
+  SysUtils,variants,  xmd5,
+  xsereg, xsefunc,
+  Classes;
+
+type texpr=class(tobject)
+ vali:string;//explistx,
+ protected
+ inquote:boolean;
+ typ:char;namedpar:boolean;
+ subexp:tlist;par:texpr;
+ bracks:integer;
+ procedure list;
+ procedure clear;
+ constructor create(pare:texpr;t:char;reglist:tlist);
+end;
+//const   const_opers ='&|<>=<=+-\^';  //remember / is also xpath
+const   const_opers ='&|<>=<=+';  //remember / is also xpath
+   //shit! * is also wildcard. use div(a,b) times(a,b) instead.
+
+//function _substitute(st:string;xs:tobject):string;
+//function _substitute(st:string;xs:tobject):string;
+function _docompute(mathtag:ttag;xs:txseus;atstr:string):string;
+function parsexse(st:ansistring;xs:txseus):ansistring;
+//function parsexpart(st:ansistring;var sta:integer;xs:txseus;ininfix,needtowrite:boolean;var got tafree:boolean):ansistring;
+//function doparsexpart(st:ansistring;var sta:integer;xs:txseus):ansistring;
+
+function _p_infix(st:ansistring;var sto:integer;xs:txseus;inival:string):ansistring;
+function p_selroot(st:string;xs:txseus;curtag:ttag; var sta:integer;  needtowrite: boolean; var gottafree:ttag): ttag;
+function parsexpart(st:ansistring;var sta:integer;xs:txseus;ininfix,needtowrite:boolean;var gottafree:ttag):ansistring;
+function parsefromele(ele:ttag;st:string):string;
+implementation
+uses xsemisc,Synautil;
+//function parsexpart(st:ansistring;var sta:integer;xs:txseus;ininfix,needtowrite:boolean;var gottafree:ttag):ansistring;forward;
+function parsefromele(ele:ttag;st:string):string;
+var ii:integer;gottafree,cb:ttag;
+begin
+ ii:=1;
+  cb:=txseus(t_currentxseus).curfromele;
+  txseus(t_currentxseus).curfromele:=ele;
+  try
+   result:=parsexpart(st,ii,t_currentxseus,false,false,gottafree);//,true);
+
+  finally
+    txseus(t_currentxseus).curfromele:=cb;
+    //writeln('<li>prspar:<b>',st,'</b>',result,'/from:',ele.head);
+  end;
+ end;
+function doparsexpart(st:ansistring;var sta:integer;xs:txseus;ininfix:boolean):ansistring;
+var needtowrite,gottafree:ttag;
+begin
+  result:=parsexpart(st,sta,xs,ininfix,false,gottafree);//,true);
+end;
+function _getstring(st:string;sta:integer;var sto:integer):string;
+begin
+  result:='';
+  sto := sta+1;
+  while sto<=length(st) do
+  begin
+      if st[sto]='''' then
+      begin          // writeln('<li>STEND:'+result+'!',sto,'!'+copy(st,sto,999),'!');
+      sto:=sto+1;
+      exit
+
+      end
+      else
+      result:=result+st[sto];
+      sto:=sto+1;
+
+  end;
+end;
+function _getnum(st:string;sta:integer;var sto:integer):string;
+begin
+   result:=st[sta];
+  sto := sta+1;
+  while sto<=length(st) do
+  begin
+      if pos(st[sto],'0123456789E.')<1 then exit else
+      result:=result+st[sto];
+      sto:=sto+1;
+  end;
+end;
+function _fetchst(findfrom,tofind:string;sta:integer;var sto:integer;maxlen:integer):string;
+var i,posi:integer;startst:string;
+begin
+  startst:=copy(findfrom,sta,sta+maxlen);
+  posi:=pos(tofind,startst);
+  if posi>0 then
+  begin
+    sto:=sta+posi+length(tofind)-1;
+    result:=copy(startst,1,posi-1);
+    //writeln('<li>fetch:'+tofind+'/found:<b>',result,'</b>_',copy(findfrom,sto,length(findfrom)));
+  end;
+end;
+function _uptoany(findfrom,tofind:string;sta:integer;var sto:integer;maxlen:integer):string;
+var i,posi:integer;startst:string;
+begin   //UGLY!
+   result:='';
+   //for i:=sta to sta+length(findfrom) do //maxlen do
+   for i:=sta to length(findfrom) do //maxlen do
+    if pos(findfrom[i],tofind)>0 then
+    begin
+     posi:=i;
+     break;
+    end else posi:=i;
+  if posi=sta+maxlen then sto:=posi else
+  begin
+    sto:=posi+1;
+    result:=copy(findfrom,sta,posi-sta); //'' if not found
+  end;
+  //writeln('<li>fetch:'+tofind+'/found:<b>',result,'/</b>_',sta,'-',sto);
+end;
+
+function _getrela(rela:trelation;st:string;var sta:integer):ttag;
+//var rel:trelation;
+begin
+// ( xs.x_relation,sta)
+  sta:=sta+1;
+  //writeln('<li>rel:',ttag(rela.toselected).vari);
+  while st[sta]='&' do
+  begin
+    //ttag(xs.x_relation.toselected);
+    rela:=rela.prev;
+    sta:=sta+1;
+    //try writeln('<li>Rel:',ttag(rela.toselected).vari,'</li>');
+    //except writeln('<li>nillrela');writeln(rela.toselector+'!'+rela.fromselector);  end;
+  end;
+  result:=rela.toselected
+end;
+
+function p_selroot(st:string;xs:txseus;curtag:ttag; var sta:integer;  needtowrite: boolean; var gottafree:ttag): ttag;
+
+                   //st,       xs,       xs.CurFromEle,sta,            gottafree) else  //rememner to add remembertofree
+var
+  res,newtag, atag: ttag;
+  txt, loc,spec,apust: string;
+  rl: TList;
+  i, apui: integer;
+  //rest: string;
+  //needtowrite: boolean; gottafree: boolean;
+begin
+ //writeln('<li>getroot:'+copy(st,sta,100),'!</li>',st,sta);
+ //t_debug:=true;
+  try
+ // t_debug:=true;
+  if st[sta]='!' then
+  begin
+    sta:=sta+1;
+    //for i:=sta to
+    spec:=_uptoany(st,'(/',sta,sta,10);
+   //WHY THIS: if st[sta-1]='/' then sta:=sta-1;
+    //t_debug:=true;  =!from/
+    //function _fetchst(findfrom,tofind:string;{var} sto:integer;sta,maxlen:integer):string;
+    //if t_debug then
+    //writeln('<li>specifier:'+spec+'!/from:'+loc+'!/rest:'+copy(st,sta,100),'!</li>');
+    Res := nil;
+    gottafree := nil;
+    //rest := '';
+    if spec = '' then
+    begin
+      Res := nil;
+      //rest := '';
+    end else
+
+    if spec='file' then
+    begin
+        loc:=_uptoany(st,')',sta,sta,100);
+        //writeln('remembertofree:',st,appta.vari);
+        apust := _indir(loc, xs.x_outdir, xs, needtowrite);
+        //if t_debug then
+        //writeln('<li>getfile:'+apust+'/rest:'+copy(st,sta,9999));
+        Res := tagfromfile(apust, nil);
+        gottafree := res;
+        //gottafree.addATT('xse_filename='+APUST);
+        //if t_debug then
+        //writeln('<li>gotfile:'+res.xmlis);
+        exit;
+     end
+     else
+     if spec='http' then
+     begin            //writeln('gggggggggggggggg');
+        loc:=_uptoany(st,')',sta,sta,100);
+         if t_debug then
+        writeln('<li>geturl:'+apust+'!'+copy(st,sta,9999));
+        apust := _httpget('http://'+loc, -1, nil);
+        Res := tagparse(apust,false,true);
+        gottafree := res;
+        if t_debug then writeln('<li>gotfile:'+res.xmlis);
+        exit;
+      end else
+      if spec='list' then
+      begin
+         loc:=_uptoany(st,')',sta,sta,100);
+         res:=_listtotag(loc,'');
+         gottafree:=res;
+         //rest:='';
+      end else
+      if (spec = 'bookmark') or (spec = 'bm')  then ////***BOOKMARKS
+      begin
+       try
+       //writeln('<li>getbookmark:',sta,st);
+       loc:=_uptoany(st,')',sta,sta,100);
+       //writeln('/:',loc,'_',sta);
+       if sta<length(st) then if  st[sta]='/' then sta:=sta+1; //UGLY
+        //writeln('<li>bookmarx/:!!!',loc,'!!!',length(st),'!<b>',copy(st,sta,999)+'!</b>');
+        res := xs.x_bookmarks.subt(loc);
+        if (res<>nil) and (res.subtags.count>0) then res:=res.subtags[0] else res:=nil;
+        if res<>nil then writeln('@@@'+loc+'!<pre>'+res.xmlis+'</pre>',copy(st,sta,99)+'!</li>')
+        //if res<>nil then writeln('@@@'+loc+'!'+res.vari+'!rest:',copy(st,sta,99)+'!</li>')
+        //else writeln('NOBOOKM:<pre>!',xs.x_bookmarks.xmlis,'!</pre>');
+       except   writeln('< --nononbiik-->');res:=nil; end;
+     end
+      else
+      if spec = 'to' then //***RESTAG
+      begin
+        Res := xs.curtoele;
+        try
+       // writeln('<li>FromTo:'+res.HEAD+'/with:'+copy(st,sta,100)+'!');
+       // writeln('<li>FromTo2:'+'/UNDER'+RES.PARENT.HEAD);
+        except     writeln('<li>didtryto'); end;
+      end else
+      if spec = 'toroot' then //***RESTAG
+      begin
+        Res := xs.curtoele;
+        try
+        try
+        //writeln('<li>*****up1.'+res.vari);
+        except    writeln('<li>curtoeleFAIL</li>'); end;
+        if res.parent<>nil then
+        while res.parent.parent<>nil do
+        //while res.parent<>nil do
+        begin
+          //writeln('<li>up.'+res.parent.vari);
+          res:=res.parent;
+        end;
+        //if t_debug then
+        //writeln('<li>gottopar:'+res.vari+'!');
+        except    writeln('<li>noparents:'+res.vari); end;
+      end else
+    if spec = 'from' then
+    begin
+      Res := xs.curfromele;
+     end else
+     if spec = 'fromroot' then
+     begin
+       Res := xs.curfromele;
+      try
+      while res.parent<>nil do
+        res:=res.parent;
+      if t_debug then writeln('<li>gottopar:'+res.subs('../../@element()'));
+      except    writeln('<li>noparents:'+res.vari); end;
+     end
+     else
+     if spec = 'class' then ////***handerslers
+     begin
+          Res := xs.x_handlers;
+          //writeln('<li>ROOTELE:'+copy(res.xmlis,1,100)+'/rest:',copy(st,sta,99));
+     end else
+    if spec = 'handler' then ////***handerslers
+    begin
+       Res := xs.x_myhandler;
+      //writeln('<li>ROOTELE:'+copy(res.xmlis,1,100)+'/rest:',copy(st,sta,99));
+     end
+     else
+     if spec = 'by' then ////***handerslers
+          Res := xs.curbyele
+     else
+        Res := nil;
+     if st[sta]='/' then begin writeln('GET:'+copy(st,sta,999));sta:=sta+1;end;  //breaks something? We don't want the leading "/" ... ever?
+   end
+   else
+   if st[sta]='/' then
+   begin
+    res:=xs.xml;sta:=sta+1;
+   end else
+   if st[sta]='&' then
+   begin
+     res:=_getrela(xs.x_relation,st,sta);// ttag(xs.x_relation.toselected);sta:=sta+1;
+     //while st[sta]='&' do res:=
+     //writeln('gotrel:'+res.xmlis);
+
+   end
+   else begin res:=curtag;//writeln('<li>gotroot:'+res.xmlis);
+   end;
+  finally
+   result:=res;
+   //t_debug:=false;
+  end;
+end;
+{type tpollists=class(tobject)
+stac,que:tstringlist;
+procedure addstac;
+procedure addque;
+constructor create;
+destructor free;
+end;
+procedure tpollists.addstac;
+begin
+end;
+procedure tpollists.addque;
+begin
+end;
+constructor tpollists.create;
+begin
+ stac:=tstringlist.create;
+ que:=tstringlist.create;
+end;
+destructor tpollists.free;
+begin
+end;
+}
+type tpollist=class(tstringlist)
+procedure addop(x:string);
+procedure addval(x:string);
+procedure insop(x:string);
+procedure insval(x:string);
+procedure moveto(pos:integer;other:tpollist);
+end;
+procedure tpollist.addop(x:string);
+begin
+  addobject(x,pointer(1));
+end;
+procedure tpollist.addval(x:string);
+begin
+ addobject(x,pointer(0));
+end;
+procedure tpollist.insop(x:string);
+begin
+  insertobject(0,x,pointer(1));
+end;
+procedure tpollist.insval(x:string);
+begin
+ insertobject(0,x,pointer(0));
+end;
+procedure tpollist.moveto(pos:integer;other:tpollist);
+begin
+other.addobject(strings[pos],objects[pos]);
+delete(pos);
+end;
+
+function _p_infix(st:ansistring;var sto:integer;xs:txseus;inival:string):ansistring;
+//infix operator parse ... stardart notation via reverse polish
+var stac,que:tpollist;
+  function _deb(stl:tstringlist):string;
+  var i:integer;
+  begin
+     if stl=stac then result:='STACK:' else result:='QUEUE:';
+     for i:=0 to stl.count-1 do
+      result:=result+'('+inttostr(i+1)+','+stl[i]+') ';
+  end;
+
+  function parsest(infix:string):tstringlist;
+  var ii,j,k,oppos,turha:integer;ch,val:string;push:boolean;nextoper,thisoper,xtraparenth:boolean;
+  begin
+   // try
+   // t_debug:=true;
+    if inival<>'' then
+    begin que.addval(INIVAL);nextoper:=true;
+    //writeln('<li><b>NEWone:'+ch+'</b>!',sto,'!'+copy(st,sto,999),'/o:',nextop,_deb(stac),_deb(que),'/in:',xs.curfromele.vari);
+    end
+    else
+    nextoper:=false;
+    //for i:=1 to  length(infix) do
+    if t_debug then writeln('/parsepart:',sto,'!',length(infix));
+    while sto<length(infix)+1 do
+    begin
+      thisoper:=nextoper;
+       if t_debug then writeln('?'+ch+'!');
+      ch:=infix[sto];
+      if ch=',' then break;
+      if (ch=' ') then begin sto:=sto+1;continue;end;
+      if (ch=';') then break;
+      if t_debug then  writeln('<li><b>trypone:'+ch+'</b>!',sto,'!'+copy(st,sto,999),'/o:',nextoper,_deb(stac),_deb(que));
+
+      if (pos(ch,const_opers)>0) then
+        begin
+          //writeln('TRYOP');
+           if not (nextoper) then que.addval(''); //ran into operator before there was sthng to operate on
+           val:=ch;
+           sto:=sto+1;
+           if (pos(ch,'<>')>0) and (pos(infix[sto],'=>')>0) then
+           begin val:=ch+infix[sto];sto:=sto+1;
+           end;
+           if t_debug then  writeln('<li>GOTOP:'+val+'!',sto,'!'+copy(st,sto,999),'!',infix,sto,'(nop:',nextoper,')',_deb(stac),_deb(que));
+           nextoper:=false;
+        end else
+        if (pos(ch,'()')>0) then
+        begin
+          sto:=sto+1;
+          val:=ch;
+          if t_debug then writeln('<li>GOT():'+val+'!',sto,'!'+copy(st,sto,999),'!',_deb(stac),_deb(que));
+          nextoper:=ch=')';
+        end else
+        if ch='''' then
+        begin
+           val:=_getstring(st,sto,sto);
+           if t_debug then writeln('<li>GOTST:'+val+'!',sto,'!'+copy(st,sto,999),'!',_deb(stac),_deb(que),'/rest:',copy(infix,sto,999));
+           nextoper:=true;
+         end
+         else
+         if pos(ch,'-1234567890')>0 then
+         begin
+              nextoper:=true;
+              val:=_getnum(st,sto,sto);
+              //if t_debug then writeln('<li>GOTNUM:'+val+'!!'+copy(st,sto,999),'!',_deb(stac),_deb(que));
+         end
+         ELSE
+         begin
+            nextoper:=true;
+             //if t_debug then
+             //writeln('<ul><li>Tryxpart:'+ch+'!',sto,'!'+copy(st,sto,999),'!',_deb(stac),_deb(que),'/rest:',copy(infix,sto,999));
+             try
+             //t_debug:=false;
+             turha:=sto;
+             val:=doparsexpart(st,sto,xs,true);  //,true);
+             if turha=sto then begin writeln('<li>gettin:'+val,'/got nothin from:',copy(st,sto,999),'!');break;end;
+             //t_debug:=true;
+             finally
+               //if t_debug then
+               //writeln('<li>GOTPATH:'+val+'!',sto,'!'+copy(st,sto,999),'!',_deb(stac),_deb(que),'/rest:',copy(infix,sto,999)+'</li></ul>');
+               //writeln('<li>triedddpath:/rest:',copy(infix,sto,999));
+             end;
+         end;
+       //if st[sto]<>')' then sto:=sto+1;
+      oppos:=pos(val,const_opers);
+      if t_debug then writeln('<li>oneval<b>[',val,']</b>@',sto,':',oppos,_deb(que)+_deb(stac)+'<b>',thisoper,'/</b></li>');
+      if (oppos>0) and (thisoper) then
+      begin
+        push:=true;
+        j:=0;
+        while j<stac.Count do
+        begin
+          if oppos-1<pos(stac[j][1],const_opers) then
+          begin
+            //is lower than or equal to the precedence of the symbol at the top of the stack,
+            //one element of the stack is popped to the output; the scan pointer is not advanced.
+            //Instead, the symbol being scanned will be compared with the new top element on the stack.
+           //stac.moveto(j,que);
+            que.addobject(stac[j],stac.objects[j]);
+            stac.delete(j);
+            //q:=q+es[j];
+          end else
+          begin //if the symbol being scanned has a higher precedence than the symbol at the top of the stack,
+            //the symbol being scanned is pushed onto the stack and the scan pointer is advanced.
+            stac.insop(val);
+            //stac.insert(0,val);
+           if t_debug then writeln('<li>break: ',val,'/',_deb(stac),_deb(que),'</li>');
+           break;
+          end;
+        end;
+        if (stac.count<1) then stac.addop(val)
+      end else
+      if val=',' then begin writeln('<h1>breakbreak</li>;');break;end else
+      if val='(' then stac.insop(VAL)
+      else if val=')' then
+      begin j:=0;
+        xtraparenth:=true;
+        while j<stac.count do
+         if stac[j]='(' then
+         begin
+           stac.delete(j);
+           xtraparenth:=false;
+           break;
+         end else
+         begin
+            //stac.moveto(j,que);
+            que.addobject(stac[j],stac.objects[j]);
+            stac.delete(j);
+               //writeln('<li><b>goonpar:'+es.text+'</b>(',q.text,')</li>');
+         end;
+        if xtraparenth then
+        begin
+          sto:=sto-1;
+          if t_debug then writeln('<li><b>oepar:'+que.text+'</b>',copy(infix,sto,999),'</li>');
+          result:=que;exit;
+        end
+      end else
+      //que.add(VAL);
+      que.addval(VAL);
+      if t_debug then
+      writeln('<li>didoneinfixtoken:',val,_deb(stac),_deb(que),'/left:',copy(infix,sto,999),'/</li>');
+    end;
+    if t_debug then writeln('/parsedpart:',sto,'!',length(infix));
+    for ii:=0 to stac.count-1 do que.addobject(stac[ii],stac.objects[ii]); //stac.moveto(ii,que); //que.add(stac[ii]);
+    if t_debug then writeln('/addedque:',stac.count,'!',que.count);
+    result:=que;
+
+    //finally t_debug:=false;end;
+  end;
+  function evalpol(pol:tstringlist):string;
+  var i,j,k,n,oppos,a,b:integer;res:tstringlist;c:char;isnum:boolean;
+  begin
+   //t_debug:=true;
+   c:=#0;
+    res:=tstringlist.create;
+    try
+    if t_debug then writeln('<li>DOpol:<b>','</b>/:',pol.COUNT,'</li>');
+    if t_debug then for i:=0 to pol.count-1 do writeln('<li>/POL:',i,'/'+pol[i]+'/');
+    i:=-1;
+    try
+    except writeln('polisnil');end;
+    if pol.count>0 then
+    while i<pol.count-1 do
+    begin
+      if t_debug then
+       writeln('<li>trypol:<b>','</b>/',c,':',pol.COUNT,'</li>');
+      i:=i+1;
+      //WHY DID I WRITE THIS: if pol[i]=';' then begin continue;end;
+      //if pos(pol[i],const_opers)>0 then  if pol.objects[i]=pointer(0) then writeln('<li><xmp>'+ pol[i]+'</xmp>just looks like op');
+
+     if pol.objects[i]=pointer(1) then
+      begin
+        isnum:=true;
+        if t_debug then  writeln('<li>tryop:/<b>/i:',i,'/p:',pol[i],'</b>/',c,':',res.text,RES.COUNT,'</li>');
+        c:=pol[i][1];
+        if t_debug then writeln('<li>TESTOP:',c,'-in:',pol[i],'/',res[0],res[1]);
+        try
+        a:=strtoint(res[1]);
+        b:=strtoint(res[0]);
+        except
+          isnum:=false;
+        end;
+        n:=0;
+        if isnum then
+        begin
+        case c of
+        '*': n:=a*b;
+        '-': n:=a-b;
+        '+': n:=a+b;
+        '/': n:=a div b;
+        '^': n:= round(exp(a*ln(b)));
+        '=': if a=b then n:=1 else n:=0;
+        '<': if length(pol[i])>1 then
+             begin
+              if pol[i][2]='>' then if (a<>b) then n:=1;
+              if pol[i][2]='=' then   if (a>=b) then n:=1;//writeln('<li>TESTNEQ:',c,'-in:',pol[i],'/',a,b,n);
+             end
+             else if (a<b) then n:=1;
+        '>': if length(pol[i])>1 then
+                    begin
+                     n:=0;
+                     if pol[i][2]='=' then if (a>=b) then n:=1;//writeln('<li>TESTNEQ:',c,'-in:',pol[i],'/',a,b,n);
+                    end    else if (a>b) then n:=1 else n:=0;
+        //'>': if a>b then n:=1 else n:=0;
+        '&': begin
+           if ((a=1) and (b=1)) then n:=1 else n:=0;
+           //writeln('evalet:',a,b,n);
+         end;
+        '|': if ((a=1) or (b=1)) then n:=1 else n:=0;
+        end;
+          //writeln('<li>EVALNUMS:',n,'!!!!!!!!!!!!!',pol[i],'//',res[0],':',res[1],res.count,_deb(que)+_deb(stac),'</li>');
+        end
+
+        else
+        begin
+        case c of
+        '=': if res[1]=res[0] then n:=1 else n:=0;
+        //'<': if res[1]<res[0] then n:=1 else n:=0;
+        '>': if res[1]>res[0] then n:=1 else n:=0;
+        '<': begin
+            if length(pol[1])>1 then begin  if (res[1]<>res[0]) then n:=1 else n:=0; end
+             else if (res[0]<res[1]) then n:=1 else n:=0;end;
+        end;
+        //writeln('<li>EVALSTRINGS:',n,'!!!!!!!!!!!!',pol[i],'//',res[0],':',res[1],res.count,_deb(que),_deb(stac),'</li>');
+        //writeln('op was:<xmp>'+c+'</xmp>');
+        end;
+        if res.count>0 then
+        begin
+        res.Delete(0);res.Delete(0);
+        end;
+{
+begin
+  writeln('<li>nonnum:',res[0],':',res[1],'</li>');
+  case c of
+   '=': if res[1]=res[0] then n:=1 else n:=0;
+   '<': if res[1]<res[0] then n:=1 else n:=0;
+   '>': if res[1]>res[0] then n:=1 else n:=0;
+  end;
+end;
+
+}
+        //res:=inttostr(n)+res;
+        if t_debug then writeln('[',pol[i],'(',a,',',b,')=',n,']');
+        res.insert(0,inttostr(n));
+      end
+      else res.insert(0,pol[i]);//res:=pol[i]+res;
+      if t_debug then
+      begin
+      writeln('<li>===',c);
+      for j:=0 to res.count-1 do writeln('[',res[j],']');
+      writeln(pol[i],')</li>');
+      end;
+      //writeln(res,'.');
+    end;
+    if res.count>0 then result:=res[0] else result:='';
+    finally
+      res.free;
+    end;
+  end;
+var res:string;polnot:tstringlist;
+begin
+    stac:=tpollist.create;
+    //t_debug:=true;
+    que:=tpollist.create;  //NOT FREED!
+    try
+    //infnot:=curbyele.att('infix');
+    try
+    polnot:=parsest(st);  //>a,b,^,c,*,d,+
+    //writeln('<li>parsedd:'+st+':'+que.Text+'!');
+    except writeln('<h2>',st,'/parseVALFAIL ');writeln(_deb(que)+_deb(stac)+'</h2>');end;
+    try
+    result:=evalpol(polnot);
+    except writeln('<h2>',st,'/EVALFAIL ');writeln(_deb(que)+_deb(stac)+'</h2>');raise;end;
+    //writeln('<li>infixed:'+st+':'+result+'!');
+ // evaled:?if($empty='','A','B');:(xseus          ) =!            2
+    finally
+      //if pos('taivutus',st)>0 then writeln('<li>Zelectcond:'+st+'!'+result+'!'+xs.CurFromEle.vali+'!'+polnot.text+'!',polnot.count);
+
+      stac.free;que.free;
+     end;
+
+    {
+d^e+c*b^a
+de^cba^*+
+^a,b,c, (d^e)
+^(a^b),c, (d^e)
+* ((a^b)*c), (d^e)
++ ((a^b)*c) + (d^e)
+  }
+end;
+
+
+
+function _p_path(st:ansistring;var sta:integer;intag:ttag):ansistring;
+var j,posi,sofar,len:integer;xst,aps:string;P:pansichar;ch,etype:ansichar;
+list:tlist;inquote:boolean;bracks, parens:integer;turha:boolean;
+{
+why parenthesis are handled? Where can they appear in path?
+pol/ku[a=funktio(jotain...)] .. ONLY IN BRACKETS
+plo/ku() .. eieie
+ent
+pol/ku[a=funktio(f2(F3()),)]
+
+}
+
+begin
+ try
+  len:=length(st);
+  turha:=false;
+  bracks:=0;
+  parens:=0;
+  inquote:=false;
+
+  //if t_debug then
+
+  if st[sta]=':' then
+  begin
+    //writeln('<h4>parsepath ',sta,'-from'+copy(st,sta,len)+'/in:'+intag.xmlis+'/</h4>');
+    //t_debug:=true;
+    sta:=sta+1;
+    turha:=true;
+    //turha:=999;
+  end;
+  while sta<=len do
+  begin
+    ch:=st[sta];
+    if ch='\' then ch:='/';
+    if t_debug then  writeln('<li>ch',ch,'/bracks:',bracks,inquote,parens,'/sta:',sta,'/of:',len,'</li>');
+    if inquote then
+    begin
+      if ch='''' then inquote:=false;
+      //xst:=xst+ch;
+      //continue;
+    end
+    else
+      if bracks>0 then
+      begin
+       if ch='''' then inquote:=not inquote  //quotes work  only in brackets
+       else if ch=']' then begin bracks:=bracks-1;if bracks<0 then begin bracks:=0;writeln('<li>too many closing bracks'); sta:=sta+1;exit;end;end;
+      end else  //not in bracks
+      if ch='(' then
+      begin parens:=parens+1;
+         //WRITELN('<LI>PARENTHESIS:',COPY(ST,STA,999),'</LI>');
+      end else
+      if parens>0 then
+      begin
+          if ch=')' then
+          begin parens:=parens-1;
+          end
+      end
+      else
+      if (pos(ch,'; ,)'+const_opers)>0) then         //or (ch=')'
+      //if (pos(ch,'; ,+)')>0) then         //or (ch=')'
+      begin
+           if t_debug then writeln('<li>trysubee:',xst,'!<ul>');
+           if xst='' then result:='' else
+           if intag<>nil then result:=intag.subs(xst);
+           //if t_debug then
+           //writeln('<li>XST:'+xst+'=',result+'</li>');
+           //sta:=sta+1;
+           //if (pos(ch,'+ ')<1)  then
+           exit;
+      end;
+
+    if ch='[' then if not inquote then bracks:=bracks+1;
+    xst:=xst+ch;
+    sta:=sta+1;
+  end;
+  if intag<>nil then result:=intag.subs(xst);
+
+  finally
+   // if pos('preceding',st)>0 then  WRITELN('<li>from: ',st,'  !!xstring:',xst,'/result:'+RESULT,'/rest:',copy(st,sta,999),'!</li>');
+    {if turha=sta then
+    begin
+    sta:=sta+1; //to prevent from trying all over
+    end;}
+    //§§t_debug:=false;
+    //if bracks<0 then writeln('NONGOBRAC');result:='NONOGOGO';
+  end;
+end;
+///function turha_p_func(st:ansistring;sta:integer;var sto://integer;xs:txseus):ansistring;forward;
+
+function turha_p_funparam(st:ansistring;var sto:integer;ordo:integer;xs:txseus):ansistring;
+var op:string;
+{  function _tryopname:integer;  //if funparam is of form par=value
+  var i:integer;ch:ansichar;
+  begin
+    op:='';
+    result:=0;
+    ch:=st[sto];
+    if Ch in ['A'..'Z', 'a'..'z'] then
+    for i := 1 to 16 do
+    begin
+      ch:=st[sto+i-1];
+      if ch='=' then
+      begin
+        result:=i;exit;
+      end;
+      if not (Ch in ['A'..'Z', 'a'..'z','0'..'9']) then break;
+    end;
+  end;
+ }
+var i,sta,opstop:integer;ch:ansichar;val,turha:string;//inope:boolean;
+begin
+try
+ { inope:=false;
+ opstop:=_tryopname;
+ if opstop>0 then
+ begin
+   op:=copy(st,sto,opstop);//-1)+'=';
+   //writeln('gotopo:'+op,'||'+st,opstop,' sto:',sto,'X',st[sto+opstop]);
+   sto:=sto+opstop;
+ end else op:='=';//'x'+inttostr(ordo)+'';
+  if t_debug then writeln('<li>GETFUNPARAMTR:',op,sto,'!<b>',copy(st,sto,99),'</b>!</li>');
+ }
+//   while pos(ST[STO],whitespace+'+'+'=')>0 do  //WHY THE PLUS?
+//     sto:=sto+1;
+ ch:=st[sto];
+  //writeln('FUNPARAMTR:',ch,'/',sto,':O:',opstop);
+ if pos(ch,';,')>0 then exit;
+ if ch=')' then begin writeln('<li>emptyfun');sto:=sto+1;exit;end;
+ //these are tricky
+
+ if ch='''' then
+   begin
+   val:=_getstring(st,sto,sto);
+   //writeln('GOTST:'+val+'!!'+copy(st,sto,999),'/o:',op);
+   end
+   else
+    if pos(ch,'(1234567890')>0 then val:=_getnum(st,sto,sto)
+    else
+    begin
+      if t_debug then writeln('<li>Xparam:'+copy(st,sto,999),'</li>');
+      val:=val+doparsexpart(st,sto,xs,false);//,false);//,false);
+      if t_debug then writeln('<li>gotXparam:('+val,'), left:',copy(st,sto,999),'</li>');
+    end;
+ if st[sto]<>')' then sto:=sto+1;
+ result:=op+val;
+ finally
+   if t_debug then writeln('<li>GoTFUNPARAMTR:'+op,val,' ??<b> '+result,'</b>-Left:<em>',copy(st,sto,99),'</em>');
+ end;
+
+end;
+{begin
+//if t_debug then writeln('<li>numparam:'+copy(st,sto,999),'</li>');
+val:=_p_infix(st,sto,xs);
+//if t_debug then   writeln('<li>gonumparam:('+val,'), left:',copy(st,sto,999),'</li>');
+end else
+}{ if pos(ch,'1234567890-')>0 then
+begin
+  val:=_getnum(st,sto,sto)
+end}
+
+
+
+
+function _p_func(st:ansistring;sta:integer;var sto:integer;xs:txseus):ansistring;
+var j,jj,apui,posi,sofar,stlen:integer;
+para,apstr,fname:string;P:pansichar;ch,etype:ansichar;
+list:tlist;pars,subexp:tstringlist;//acom:ttag;
+ok,hasparams,debug:boolean;fun:tfunc;
+
+ function _getfunname:string;
+ var en,i:integer;
+ begin
+  hasparams:=false;
+  en:=32+sta;
+  if en>length(st) then en:=length(st);
+   for i:= sta to en do
+   begin
+     try
+     if pos(st[i],whitespace+'();,'+const_opers)>0 then
+     begin
+      //result:=copy(st,sta+1,i-1-sta);
+      result:=copy(st,sta,i-sta);
+      //if t_debug then
+      //if st[i]<>';' then
+      if st[i]='(' then
+      begin
+        if (stlen>i) and (st[i+1]=')') then
+        begin
+         //writeln('<li>emptyparams_'+result);
+        sta:=i+2;
+        end
+        else
+        begin
+        hasparams:=true;
+        sta:=i+1;
+        end;
+
+      end
+      else sta:=i;
+//!!      if pos(st[i],whitespace+'(;,')>0 then
+//!!      sta:=i+1 else sta:=i;//what else is there? operators +-<>&
+       //writeln('<li>fname:',result+'/at:',st[sta],'/', en,'/', i,'/rest:',copy(st,sta,999));
+      exit;
+     end;
+     //write(st[i]+'.');
+
+     except writeln('fail p_func getname');
+     end;
+   end;
+
+    result:='';
+ end;
+begin
+ //t_debug:=true;
+  fname:=_getfunname;
+  if fname='' then exit;  //just ?: ?_, ?; ?xse:$myfun? throw some error!
+  subexp:=tstringlist.create;
+  pars:=tstringlist.create;
+  stlen:=length(st);
+  sto:=sta;
+  para:='';
+  //if t_debug then
+  //writeln('<li>parsefun ',fname,'/from:',copy(st,sto,len),'      at!',sto,st[sto-1],hasparams,'<ul>');
+  //parsefun eq/from:?gt;!5=
+  //if st[sto-1]<>')' then sto:=sto-1 else
+  //if st[sto-1]=';' then sto:=sto-1 else
+  //if st[sto-1]=')' then sto:=sto-1 else  //not pretty perhaps ?time(?now)  omitted ?now()
+  //if st[sto-1]='(' then
+  if hasparams then
+  while sto<=stlen do
+  begin
+    //if t_debug then
+  //writeln('<li>c:: ',sto,'-',len,'get:',copy(st,sto,len),' sofar:',subexp.text+'!</li>');
+    try
+      while (sto<stlen) and (pos(st[sto], whitespace)>0) do sto:=sto+1;
+      if st[sto]=')' then break;
+      //writeln('<li>trypar /at:',st[sto],sto,'/rest:',copy(st,sto,len),'!</li>');
+      if st[sto]=',' then subexp.Add('') else
+      subexp.Add(doparsexpart(st,sto,xs,false));////,false));//,false);
+      //t_debug:=true;
+     //if t_debug then writeln('<li>GOTpar:'+subexp[subexp.count-1],'/at:',ch,sto,'/rest:',copy(st,sto,len),'|stext:'+subexp.text,'_',subexp.count,'!</li>');
+    except  writeln('failed to parse function parameters for ',fname,' at pos ',sto);
+    end;
+    if t_debug then writeln('<li>GOonfparts:','/at:',ch,sto,'/rest:',copy(st,sto,stlen),'!</li>');
+    while (sto<stlen) and (pos(st[sto], whitespace)>0) do sto:=sto+1;
+    if sto>stlen then begin writeln('<li>unexpected end of params for ', fname);bREAK;end;
+    ch:=st[sto];
+    //if ch=',' then   sto:=sto+1  //and continue to get params
+    //else
+    begin
+      sto:=sto+1;
+      if ch=',' then continue else
+      if (ch=')') then
+       break  //normal brea,
+      else // if pos(ch=';') then
+      begin
+        writeln('<li>invalid "',ch,'" within parameter list of '+fname+' in:',st,'!!!');break;
+      end
+    end;
+
+
+  end;
+  //writeln('<li>gotfunc:'+fname,'/at:',st[sto],sto,'/n=',subexp.count,'/rest:',copy(st,sto,len),'!</li>');
+  //if hasparams then
+  //    if st[sto]=')' then //if sto<length(st) then {if st[sto+1]=';' then}
+  //      sto:=sto+1;
+  //auts!
+  para:='';
+  for j:=0 to subexp.count-1 do
+     pars.add(subexp[j]);
+   //if t_debug then
+   //writeln('<li>getfun:',fname,subexp.count, '/left:',copy(st,sto,len),'/pars:<b>',subexp.text+'!</b></li>');
+   fun:=tfunc.create(fname,pars,xs);
+   try
+      result:=fun.execute;
+   except writeln('fail p_func exec',fname,'!');end;
+      fun.Free;
+    //writeln('</ul><li>funresult:',fname,'<b>',result,'</b>!',pars.text,pars.count,'/left:',copy(st,sto,len),'');
+  try
+   subexp.Free;
+   except  writeln('failed free p_func sub');  end;
+   try
+   pars.free;
+
+   except  writeln('failed free p_func pars');  end;
+   //if pars=nil then
+   // writeln('nopars');
+   //t_debug:=false;
+
+  end;
+
+
+function _p_bookmark(st:ansistring;var sta:integer;xs:txseus):ansistring;
+var aps:ansistring;apui:integer;aput:ttag;
+ begin
+    result:='';
+    if xs=nil then exit;
+    aps:='';
+    while (sta<length(st)-1) do
+    begin
+      sta:=sta+1;
+      if st[sta]='/' then break else aps:=aps+st[sta];
+    end;
+    //writeln('<li>bm_',aps,'$'+copy(st,sta,10)+'<pre>',xs.x_bookmarks.xmlis,'</pre>');
+
+    //apui:= xs.x_bookmarks.subtags.IndexOf(aps)
+    //aput:=ttag(xs.x_bookmarks.subtags.objects[apui]);
+    try
+    aput:=xs.x_bookmarks.subt(aps).subtags[0];
+         except writeln('nobooksinexp:'+xs.x_bookmarks.subt(aps).xmlis);
+        end;
+
+    //writeln('<li>bm2_'+aput.xmlis,'</pre>');
+    //listwrite(aput);
+    sta:=sta+1;
+    result:=_p_path(st,sta,aput);
+ end;
+function _p_ids(st:ansistring;var sta:integer;xs:txseus):ansistring;
+var aps:ansistring;apui:integer;aput:ttag;
+ begin
+  result:='';
+  if xs=nil then exit;
+  aps:='';
+    while (sta<length(st)) do
+    begin
+      sta:=sta+1;
+      if st[sta]=';' then break
+      else if st[sta]='/' then begin sta:=sta+0;break;end
+      else aps:=aps+st[sta];
+    end;
+    //writeln('<li>id_',aps,'$'+copy(st,sta,10)+'<pre>','</pre>');
+
+    //apui:= xs.x_bookmarks.subtags.IndexOf(aps)
+    //aput:=ttag(xs.x_bookmarks.subtags.objects[apui]);
+    try
+
+    aput:=xs.x_ids.findobject(aps);
+         except writeln('noIDinexp');
+        end;
+
+    //writeln('<li>GOTID_',aps,'<pre>',aput.xmlis,'#</pre>',st,':',sta,'left:',copy(st,sta,999),'!');
+    //listwrite(aput);
+    sta:=sta+1;
+    result:=_p_path(st,sta,aput);
+    //writeln('<li>GOTIDrest_',result,'!');
+ end;
+
+function _p_var(st:ansistring;var sta:integer;xs:txseus):ansistring;
+var aps:ansistring;apui:integer;aput:ttag;
+ begin
+  result:='';
+  if xs=nil then exit;
+   aps:='';
+    while true do //(sta<length(st)+1) do
+    begin
+      sta:=sta+1;
+      if sta>length(st) then break;
+      {if st[sta]=';' then
+      begin
+       //sta:=sta+1;
+       //writeln('<li>VAREND:'+aps+'!');
+       break;
+
+      end;}
+      if pos(st[sta],'-<>=+*/ ;.,)([]''')>0 then break else aps:=aps+st[sta];
+    end;
+    //writeln('<li>',st,'/VAR_'+aps+'/rest:'+copy(st,sta,99),'!');//+xs.x_svars.ToString);
+    //xs.x_svars.list;
+    //result:=xs.x_svars.values[aps];
+    result:=xs.x_svars.values[aps];   //find(aps);
+    //sta:=sta-1;
+    //if result='' then result:='0';
+    //writeln('<li>VAR:',aps,'=',result+'!');
+ end;
+
+function parsexpart(st:ansistring;var sta:integer;xs:txseus;ininfix,needtowrite:boolean;var gottafree:ttag):ansistring;
+var i,j,posi,sofar,len,apui:integer;xst,aps:string;P:pansichar;ch,etype:ansichar;
+list:tlist;aput:ttag;rest:string;
+//this requires a non-nil  xseus-object. Rewrite!
+begin
+ result:='';
+ if xs=nil then begin writeln('nilxseus'); exit;end;
+ // t_debug:=true;
+ xst:='';
+ len:=length(st);
+ ch:=st[sta];
+   //if t_debug then
+    //if ininfix then
+    // writeln('<li>getpartfrom:'+copy(st,sta,99999)+'!</li>_',ch,'',sta);
+ aput:=nil;
+ if ch='#' then begin //writeln('<li>findid:',copy(st,sta,99999),'</li>'); //  result:=xs.x_ids.findtag())
+    result:=_p_ids(st,sta,xs);end
+ else if ch='''' then result:=_getstring(st,sta,sta) //sta:=sta+1;
+ else  if pos(ch,'-1234567890')>0 then result:=_getnum(st,sta,sta)  else
+ if ch='(' then result:=_p_infix(st,sta,xs,'')  else
+ if ch='?' then
+ begin
+  //writeln('<li>FUNC:'+copy(st,sta,99999)+'!</li>');
+   result:=_p_func(st,sta+1,sta,xs);
+   //writeln('<li>goaonefunc:',result, '/rest:'+copy(st,sta,len),'</li>');
+ end else
+ //if ch=':' then result:=_p_path(st,sta,xs.CurFromEle)  else
+ if ch='$' then result:=_p_var(st,sta,xs) else
+ //none of the above chars
+ begin
+   apui:=sta;
+   gottafree:=nil;
+   if (ch='!') or (ch='&') then
+   begin
+     //writeln('<li>!tag:',copy(st,sta,999));
+     aput:=p_selroot(st,   xs,   ttag(xs.curfromele),sta,false, gottafree);
+   end
+   else  //rememner to add remembertofree
+   if ch='/' then aput:=xs.xml else aput:=xs.curfromele;
+   //if ch='!' then writeln('<li>getele:'+copy(st,sta,39)+'/from'+aput.vari);
+   //if aput<>nil then
+     //if ininfix then
+     //writeln('<li>getpartfrom:'+copy(st,sta,99999)+'!</li>_',ch,'',sta);
+
+   //if sta=length(st) then begin result:=aput.vali;sta:=sta+0;end  else
+   begin
+        //if pos('!to',st)>0 then sta:=sta+1;//writeln('<li>TO:',aput.head,'!!',copy(st,sta,999),'!!');
+      result:=_p_path(st,sta,aput);
+     //   if pos('!to',st)>0 then writeln('<li>GotTO:',aput.head,'!!',result,'!! in:'+copy(st,sta,aput)+'_'+st);
+   end;
+   //if pos('bookmark',st)>0 then writeln('<li>bookvalue:',aput.vari,'!!',copy(st,sta,999),'!!=',RESULT,'!');
+   //if aput.vari='ul' then writeln('<li>gotele:'+result+'/rest:'+copy(st,sta,9999)+'!',apui,'?',sta,ininfix);
+   if gottafree<>nil then gottafree.killtree;
+   //if apui=sta then writeln('<h1>stuck</h1>');//exit; //just checking we are not stuck
+ end;
+{ if ch='/' then
+ begin
+   if t_debug then writeln('<li>!!!doparsexpart',sta,copy(st,sta,9999)+'!!</li>');
+   //result:=_p_path(copy(st,sta,9999),sta,XS.xml);
+   result:=_p_path(st,sta,XS.xml);
+   //t_debug:=true;
+   if t_debug then writeln('<li>!!!parsexpart///result='+result+' !!!rest:',copy(st,sta,999),'</li>');
+ end else
+ //if ch='/' then result:=_p_path(st,sta,xs.xml) else
+ if ch='!' then result:=_p_path(st,sta,xs.x_myhandler) else
+ if ch='%' then result:=_p_bookmark(st,sta,xs) else
+ if ch='$' then
+ begin result:=_p_var(st,sta,xs);
+ end else
+ begin
+    result:=_p_path(st,sta,xs.curfromele);
+ end;
+ }
+try
+ while (sta<length(st)) and (st[sta]=' ') do sta:=sta+1;
+   //if (not ininfix) then  //if it is infix, then operators have been handled
+   //but this part should not be here- Needs a bit refactoring`
+  //TRYING TO MOVE THIS ABOVE
+if not ininfix then if pos(st[sta],const_opers)>0 then
+   begin
+     if st[sta]=')' then begin writeln('<!--NOINFIX:'+result+'!'+copy(st,sta-1,999)+'-->');
+       sta:=sta-1; exit;end;
+    if t_debug then
+     write('<li>+switchtoinfix('+inttostr(sta)+')'+result+'- rest:'+copy(st,sta,len),ininfix,'</li>');
+    result:=_p_infix(st,sta,xs,result);
+    if t_debug then
+    write('<li>+didinfpart('+inttostr(sta)+')'+result+'- rest:'+copy(st,sta,len)+'</li></ul>');
+   end;//else   result:=result+copy(st,sta+1,len); //WHEN WOULD THIS BE OK
+//if ininfix then
+// writeln('<li>gotpartfrom:'+copy(st,sta,99999)+'!_',ch,'/',sta,'!',result,'!'+xs.curfromele.vali+xs.curfromele.vari,'</li>');
+
+except
+//writeln('nonNumeric:',result,'/sta',sta,'/left:',copy(st,sta,999),'|</li>');
+ //if not num, leave as is//result:=result+copy(st,sta+1,len);
+end;
+end;
+
+
+
+function parsexse(st:ansistring;xs:txseus):ansistring;
+//parses a string that can contain several xse:-elements
+var i,j,posi,sofar,apui,startat:integer;aps,apus:string;P:pansichar;ch,etype:ansichar;
+list:tlist;//,dones,chst,chen:tlist;//dones:txsechecpoint;
+begin
+ result:='';
+ if xs=nil then exit;
+
+ //t_debug:=true;
+ try
+ //logwrite('getxs:'  +'(('+st);
+list:=tlist.create;
+//chst:=tlist.create;
+//chen:=tlist.create;
+if st='' then begin result:='';exit;end;
+//if pos('cxz',st)>0 then t_debug:=true;
+try
+  //posi:=pos('xse:',st);  //quickfind!
+  //          if t_debug  then
+  //               writeln('<h4>TRY:</h4><xmp>'+st+'</xmp>');
+  p:=pansichar(st);
+  posi:=pos(xs.ns,p);  //quickfind!
+  sofar:=0;
+  //if t_debug  then
+  // writeln('<H3>pp',st,length(st),'_</H3>');
+  while posi>0 do
+  begin
+    p:=p+posi+4-1;
+    sofar:=sofar+posi+4-1;
+    list.Add(pointer(posi-1));
+    posi:=pos(xs.ns,p);  //quickfind!
+    //if t_debug  then
+    //writeln('PARTPOS:',length(st)-sofar,'-----------');
+  end;
+  list.Add(pointer(length(st)-sofar));
+  p:=pansichar(st);
+  sofar:=length(st);
+  aps:='';
+  //aps:=copy(st,sofar-integer(list[list.Count-1]);
+   // writeln('<ul>');
+  for I := List.Count - 1 downto 1 do
+  begin
+    apui:=integer(list[i]);
+    aps:=copy(st,sofar-integer(list[i])+1,integer(list[i]))+aps;
+    //logwrite('tryxpart:('+inttostr(sofar) +')'+aps+'//REST:'+copy(st,1,sofar-4-integer(list[i])));
+    {if t_debug  then
+    begin
+     writeln('<li> ',sofar,' ',sofar-apui,' = ',inttostr(apui),'$'+copy(st,sofar-apui+1,apui)+'</li>');
+     writeln('<li>aps:',aps,i);
+    end;}
+    //aps:=xseparse(aps,1,xs);
+    startat:=1;
+    try
+    apus:=doparsexpart(aps,startat,xs,false);//,false);//,false);
+    except apus:='';end;
+
+    //apus:=_p_infix(aps,startat,xs);
+    //if t_debug then logwrite('gotaxpart(' +inttostr(startat)   +')'+ apus+'//sofar:'+copy(aps,1,startat)+'!'+copy(aps,startat+1,99999)+'//REST:'+copy(st,1,sofar-apui-4));
+    aps:=apus+copy(aps,startat+1,99999);
+    //if pos('debug', st)=1 then
+    //writeln('<li>aps2:',aps,'<ul>');
+    sofar:=sofar-apui-4;
+  end;
+    //result:=copy(st,1,integer(list[i]))+aps;
+  result:=copy(st,1,integer(list[0]))+aps;//+copy(; 0
+  //if pos('debug', st)=1 then
+   // logwrite('***********didxseparse:'      +inttostr(apui)+' '      +result+'//'+aps+'(('+st);
+   // writeln('<h1>RES:'+result+'</h1>');
+  except
+   writeln('<--fail parse xse'+st+'-->');
+  end;
+finally
+  //t_debug:=false;
+  list.free;
+  //dones.free;
+end;
+end;
+
+
+
+{
+type tcompparam = class(tobject)
+vars,vals:tstringlist;
+constructor create(reglist:tlist);
+procedure add(vari,vali:string);
+procedure split(st,separ:string);
+function values(vari:string):string;
+procedure clear;
+procedure list;
+end;
+constructor tcompparam.create(reglist:tlist);
+begin
+  vars:=tstringlist.create;
+  vals:=tstringlist.create;
+  reglist.add(self);
+
+end;
+procedure tcompparam.add(vari,vali:string);
+begin
+  vars.add(vari);
+  vals.add(vali);
+end;
+procedure tcompparam.split(st,separ:string);
+var astl:tstringlist;i:integer;eqpos:integer;
+begin
+try
+  astl:=tstringlist.create;
+      _split(st,separ,astl);
+   for i:=0 to astl.count-1 do
+   begin
+      eqpos:=pos('=',astl[i]);
+      vars.add(copy(astl[i],1,eqpos-1));
+      vals.add(copy(astl[i],eqpos+1,999999));
+   end;
+  astl.Clear;astl.free;
+  except writeln('failed to split comp params');end;
+end;
+procedure tcompparam.clear;
+begin
+  vars.clear;
+  vars.free;
+  vals.clear;
+  vals.free;
+end;
+procedure tcompparam.list;
+var i:integer;
+begin
+  for i:=0 to vars.count-1 do
+   writeln('<li>'+vars[i]+'='+vals[i]);
+end;
+
+function tcompparam.values(vari:string):string;
+var hit:integer;
+begin
+ result:='';
+ hit:=vars.indexof(vari);
+ if hit>-1 then result:=vals[hit];
+end;
+
+
+}
+procedure _h1(st:string);
+begin
+ writeln('<h1>'+st+'</h1>');
+end;
+
+//function _substi(path:string;xs:txseus):string;forward;
+
+{function _substitutenew(st,ssx:string;selp,xformp:tobject;vars:tstringlist):string;
+begin
+end;}
+ {
+ -osa polkua
+ -para:strting, num, polkust
+ }
+
+ function _evalfunc(op:string;pars:tstringlist;xs:txseus):string;
+var fun:tfunc;
+begin
+//_h1('evalfunc'+op+':'+pars.text);
+ fun:=tfunc.create(op,pars,xs);
+ result:=fun.execute;
+ fun.Free;
+end;
+
+function _substitute(st:string;xs:tobject):string;
+begin
+ TRY
+ result:=parsexse(st,txseus(xs));
+ except writeln('NO_SUBS:',ST,'!');end;
+ end;
+
+procedure texpr.clear;
+var i:integer;
+begin
+  for i:=0 to subexp.count-1 do
+   texpr(subexp[i]).clear;
+   texpr(subexp[i]).free;
+end;
+
+ constructor texpr.create(pare:texpr;t:char;reglist:tlist);
+begin
+ inherited create;
+ bracks:=0;
+ inquote:=false;
+  namedpar:=false;
+
+ subexp:=tlist.create;
+ par:=pare;
+ typ:=t;
+ if par<>nil then
+ begin
+ par.subexp.add(self);
+ //explist:=par.explist;
+ end;
+ reglist.add(self);
+end;
+
+
+
+
+procedure texpr.list;
+var i:integer;
+begin
+  writeln('<ul><li>'+vali+'/'+typ);
+  for i:=0 to subexp.count-1 do
+   texpr(subexp[i]).list;
+  writeln('</li></ul>');
+end;
+
+function _getbookmark(path:string;bookmarks:tstringlist):string;
+var st:string;
+apui:integer;
+       begin
+         try
+          //writeln('<li>bm1:',path,bookmarks.count,ttag(bookmarks.objects[0]).attributes.text);
+          //st:=copy(path,3,999);
+          st:=copy(path,2,pos('/',path)-2);
+          apui:=bookmarks.indexof(st);
+          //writeln('<li>///',st,'/',apui,bookmarks.Text,bookmarks.count,copy(path,3,999));
+          //writeln('<li>bm:'+copy(path,pos('/',path)+1,length(path)),'+++',
+          //copy(path,pos('/',path)+1,length(path))+//ttag(bookmarks.objects[apui]).attributes.text+
+          //'|</li>');
+          //listwrite(ttag(bookmarks.objects[apui]));
+           result:=ttag(bookmarks.objects[apui]).subs(copy(path,pos('/',path)+1,length(path)));
+          //writeln('<li>resultx',st,'/',result);
+           //result:=ttag(bookmarks.objects[apui]).att(copy(path,pos('/',path)+1,length(path)));
+         except writeln('<li>failedbookmark:::',path);end;
+       end;
+
+
+
+function _extfunctions(mathtag:ttag;xs:txseus):string; //DOE
+
+var op:string;restag,stag:ttag;i:integer;
+begin
+ op:=mathtag.att('func');
+ if pos('?',op)=1 then
+ begin  //user-defined funcs
+    try
+    delete(op,1,1);
+    for i:=0 to xs.X_funcs.subtags.count-1 do
+    begin
+     if ttag(xs.X_funcs.subtags[i]).att('name')=op then
+     stag:=ttag(xs.x_funcs.subtags[i]);
+    end;
+    if stag=nil then exit;
+      try
+          restag:=ttag.create;
+          (xs.dosubelements);
+      except writeln('<li>failed to call function');end;
+    if restag.subtags.count>0 then result:=ttag(restag.subtags[0]).listst
+    else result:='';except writeln('<li>failed to call function.');end;
+ end;
+end;
+
+function _docompute(mathtag:ttag;xs:txseus;atstr:string):string;
+var afun:tfunc;   pars:tstringlist;didtag:boolean;op,ctagi:string;i:integer;
+stag:ttag;apus:string;
+begin
+  didtag:=false;
+  pars:=tstringlist.create;
+  try
+  //if mathtag=nil then mathtag:=_oldfuncsyntax(atstr,didtag,pars);
+  op:=mathtag.att('func');
+  if pos('?',op)=1 then
+  begin
+    result:=_extfunctions(mathtag,xs);
+    exit;
+  end;
+  if mathtag.vali<>'' then pars.add('value='+_substitute(mathtag.vali,xs));
+  if not didtag then
+  try
+  for i:=0 to mathtag.getattributes.count-1 do
+  begin
+    apus:=cut_ls(mathtag.getattributes[i]);
+    if apus ='func' then continue
+    else if apus='var' then continue;
+    IF (length(apus)=2)and (apus[1]='x') then
+    pars.add(cut_rs(mathtag.getattributes[i])) else
+    pars.add(mathtag.getattributes[i]);
+  end;
+  except writeln('failded in mathttag.attributes');
+  end;
+  try
+  if not didtag then for i:=0 to mathtag.subtags.count-1 do
+  begin
+    stag:=ttag(mathtag.subtags[i]);
+     if stag.vari=xs.ns+'comp' then
+     begin
+       ctagi:=stag.att('tag');
+       if ctagi='' then ctagi:=op;
+       pars.add(ctagi+'='+_docompute(STAG,xs,''));
+     end
+     else
+      IF (length(stag.vari)=2)and (stag.vari[1]='x') then
+       pars.add(_substitute(stag.vali,xs)) else
+       pars.add(stag.vari+'='+_substitute(stag.vali,xs));
+       end;
+  except writeln('failded in mathttag.subtags');
+  end;
+  //tfunc.create(pars,xs.x_svars,xs.x_bookmarks,atstr,xs);
+ // tfunc.create(op,pars,xs);
+ result:=_evalfunc(op,pars,xs);
+  finally
+    pars.Free;
+
+  end;
+end;
+
+
+
+end.
+

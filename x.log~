@@ -1,0 +1,139 @@
+xSTARTing/home/t/xseusxseus.xsixseus1.loginit appAPP inited*************Formi_is_created********INIF:/home/t/xseus/xseus.xsi
+readingconfig
+XXXXXXXXXXXXXXXX
+DIDPARSEONE
+mimetypesmimetypes
+   type mime="text/plain" ext="txt"
+   type mime="text/html" ext="htm"
+   type mime="text/html" ext="html"
+   type mime="text/xml" ext="xml"
+   type mime="text/css" ext="css"
+   type mime="text/javascript" ext="js"
+   type mime="text/rtf" ext="rtf"
+   type mime="image/jpeg" ext="jpg"
+   type mime="image/jpeg" ext="jpeg"
+   type mime="image/gif" ext="gif"
+   type mime="image/png" ext="png"
+   type mime="image/tiff" ext="tif"
+   type mime="image/tiff" ext="tiff"
+   type mime="audio/basic" ext="au"
+   type mime="audio/basic" ext="snd"
+   type mime="audio/aiff" ext="aif"
+   type mime="audio/aiff" ext="aiff"
+   type mime="audio/wave" ext="wav"
+   type mime="audio/midi" ext="mid"
+   type mime="audio/midi" ext="midi"
+   type mime="video/mpeg" ext="mpg"
+   type mime="video/mpeg" ext="mpeg"
+   type mime="video/quicktime" ext="mov"
+   type mime="video/msvideo" ext="avi"
+   type mime="application/octet-stream" ext="exe"
+   type mime="application/postscript" ext="ps"
+   type mime="application/pdf" ext="pdf"
+   type mime="application/zip" ext="zip"
+   type mime="application/x-zip-compressed" ext="zip"
+   type mime="application/msword" ext="doc"
+
+apptahts INDIR:apppaths
+   map ns="xsedit" path="/home/t/xseus/xsedit/"
+   map ns="xseus" path="/home/t/xseus/www/"
+   map ns="apps" path="/home/t/xseus/apps/"
+   map ns="testdev" path="/home/t/xseus/apps/test/devel/"
+   map path="/home/t/xseus/apps/" ns="mynewns"
+   map path="/home/t/xseus/apps/turha2/app/" ns="turha2"
+   map path="/home/t/xseus/apps/testi3/app/" ns="testi3"
+   map path="/home/t/xseus/apps/test3/app/" ns="test3"
+   map path="/home/t/xseus/apps//app/" ns="/"
+
+SMTP INDIR:
+config read xseus from /home/t/xseus/xseus.xsi
+did create a xseusserver
+*************XSERV _is_created*********************RUNAPPLIC********RUN server
+startlistener
+listener started
+startlistening
+start connection
+obtained thread / now free: 11
+doid connection011
+starting thread0to handle 127.0.0.1
+RECEIVED:POST /test.htmi HTTP/1.1///bufsize:87380
+XXX1
+XXX2
+XXX3
+XXX4
+XXXXXXXXXXXXXXXX
+DIDPARSEONE
+findbyatt:apppaths
+   map ns="xsedit" path="/home/t/xseus/xsedit/"
+   map ns="xseus" path="/home/t/xseus/www/"
+   map ns="apps" path="/home/t/xseus/apps/"
+   map ns="testdev" path="/home/t/xseus/apps/test/devel/"
+   map path="/home/t/xseus/apps/" ns="mynewns"
+   map path="/home/t/xseus/apps/turha2/app/" ns="turha2"
+   map path="/home/t/xseus/apps/testi3/app/" ns="testi3"
+   map path="/home/t/xseus/apps/test3/app/" ns="test3"
+   map path="/home/t/xseus/apps//app/" ns="/"
+_map@ns=xseus!apppaths
+find att:nsvalue matching:xseus9
+nofoundbyatt:map ns="xsedit" path="/home/t/xseus/xsedit/"
+!
+foundbyatt:map ns="xseus" path="/home/t/xseus/www/"
+
+indirs:test.xsi!xseus!
+indirs2:test.xsi!/home/t/xseus/www/
+indirs3:/home/t/xseus/www/test.xsi
+READXSI FOR:/han:/home/t/xseus/www/test.xsi
+DIDPARSEONE
+try to get handler open
+did get handler handler name="open"
+   xse:list
+
+released thread 0 now at 11/12
+start connection
+obtained thread / now free: 11
+doid connection111
+starting thread1to handle 127.0.0.1
+RECEIVED:GET /test.html HTTP/1.1///bufsize:87380
+serving:/test.html(/home/t/xseus/www/test.html)text/html732
+wroteheader
+finished download
+released thread 1 now at 11/12
+start connection
+obtained thread / now free: 11
+doid connection211
+starting thread2to handle 127.0.0.1
+RECEIVED:POST /test.htmi HTTP/1.1///bufsize:87380
+saved upload ctypes.txt622//ctypes.txt=622
+
+XXX1
+XXX2
+XXX3
+XXX4
+XXXXXXXXXXXXXXXX
+DIDPARSEONE
+findbyatt:apppaths
+   map ns="xsedit" path="/home/t/xseus/xsedit/"
+   map ns="xseus" path="/home/t/xseus/www/"
+   map ns="apps" path="/home/t/xseus/apps/"
+   map ns="testdev" path="/home/t/xseus/apps/test/devel/"
+   map path="/home/t/xseus/apps/" ns="mynewns"
+   map path="/home/t/xseus/apps/turha2/app/" ns="turha2"
+   map path="/home/t/xseus/apps/testi3/app/" ns="testi3"
+   map path="/home/t/xseus/apps/test3/app/" ns="test3"
+   map path="/home/t/xseus/apps//app/" ns="/"
+_map@ns=xseus!apppaths
+find att:nsvalue matching:xseus9
+nofoundbyatt:map ns="xsedit" path="/home/t/xseus/xsedit/"
+!
+foundbyatt:map ns="xseus" path="/home/t/xseus/www/"
+
+indirs:test.xsi!xseus!
+indirs2:test.xsi!/home/t/xseus/www/
+indirs3:/home/t/xseus/www/test.xsi
+READXSI FOR:/han:/home/t/xseus/www/test.xsi
+DIDPARSEONE
+try to get handler open
+did get handler handler name="open"
+   xse:list
+
+released thread 2 now at 11/12

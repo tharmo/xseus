@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+
+<script type="text/javascript" src="jquery.js"></script>
+<script> <!--
+
+function loadxml() {
+  var xmlhttp;
+  xmlhttp=new XMLHttpRequest();
+  xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    document.getElementById("resu").innerHTML=xmlhttp.responseText;
+    }
+  }
+  xmlhttp.open("GET","test.htmi",true);
+  xmlhttp.send();
+}
+
+-->
+</script>
+<title>testiki</title>
+</head>
+<body>
+
+<h1>test.htmi</h1>
+<div id="resu"></div>
+<button type="button" onclick="loadxml()">Change Content</button>
+
+<form action="http://localhost:6500/test.htmi" method="post" enctype="multipart/form-data">
+<input name="input" type="text" value="testdata"/>
+<input name="filee" type="file"/>
+<input name="input2" type="text" value="ääkkösiä"/>
+<!--<textarea name="ta">
+ ja 
+tänne kaikkea sotkua<JA> yksi taginnäköinen otus</x>
+!(/"9898797!"(/&#/&¤%=)"(
+</textarea>-->
+<input name="@atria" value="puttia" type="hidden"/>
+<input name="starttag" value="details" type="hidden"/>
+<input name="@atri" value="putti" type="hidden"/>
+<input name="input3" type="text" value="detail"/>
+<input name="input4" type="text" value="more details"/>
+<input name="endtag" value="details" type="hidden"/>
+<input type="submit"/>
+</form>
+
+</body>
+</html>
+

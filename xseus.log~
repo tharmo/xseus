@@ -1,0 +1,1041 @@
+xSTARTing/home/t/xseusxseus1.loginit app*************Formi_is_created********sessiontimeout:0
+readingconfig
+mimetypes:mimetypes
+   type mime="text/plain" ext="txt"
+   type mime="text/html" ext="htm"
+   type mime="text/html" ext="html"
+   type mime="text/xml" ext="xml"
+   type mime="text/css" ext="css"
+   type mime="text/javascript" ext="js"
+   type mime="text/rtf" ext="rtf"
+   type mime="image/jpeg" ext="jpg"
+   type mime="image/jpeg" ext="jpeg"
+   type mime="image/gif" ext="gif"
+   type mime="image/png" ext="png"
+   type mime="image/tiff" ext="tif"
+   type mime="image/tiff" ext="tiff"
+   type mime="audio/basic" ext="au"
+   type mime="audio/basic" ext="snd"
+   type mime="audio/aiff" ext="aif"
+   type mime="audio/aiff" ext="aiff"
+   type mime="audio/wave" ext="wav"
+   type mime="audio/midi" ext="mid"
+   type mime="audio/midi" ext="midi"
+   type mime="video/mpeg" ext="mpg"
+   type mime="video/mpeg" ext="mpeg"
+   type mime="video/quicktime" ext="mov"
+   type mime="video/msvideo" ext="avi"
+   type mime="application/octet-stream" ext="exe"
+   type mime="application/postscript" ext="ps"
+   type mime="application/pdf" ext="pdf"
+   type mime="application/zip" ext="zip"
+   type mime="application/x-zip-compressed" ext="zip"
+   type mime="application/msword" ext="doc"
+
+defheads:transfer-encoding=chunked
+content-type=text/html
+pragma=no-cache
+connection=keep-alive
+
+apptahts INDIR:apppaths
+   map ns="xsedit" path="/home/t/xseus/xsedit/"
+   map ns="xseus" path="/home/t/xseus/www/"
+   map ns="apps" path="/home/t/xseus/apps/"
+   map ns="testdev" path="/home/t/xseus/apps/test/devel/"
+   map path="/home/t/xseus/apps/" ns="mynewns"
+   map path="/home/t/xseus/apps/turha2/app/" ns="turha2"
+   map path="/home/t/xseus/apps/testi3/app/" ns="testi3"
+   map path="/home/t/xseus/apps/test3/app/" ns="test3"
+   map path="/home/t/xseus/apps//app/" ns="/"
+
+SMTP INDIR:
+config read xseus from /home/t/xseus/xseus.xsi
+did create a xseusserver with inifile:/home/t/xseus/xseus.xsi
+*************XSERV _is_created*********************RUNAPPLIC********RUN server
+startlistener
+listener started
+startlistening
+started connection0/11@14.43.08
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.08 connection gotses for ikotktit/0:session
+   started: 14.43.08
+
+inited seus14.43.08 0
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection1/11@14.43.12
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.12 connection gotses for ikotktit/1:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+
+inited seus14.43.12 1
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection2/11@14.43.16
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.16 connection gotses for ikotktit/2:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+
+inited seus14.43.16 2
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection3/11@14.43.18
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.18 connection gotses for ikotktit/3:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+
+inited seus14.43.18 3
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection4/11@14.43.19
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.19 connection gotses for ikotktit/4:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+
+inited seus14.43.19 4
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection5/11@14.43.21
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.21 connection gotses for ikotktit/5:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+
+inited seus14.43.21 5
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection6/11@14.43.23
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.23 connection gotses for ikotktit/6:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+
+inited seus14.43.23 6
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection7/11@14.43.24
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.24 connection gotses for ikotktit/7:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+
+inited seus14.43.24 7
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection8/11@14.43.25
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.25 connection gotses for ikotktit/8:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+
+inited seus14.43.25 8
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection9/11@14.43.27
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.27 connection gotses for ikotktit/9:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+
+inited seus14.43.27 9
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection10/11@14.43.28
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.28 connection gotses for ikotktit/10:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+
+inited seus14.43.28 10
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+purgeolder:2013-09-02 14.28.29  2013-09-02 14.43.29
+started connection11/11@14.43.29
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.29 connection gotses for ikotktit/11:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+
+inited seus14.43.29 11
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection0/11@14.43.30
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.30 connection gotses for ikotktit/0:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+
+inited seus14.43.30 0
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection1/11@14.43.32
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.32 connection gotses for ikotktit/1:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+
+inited seus14.43.32 1
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection2/11@14.43.33
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.33 connection gotses for ikotktit/2:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+
+inited seus14.43.33 2
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection3/11@14.43.38
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.38 connection gotses for ikotktit/3:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+
+inited seus14.43.38 3
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection4/11@14.43.40
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.40 connection gotses for ikotktit/4:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+
+inited seus14.43.40 4
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection5/11@14.43.41
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.41 connection gotses for ikotktit/5:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+
+inited seus14.43.41 5
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection6/11@14.43.49
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.43.49 connection gotses for ikotktit/6:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+
+inited seus14.43.49 6
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection7/11@14.43.50
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.43.50 connection gotses for ikotktit/7:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+
+inited seus14.43.50 7
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection8/11@14.44.00
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.44.00 connection gotses for ikotktit/8:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+
+inited seus14.44.00 8
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection9/11@14.44.00
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.00 connection gotses for ikotktit/9:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+
+inited seus14.44.00 9
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+purgeolder:2013-09-02 14.29.01  2013-09-02 14.44.01
+started connection10/11@14.44.01
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.44.01 connection gotses for ikotktit/10:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+
+inited seus14.44.01 10
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection11/11@14.44.02
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.02 connection gotses for ikotktit/11:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+
+inited seus14.44.02 11
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection0/11@14.44.03
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.03 connection gotses for ikotktit/0:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+
+inited seus14.44.03 0
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection1/11@14.44.04
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.04 connection gotses for ikotktit/1:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+
+inited seus14.44.04 1
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection2/11@14.44.05
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.44.05 connection gotses for ikotktit/2:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+
+inited seus14.44.05 2
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection3/11@14.44.05
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.05 connection gotses for ikotktit/3:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+
+inited seus14.44.05 3
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection4/11@14.44.06
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.44.06 connection gotses for ikotktit/4:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.06
+
+inited seus14.44.06 4
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection5/11@14.44.07
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.07 connection gotses for ikotktit/5:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.06
+   hit: 2013-09-02 14.44.07
+
+inited seus14.44.07 5
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+started connection6/11@14.44.59
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.44.59 connection gotses for ikotktit/6:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.06
+   hit: 2013-09-02 14.44.07
+   hit: 2013-09-02 14.44.59
+
+inited seus14.44.59 6
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+add new lock for /home/t/xseus/www/test.htmi
+started connection7/10@14.44.59
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.44.59 connection gotses for ikotktit/7:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.06
+   hit: 2013-09-02 14.44.07
+   hit: 2013-09-02 14.44.59
+   hit: 2013-09-02 14.44.59
+
+inited seus14.44.59 7
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+/home/t/xseus/www/test.htmi is locked0
+/home/t/xseus/www/test.htmi is locked1
+/home/t/xseus/www/test.htmi is locked2
+/home/t/xseus/www/test.htmi is locked3
+/home/t/xseus/www/test.htmi is locked4
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+add new lock for /home/t/xseus/www/test.htmi
+started connection8/10@14.45.00
+RECEIVED:GET /test.htmi?lock&f=1 HTTP/1.1///bufsize:87380
+14.45.00 connection gotses for ikotktit/8:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.06
+   hit: 2013-09-02 14.44.07
+   hit: 2013-09-02 14.44.59
+   hit: 2013-09-02 14.44.59
+   hit: 2013-09-02 14.45.00
+
+inited seus14.45.00 8
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+/home/t/xseus/www/test.htmi is locked0
+/home/t/xseus/www/test.htmi is locked1
+/home/t/xseus/www/test.htmi is locked2
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+add new lock for /home/t/xseus/www/test.htmi
+started connection9/10@14.45.01
+RECEIVED:GET /test.htmi?lock&f=2 HTTP/1.1///bufsize:87380
+14.45.01 connection gotses for ikotktit/9:session
+   started: 14.43.08
+   hit: 2013-09-02 14.43.12
+   hit: 2013-09-02 14.43.16
+   hit: 2013-09-02 14.43.18
+   hit: 2013-09-02 14.43.19
+   hit: 2013-09-02 14.43.21
+   hit: 2013-09-02 14.43.23
+   hit: 2013-09-02 14.43.24
+   hit: 2013-09-02 14.43.25
+   hit: 2013-09-02 14.43.27
+   hit: 2013-09-02 14.43.28
+   hit: 2013-09-02 14.43.29
+   hit: 2013-09-02 14.43.30
+   hit: 2013-09-02 14.43.32
+   hit: 2013-09-02 14.43.33
+   hit: 2013-09-02 14.43.38
+   hit: 2013-09-02 14.43.40
+   hit: 2013-09-02 14.43.41
+   hit: 2013-09-02 14.43.49
+   hit: 2013-09-02 14.43.50
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.00
+   hit: 2013-09-02 14.44.01
+   hit: 2013-09-02 14.44.02
+   hit: 2013-09-02 14.44.03
+   hit: 2013-09-02 14.44.04
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.05
+   hit: 2013-09-02 14.44.06
+   hit: 2013-09-02 14.44.07
+   hit: 2013-09-02 14.44.59
+   hit: 2013-09-02 14.44.59
+   hit: 2013-09-02 14.45.00
+   hit: 2013-09-02 14.45.01
+
+inited seus14.45.01 9
+LOCKSCREATE:/home/t/xseus/www/test.htmi
+created lock for /home/t/xseus/www/test.htmi
+LOCKSCREATED:/home/t/xseus/www/test.htmi
+/home/t/xseus/www/test.htmi is locked0
+/home/t/xseus/www/test.htmi is locked1
+/home/t/xseus/www/test.htmi is locked2
+/home/t/xseus/www/test.htmi is locked3
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving
+add new lock for /home/t/xseus/www/test.htmi
+purgeolder:2013-09-02 14.30.02  2013-09-02 14.45.02
+LOCKSDEL:/home/t/xseus/www/test.htmi
+finished xseus-serving

@@ -1,0 +1,12 @@
+10:46:57.813962 IP localhost.39367 > localhost.8001: Flags [S], seq 924302527, win 32792, options [mss 16396,sackOK,TS val 13491984 ecr 0,nop,wscale 6], length 0
+10:46:57.813974 IP localhost.8001 > localhost.39367: Flags [S.], seq 1446367723, ack 924302528, win 32768, options [mss 16396,sackOK,TS val 13491984 ecr 13491984,nop,wscale 6], length 0
+10:46:57.813981 IP localhost.39367 > localhost.8001: Flags [.], ack 1, win 513, options [nop,nop,TS val 13491984 ecr 13491984], length 0
+10:46:57.833490 IP localhost.39367 > localhost.8001: Flags [P.], seq 1:360, ack 1, win 513, options [nop,nop,TS val 13491989 ecr 13491984], length 359
+10:46:57.833514 IP localhost.8001 > localhost.39367: Flags [.], ack 360, win 529, options [nop,nop,TS val 13491989 ecr 13491989], length 0
+10:46:57.834014 IP localhost.8001 > localhost.39367: Flags [P.], seq 1:15, ack 360, win 529, options [nop,nop,TS val 13491989 ecr 13491989], length 14
+10:46:57.834160 IP localhost.8001 > localhost.39367: Flags [FP.], seq 15:1521, ack 360, win 529, options [nop,nop,TS val 13491989 ecr 13491989], length 1506
+10:46:57.834178 IP localhost.39367 > localhost.8001: Flags [.], ack 15, win 513, options [nop,nop,TS val 13491989 ecr 13491989], length 0
+10:46:57.834183 IP localhost.39367 > localhost.8001: Flags [.], ack 1522, win 560, options [nop,nop,TS val 13491989 ecr 13491989], length 0
+10:46:57.834347 IP localhost.39367 > localhost.8001: Flags [F.], seq 360, ack 1522, win 560, options [nop,nop,TS val 13491989 ecr 13491989], length 0
+10:46:57.834355 IP localhost.8001 > localhost.39367: Flags [.], ack 361, win 529, options [nop,nop,TS val 13491989 ecr 13491989], length 0
+

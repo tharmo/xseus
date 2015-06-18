@@ -1,0 +1,24 @@
+object xform1: Txform1
+  Left = 340
+  Height = 427
+  Top = 594
+  Width = 298
+  Caption = 'xseusformi'
+  ClientHeight = 427
+  ClientWidth = 298
+  LCLVersion = '1.0.10.0'
+  Visible = True
+  object Memo1: TMemo
+    Left = 10
+    Height = 702
+    Top = 10
+    Width = 270
+    Font.Height = -8
+    Font.Name = 'Sans'
+    Lines.Strings = (
+      'Memo1'
+    )
+    ParentFont = False
+    TabOrder = 0
+  end
+end

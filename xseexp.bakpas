@@ -1,0 +1,168 @@
+function txseus.Clear: integer;
+var
+  i, ii, ers, orefcount: integer;
+  ele: ttag;
+begin
+  //exit;
+  try
+
+    ers := 0;    //c:=0;
+    x_svars.Free;
+    // x_ids.list;
+    try
+    X_HANDLERS.KILLTREE;
+    except writeln('nokillhands');end;
+    try
+    X_RIGHTS.KILLTREE;
+    except writeln('nokillrights');end;
+    if g_memtest then
+      writeln('clearbookmarsk:<pre>', x_bookmarks.xmlis + '</pre>',  elements_CREATED, ' Killed:', elements_FREED);
+    try
+    X_BOOKMARKS.KILLTREE;
+    except writeln('nokillbook');end;
+    if g_memtest then
+      writeln('cleedarbookmar:', elements_CREATED, ' Killed:', elements_FREED);
+    try
+    X_funcs.KILLTREE;
+    except writeln('nokillfun');end;
+    //  c:=c+sizeof(elems);
+    started.Free;
+    for i := 0 to myLocks.Count - 1 do
+      g_locks.freefile(mylocks[i], mylocks);
+    mylocks.Free;
+    objectlist.Clear;
+    objectlist.Free;
+    // c:=c+sizeof(states);
+    tim.Clear;
+    tim.Free;
+
+    x_ids.Free;
+    if x_called then
+    begin
+      //states.free;
+      //elems.free;
+      exit;
+    end;
+  except
+    ers := ers + 1;
+    writeln('could not clear somethinv', i);
+    raise;
+  end;
+  if g_memtest then
+    if x_elemlist <> nil then
+      writeln('<li>TOTAL ELEMENTS:', elements_CREATED, ' Killed:', elements_FREED,
+        ' mem:', getheapstatus.totalallocated div 1000, '!</li>');
+  //if g_memtest then
+  for i := 0 to x_elemlist.Count - 1 do
+  begin
+    try
+      orefcount := integer(x_elemrefcount[i]);
+      //writeln('<li>free:',i,'/',orefcount);
+      if orefcount < 0 then
+        writeln('<li>multifreed:', i, ttag(x_elemlist[i]).vari)
+      else
+      if orefcount > 0 then
+        if x_elemlist[i] <> nil then
+        begin
+          try
+            try
+              ele := x_elemlist[i];
+              writeln('<li>Unfreed:', ele.vari, '/', i, '/', ele.memregnum);
+            except
+              writeln('<li>Unfreed but nonexistent element:', i);
+            end;
+            try
+              //f ele.getattributes <> nil then
+              ele.freeattributes;
+              //ele.getattributes.Free;
+            except
+              ers := ers + 1;
+              writeln('<li>failed eleattsfree', i, ' -', ttag(x_elemlist[i]).vari)
+            end;
+            //ele.attributes := nil;
+            //ele.subtags.clear;
+            try
+              if ele.subtags <> nil then
+                ele.subtags.Free;
+            except
+              ers := ers + 1;
+              writeln('<li>failed subfree', i, ' -', ttag(x_elemlist[i]).vari);
+            end;
+          except
+            ers := ers + 1;
+            writeln('<li>failed eleafree', i, ' -', ttag(x_elemlist[i]).vari)
+          end;
+          try
+            ele.Free;
+          except
+            ers := ers + 1;
+            writeln('<li>ffailed elefree ', i, ' -', ttag(x_elemlist[i]).vari);
+            //raise;
+          end;
+        end
+        else
+          writeln('<li>nilele ', i);
+    except
+      ers := ers + 1;
+      writeln('cold not clear', i);
+      //raise;
+    end;
+  end;
+  if g_memtest then
+    writeln('<li>freed elemems:', getheapstatus.totalallocated div 1000, '</li>');
+  try
+    {if states <> nil then
+      for i := 0 to states.Count - 1 do
+      begin
+        try
+          if states[i] <> nil then
+          begin
+            sta := states[i];
+            //c:=c+sizeof(sta);
+            sta.Free;
+          end;
+        except
+          ers := ers + 1;
+          writeln('could not clear state');
+        end;
+        Result := ers;
+
+      end;
+    //writeln('<li>states cleared' s.count,'(mem:',getheapstatus.totalallocated div 1000,'</li>');
+    states.Clear;
+    states.Free;
+    }
+    if g_memtest then
+      writeln('<li>stateLIST cleared', '(mem:', getheapstatus.totalallocated div
+        1000, '</li>');
+    x_elemlist.Clear;
+    if g_memtest then
+      writeln('<li>ELE cleared', SIZEOF(x_elemlist), '(mem:',
+        getheapstatus.totalallocated div 1000, '</li>');
+    x_elemlist.Free;
+    if g_memtest then
+      writeln('<li>ele freed, next eref', SIZEOF(x_elemrefcount), '(mem:',
+        getheapstatus.totalallocated div 1000, ')</li>');
+    x_elemrefcount.Clear;
+    if g_memtest then
+      writeln('<li>EREF cleared', SIZEOF(x_elemrefcount), '(mem:',
+        getheapstatus.totalallocated div 1000, '</li>');
+    x_elemrefcount.Free;
+    if g_memtest then
+      writeln('<li>EREFcout freed', '(mem:', getheapstatus.totalallocated div
+        1000, '</li>');
+    //loc.free;
+    // lists.Free;
+//§    ccall.fields.Free;
+//§    ccall.vars.Free;
+//§    ccall.cookies.Free;
+
+    if g_memtest then
+      writeln('<li>!--mem after xseus.clear:', getheapstatus.totalallocated, 'B--</li>');
+  except
+    ers := ers + 1;
+    writeln('Failed to clear xseus ', i);
+    raise;
+  end;
+
+end;

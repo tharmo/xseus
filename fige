@@ -1,0 +1,5 @@
+#hfst-proc  -g --apertium -s /usr/local/share/hfst/fi/fi-generation.hfst.ol 
+hfst-lookup   /usr/local/share/hfst/fi/fi-generation.hfst.ol
+#cat $1 |hfst-lookup -O xerox  /usr/local/share/hfst/fi/fi-generation.hfst.ol
+#hfst-proc --help
+

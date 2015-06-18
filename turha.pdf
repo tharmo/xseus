@@ -1,0 +1,21 @@
+<h1>test.htmi</h1>
+<form action="http://localhost:6500/test.htmi" method="post" enctype="multipart/form-data">
+<input name="input" type="text" value="testdata"/>
+<input name="filee" type="file"/>
+<input name="input2" type="text" value="ääkkösiä"/>
+!--<textarea name="ta">
+ ja 
+tänne kaikkea sotkua<JA> yksi taginnäköinen otus</x>
+!(/"9898797!"(/&#/&¤%=)"(
+</textarea>
+<input name="@atria" value="puttia" type="hidden"/>
+<input name="starttag" value="details" type="hidden"/>
+<input name="@atri" value="putti" type="hidden"/>
+<input name="input3" type="text" value="detail"/>
+<input name="input4" type="text" value="more details"/>
+<input name="endtag" value="details" type="hidden"/-->
+<input type="submit"/>
+</form>
+
+
+

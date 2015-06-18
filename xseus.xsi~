@@ -1,0 +1,78 @@
+xseus
+   port: 8001
+   test: testii
+   xproxyport: 5000
+   sessiontimeout:10
+   hmackey: verysecretxseuskey
+   commands
+      cmd name=r call=/usr/bin/R
+         option name=cmd call= sep=" --"
+   apppaths
+      map ns=pad path=/home/t/xseus/www/xseuspad/
+      map ns=jere path=/home/t/xseus/jere/
+      map ns=xsedit path=/home/t/xseus/xsedit/
+      map ns=ocean path=/home/t/xseus/ocean/
+      map ns=xseus path=/home/t/xseus/www/
+      map ns=apps path=/home/t/xseus/apps/
+      map ns=testdev path=/home/t/xseus/apps/test/devel/
+      map path=/home/t/xseus/apps/ ns=mynewns
+      map path=/home/t/xseus/apps/turha2/app/ ns=turha2
+      map path=/home/t/xseus/apps/testi3/app/ ns=testi3
+      map path=/home/t/xseus/apps/test3/app/ ns=test3
+      map path=/home/t/xseus/ ns=/
+   urlpaths
+      map path=/home/t/xseus/www/xseuspad/ url=pad/
+      map path=/home/t/xseus/jere/ url=/jere/
+      map path=/home/t/xseus/ocean/ url=/ocean/
+      map path=/home/t/xseus/xsedit/ url=/xsedit/
+      map path=/home/t/xseus/apps/test3/data/ url=/test3/
+      map path=/home/t/xseus/apps/testi3/data/ url=/testi3/
+      map path=/home/t/xseus/apps/turha2/data/ url=/turha2/
+      map path=/home/t/xseus/apps/ url=mynewurl/
+      map path=/home/t/xseus/apps/test/ url=/test-d/
+      map url=/testdev/ path=/home/t/xseus/apps/test/
+      map paxseusth=/home/t/xseus/apps/ url=/apps/
+      map path=/home/t/xseus/www/ url=/
+   userdomains
+      adomain name="base" idi="basedomain" path="/home/t/xseus/www/"
+   chunked: true
+   defaultheaders
+     transfer-encoding: chunked
+     content-type: text/html
+     pragma: no-cache
+     connection: keep-alive
+   mimetypes
+        type mime="text/plain" ext="txt"
+        type mime="text/html" ext="htm"
+        type mime="text/html" ext="html"
+        type mime="text/xml" ext="xml"
+        type mime="text/css" ext="css"
+        type mime="text/javascript" ext="js"
+        type mime="text/rtf" ext="rtf"
+        type mime="image/jpeg" ext="jpg"
+        type mime="image/jpeg" ext="jpeg"
+        type mime="image/gif" ext="gif"
+        type mime="image/png" ext="png"
+        type mime="image/tiff" ext="tif"
+        type mime="image/tiff" ext="tiff"
+        type mime="audio/basic" ext="au"
+        type mime="audio/basic" ext="snd"
+        type mime="audio/aiff" ext="aif"
+        type mime="audio/aiff" ext="aiff"
+        type mime="audio/wave" ext="wav"
+        type mime="audio/midi" ext="mid"
+        type mime="audio/midi" ext="midi"
+        type mime="video/mpeg" ext="mpg"
+        type mime="video/mpeg" ext="mpeg"
+        type mime="video/quicktime" ext="mov"
+        type mime="video/msvideo" ext="avi"
+        type mime="application/octet-stream" ext="exe"
+        type mime="application/postscript" ext="ps"
+        type mime="application/pdf" ext="pdf"
+        type mime="application/zip" ext="zip"
+        type mime="application/x-zip-compressed" ext="zip"
+        type mime="application/msword" ext="doc"
+   commands
+      cmd name=r call=/usr/bin/R
+      option name=cmd call="" sep=" --"
+   xxxxxxxx

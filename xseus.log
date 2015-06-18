@@ -1,0 +1,21 @@
+NOW LOGGING TO:/home/t/xseus/xseus.log
+Created sessionlist, timeout:0
+readingconfig
+config read xseus from /home/t/xseus/xseus.xsi
+created thread 0
+created thread 1
+created thread 2
+created thread 3
+created thread 4
+created thread 5
+created thread 6
+created thread 7
+created thread 8
+created thread 9
+did create a xseusserver with inifile:/home/t/xseus/xseus.xsi running 10 threads
+*************XSERV _is_created********
+RUN server
+startlistener
+listener created
+** STARTing LISTEN PORT:8001
+**  LISTENING PORT:8001

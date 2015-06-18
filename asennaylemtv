@@ -1,0 +1,4 @@
+#!/bin/bash
+wget -r -O./asenna_yle-dl.bash homelinuxpc.com/download/asenna_yle-dl.bash && chmod +x asenna_yle-dl.bash && ./asenna_yle-dl.bash
+wget -r -O./asennamenut.bash homelinuxpc.com/download/asennamenut.bash && chmod +x asennamenut.bash && ./asennamenut.bash
+

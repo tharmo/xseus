@@ -1,0 +1,9 @@
+object xseusformi: Txseusformi
+  Left = 608
+  Height = 240
+  Top = 255
+  Width = 320
+  Caption = 'xseusformi'
+  LCLVersion = '1.0.10.0'
+  Visible = True
+end

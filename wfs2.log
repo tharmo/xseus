@@ -1,0 +1,9 @@
+08:37:43.045179 IP 37.139.30.171.58628 > timoh-kone.local.8001: Flags [S], seq 1609677543, win 14600, options [mss 1460,sackOK,TS val 487779 ecr 0,nop,wscale 8], length 0
+08:37:43.045202 IP timoh-kone.local.8001 > 37.139.30.171.58628: Flags [S.], seq 974124178, ack 1609677544, win 14480, options [mss 1460,sackOK,TS val 11553292 ecr 487779,nop,wscale 6], length 0
+08:37:43.081961 IP 37.139.30.171.58628 > timoh-kone.local.8001: Flags [.], ack 1, win 58, options [nop,nop,TS val 487788 ecr 11553292], length 0
+08:37:43.082113 IP 37.139.30.171.58628 > timoh-kone.local.8001: Flags [P.], seq 1:127, ack 1, win 58, options [nop,nop,TS val 487788 ecr 11553292], length 126
+08:37:43.082132 IP timoh-kone.local.8001 > 37.139.30.171.58628: Flags [.], ack 127, win 227, options [nop,nop,TS val 11553301 ecr 487788], length 0
+08:37:43.082346 IP timoh-kone.local.8001 > 37.139.30.171.58628: Flags [P.], seq 1:241, ack 127, win 227, options [nop,nop,TS val 11553301 ecr 487788], length 240
+08:37:43.124060 IP 37.139.30.171.58628 > timoh-kone.local.8001: Flags [.], ack 241, win 62, options [nop,nop,TS val 487799 ecr 11553301], length 0
+08:37:43.124081 IP 37.139.30.171.58628 > timoh-kone.local.8001: Flags [R.], seq 127, ack 241, win 62, options [nop,nop,TS val 487799 ecr 11553301], length 0
+
