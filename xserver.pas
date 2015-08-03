@@ -1292,6 +1292,7 @@ begin
  port:=xseuscfg.config.subs('port');
  if port='' then port:='8001';
  ListenerSocket := TTCPBlockSocket.Create;
+ //listenersocket.SO_REUSEADDR:=true;
  ListenerSocket.CreateSocket;
  ListenerSocket.bind('0.0.0.0', port);
  logwrite('** STARTing LISTEN PORT:'+PORT);

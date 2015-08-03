@@ -323,7 +323,7 @@ function _httpget(urli:string;wait:integer;acomatts:tstringlist):string;
  var HTTP:THTTPSend;Resultb:boolean;st:string;i:integer;
  begin
   HTTP := THTTPSend.Create;
-  //writeln('<li>GET', urli);
+  //riteln('<li>GET', urli);
   try
   //SynHttp.HTTPMethod('GET', 'https://www.google.com');  try
     //http.UserName:='';
@@ -350,7 +350,7 @@ function _httpget(urli:string;wait:integer;acomatts:tstringlist):string;
        Resultb := HTTP.HTTPMethod('GET', ST);
       end;
 
-       //writeln('<li>got:'+urli,http.document.Size);
+      // writeln('<li>got:'+urli,http.document.Size);
       SetString(result, PChar(http.document.memory), http.document.Size);
       //writeln('GOTURL:',http.resultcode,'<xmp>',result+'!!!</xmp>',http.document.Size);// ReadStrFromStream(HTTP.Document,HTTP.Document.Size))
       except writeln('failed http!get');

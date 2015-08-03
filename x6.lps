@@ -3,30 +3,30 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="21">
+    <Units Count="22">
       <Unit0>
         <Filename Value="x6.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="151"/>
-        <CursorPos X="17" Y="171"/>
+        <TopLine Value="136"/>
+        <CursorPos X="16" Y="157"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="xserver.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="xserver"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1103"/>
-        <CursorPos X="24" Y="1123"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1275"/>
+        <CursorPos Y="1315"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="xseglob.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="xseglob"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="152"/>
         <CursorPos X="16" Y="176"/>
@@ -55,9 +55,12 @@
       <Unit5>
         <Filename Value="xsejunk.pas"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="80"/>
-        <CursorPos X="42" Y="80"/>
+        <UnitName Value="XSEJUNK"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="29"/>
+        <CursorPos X="45" Y="46"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
       <Unit6>
@@ -103,99 +106,229 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit10>
       <Unit11>
-        <Filename Value="turha.pas"/>
-        <ComponentName Value="Form1"/>
-        <ResourceBaseClass Value="Form"/>
-        <UsageCount Value="49"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="uusserv.pas"/>
-        <ComponentName Value="xseusformi"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <TopLine Value="760"/>
-        <CursorPos X="10" Y="763"/>
-        <UsageCount Value="49"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit12>
-      <Unit13>
         <Filename Value="esim.pas"/>
         <CursorPos X="59" Y="26"/>
-        <UsageCount Value="88"/>
+        <UsageCount Value="12"/>
         <Bookmarks Count="1">
           <Item0 Y="2707"/>
         </Bookmarks>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="xsefunc.pas"/>
-        <TopLine Value="1122"/>
-        <CursorPos X="53" Y="1136"/>
-        <UsageCount Value="65"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit14>
-      <Unit15>
+      </Unit11>
+      <Unit12>
         <Filename Value="xsemisc.pas"/>
         <UnitName Value="xsemisc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="813"/>
-        <CursorPos Y="835"/>
-        <UsageCount Value="101"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="322"/>
+        <CursorPos X="24" Y="356"/>
+        <UsageCount Value="67"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit15>
-      <Unit16>
+      </Unit12>
+      <Unit13>
         <Filename Value="xsexse.pas"/>
         <UnitName Value="xsexse"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="5818"/>
-        <CursorPos X="28" Y="5842"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4467"/>
+        <CursorPos Y="4498"/>
         <UsageCount Value="104"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit16>
-      <Unit17>
+      </Unit13>
+      <Unit14>
         <Filename Value="xsexml.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="262"/>
-        <CursorPos X="8" Y="286"/>
-        <UsageCount Value="98"/>
+        <UnitName Value="xsexml"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="32"/>
+        <CursorPos X="37" Y="47"/>
+        <UsageCount Value="122"/>
         <Bookmarks Count="2">
           <Item0 X="26" Y="861" ID="2"/>
           <Item1 Y="3835" ID="1"/>
         </Bookmarks>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit17>
-      <Unit18>
+      </Unit14>
+      <Unit15>
         <Filename Value="xseexp.pas"/>
-        <UnitName Value="xseexp"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
         <TopLine Value="781"/>
         <CursorPos X="47" Y="802"/>
-        <UsageCount Value="181"/>
+        <UsageCount Value="105"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit18>
-      <Unit19>
+      </Unit15>
+      <Unit16>
         <Filename Value="synapse/smtpsend.pas"/>
         <TopLine Value="55"/>
         <CursorPos X="5" Y="46"/>
-        <UsageCount Value="141"/>
+        <UsageCount Value="65"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit19>
-      <Unit20>
+      </Unit16>
+      <Unit17>
         <Filename Value="xsetimers.pas"/>
         <TopLine Value="10"/>
         <CursorPos X="35" Y="22"/>
-        <UsageCount Value="140"/>
+        <UsageCount Value="64"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="xsedb.pas"/>
+        <UnitName Value="xsedb"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="88"/>
+        <CursorPos X="90" Y="118"/>
+        <UsageCount Value="100"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="/usr/share/fpcsrc/2.6.4/packages/fcl-db/src/base/db.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1395"/>
+        <CursorPos X="35" Y="1419"/>
+        <UsageCount Value="28"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="/usr/share/fpcsrc/2.6.4/packages/fcl-db/src/base/dataset.inc"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="880"/>
+        <CursorPos X="3" Y="887"/>
+        <UsageCount Value="108"/>
+        <Loaded Value="True"/>
       </Unit20>
+      <Unit21>
+        <Filename Value="/usr/share/fpcsrc/2.6.4/packages/fcl-db/src/base/datasource.inc"/>
+        <EditorIndex Value="7"/>
+        <UsageCount Value="108"/>
+        <Loaded Value="True"/>
+      </Unit21>
     </Units>
-    <General>
-      <ActiveWindowIndexAtStart Value="-1"/>
-    </General>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="274" Column="24" TopLine="216"/>
+      </Position1>
+      <Position2>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="31" Column="25" TopLine="11"/>
+      </Position2>
+      <Position3>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="7154" Column="22" TopLine="7145"/>
+      </Position3>
+      <Position4>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="7175" Column="32" TopLine="7145"/>
+      </Position4>
+      <Position5>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="7235" Column="22" TopLine="7203"/>
+      </Position5>
+      <Position6>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="7267" Column="28" TopLine="7234"/>
+      </Position6>
+      <Position7>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="7273" Column="24" TopLine="7240"/>
+      </Position7>
+      <Position8>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="7553" Column="20" TopLine="7521"/>
+      </Position8>
+      <Position9>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4470" Column="38" TopLine="4435"/>
+      </Position9>
+      <Position10>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="72" Column="5" TopLine="29"/>
+      </Position10>
+      <Position11>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4516" Column="13" TopLine="4488"/>
+      </Position11>
+      <Position12>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4537" Column="13" TopLine="4505"/>
+      </Position12>
+      <Position13>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4546" Column="17" TopLine="4514"/>
+      </Position13>
+      <Position14>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4561" Column="15" TopLine="4529"/>
+      </Position14>
+      <Position15>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="83" Column="97" TopLine="67"/>
+      </Position15>
+      <Position16>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="115" Column="104" TopLine="95"/>
+      </Position16>
+      <Position17>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="172" Column="34" TopLine="152"/>
+      </Position17>
+      <Position18>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4498" Column="13" TopLine="4478"/>
+      </Position18>
+      <Position19>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4470" Column="32" TopLine="4450"/>
+      </Position19>
+      <Position20>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4467" Column="34" TopLine="4467"/>
+      </Position20>
+      <Position21>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4475" Column="8" TopLine="4467"/>
+      </Position21>
+      <Position22>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="200" Column="17" TopLine="93"/>
+      </Position22>
+      <Position23>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="30" Column="22" TopLine="10"/>
+      </Position23>
+      <Position24>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="93" Column="58" TopLine="67"/>
+      </Position24>
+      <Position25>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="115" Column="59" TopLine="82"/>
+      </Position25>
+      <Position26>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4499" Column="69" TopLine="4467"/>
+      </Position26>
+      <Position27>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="687" Column="6" TopLine="666"/>
+      </Position27>
+      <Position28>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="92" Column="4" TopLine="37"/>
+      </Position28>
+      <Position29>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="208" TopLine="173"/>
+      </Position29>
+      <Position30>
+        <Filename Value="xsedb.pas"/>
+        <Caret Line="92" Column="13" TopLine="72"/>
+      </Position30>
+    </JumpHistory>
   </ProjectSession>
   <Debugging>
-    <BreakPoints Count="2">
+    <BreakPoints Count="3">
       <Item1>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
@@ -207,9 +340,16 @@
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
-        <Source Value="xserver.pas"/>
-        <Line Value="1314"/>
+        <Source Value="x6.lpr"/>
+        <Line Value="79"/>
       </Item2>
+      <Item3>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="xsexse.pas"/>
+        <Line Value="4438"/>
+      </Item3>
     </BreakPoints>
     <Watches Count="9">
       <Item1>

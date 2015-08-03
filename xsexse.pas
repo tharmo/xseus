@@ -34,7 +34,7 @@ uses
   xsemuu,
   xsexml, Math,
   variants,
-  xsedif;//, xsedb;
+  xsedif, xsedb;
 //IdBaseComponent, IdComponent, IdCustomTCPServer, IdCustomHTTPServer,
 //IdHTTPServer, IdContext;
 type
@@ -98,6 +98,7 @@ txseus = class(TObject)
     break_state: teabreak;
     //x_svars:TurboHashedStringList;
     x_svars:TSTRINGLIST;
+    x_databases:tstringlist;
     //x_svars used to be hashstrings, but no point in that
     x_ids: ThashSTRINGs;
     xx_connections, objectlist, mylocks: TStringList;
@@ -110,7 +111,8 @@ txseus = class(TObject)
     //loc:tlocs;
     x_times: ttimes;
     debug, x_critical, unlimited, httpinited, htmlinited, nobody,
-    x_resettimer, x_called, x_locked: boolean;
+    x_streaming, x_resettimer, x_called, x_locked: boolean;
+
     CurFromEle, CurByEle, CurToEle: ttag;
     Curselectionset: TList;
     constructor Create(principal: txseus);
@@ -160,6 +162,7 @@ txseus = class(TObject)
     function c_to: boolean;
     function c_from: boolean;
     function c_by: boolean;
+    //function c_todb:boolean;
    // function c_fromall: boolean;
 
     //the very basics
@@ -324,7 +327,16 @@ txseus = class(TObject)
     function c_hyphenfi: boolean;    //addhoc, will be removed
     function c_openid: boolean;  //these did something with open id providers, gotta
     function c_checkopenid: boolean;
-    function c_dbtest: boolean;  //just a plan to use sql
+    //function c_sqlcreate: boolean;  //just a plan to use sql
+    function c_sqlexec: boolean;  //just a plan to use sql
+    function c_sqlopen: boolean;  //open with transaction   and query
+    function c_sqlselect: boolean;  //just a plan to use sql
+    function c_sqlnext: boolean;  //just a plan to use sql
+    function c_sqllist: boolean;
+    function c_sqlprepare: boolean;
+    function c_sqldoprepared: boolean;
+    function c_sqlclose: boolean;
+    function c_sqlconnect: boolean;
     function c_test: boolean;
     function c_callobject: boolean;  //probably not working. To start new xseus-processess, call them via url
 
@@ -364,7 +376,7 @@ implementation
 uses  xsemisc, xsefunc, synacode,
   xseexp,  //xseftp,
   xseoid,xsetrie,//xsmarkd,
-  xsemarkd,
+  xsemarkd,       sqldb,
   xserver, xsereg;
 {tolist,fromlist:tlist;
 //toele:pointer;
@@ -617,10 +629,127 @@ begin
   end;
 end;
 
-function txseus.c_dbtest: boolean;
+
+
+
+function txseus.c_sqlclose: boolean;
 begin
-  //createdb;
+ closeall_sql(x_databases);
+ x_databases.clear;
 end;
+function txseus.c_sqlconnect: boolean;
+// open database connection without  starting transaction
+var d:tdb;
+begin
+  d:=tdb.create(curbyele.vali);
+  x_databases.addobject(curbyele.vali,d);
+end;
+
+function txseus.c_sqlexec: boolean;
+var newtag:ttag;i,
+   //fi:integer;stime:tdatetime;
+  c,t,q:pointer;db:tdb;
+  //execute single query &close transaction, criticalpoints,timeouts?
+begin
+  db:=getdb_sql(curbyele.vali,x_databases);
+  //for i:=1 to 100 do
+
+ // c:=sql_getconnection(curbyele.att('db'));
+//  t:=sql_starttransaction(c);
+//  q:=sql_query(c,t,curbyele.att('q'));
+//  writeln('<li>queried in ',MilliSecondsBetween(now,stime));
+ //x_databases.add(tdb.create('/home/t/xseus/turha.db'));
+ writeln('<li>do_execsql:',x_databases.Count,'</li>');
+ //x_database.sql_list(curbyele.att('query'));
+  db.sql_exec(curbyele.att('q'));
+  writeln('<li>did_exec<li>');
+ // createdb;
+
+end;
+
+function _createtempdb(db:tdb;dlist:tstringlist;sels,table:string):tdb;
+var newdb:tdb;
+begin
+  //result:=getdb_sql(':memory',dlist);
+  result:=tdb.create(':memory:');
+  //result:=tdb(db.sql_gettable(selst));
+  dlist.addobject('temp_table',result);
+  tdb(result.sql_copytable(db,sels,table));
+
+end;
+
+function txseus.c_sqlopen: boolean;  //open with transaction   and query
+var db:tdb;i:integer;
+begin
+  db:=getdb_sql(curbyele.vali,x_databases);
+  writeln('USING DB:',db.name,'!');
+ //di:=x_databases.indexof(curfromele.vali);
+  db.sql_open(curbyele.att('q'));
+end;
+
+function txseus.c_sqlselect: boolean;
+var subtags,oldto:ttag;i:integer;comlist:tlist;db:tdb;
+  fn:string;
+  //create a temporary table with open transaction to be applied
+begin
+  writeln('<li>createdb '+fn);
+  fn:=curfromele.att('db');
+  db:=tdb.create(fn);
+  x_databases.addobject(fn,db);
+  writeln('<li>query: ',curbyele.att('q'));
+  //x_database.sql_query(curbyele.att('query'));
+  db.sql_gettable(curbyele.att('q'));
+  writeln('<li>didq <hr>');
+
+end;
+function txseus.c_sqlnext: boolean;
+//needs a connection with open transaction and query
+var subtags,oldto:ttag;i,fi:integer;comlist:tlist;ret:ttag;db:tdb;
+begin
+  writeln('<li>getnextt ',x_databases.Count,curbyele.xmlis);
+   db:=getdb_sql(curbyele.vali,x_databases);
+   writeln('<li>openeddb:',db.name);
+
+   if (db.Q=nil) or (db.t=nil) then
+   begin
+     writeln('<li>No query active '+curtoele.xmlis);
+   end;
+   ret:=ttag(db.sql_next);
+   if ret<>nil then curtoele.subtags.Add(ret);
+
+end;
+function txseus.c_sqlprepare: boolean;
+//needs a connection with open transaction and query
+var ret:ttag;db:tdb;
+begin
+  writeln('<li>prepare ',x_databases.Count,curbyele.xmlis);
+   db:=getdb_sql(curbyele.vali,x_databases);
+   writeln('<li>db: ',db.name);
+   db.sql_prepare(curbyele.att('q'));
+   writeln('<li>prepared: ',db.name,' /query:',db.Q.SQL.text,' /params:',db.q.Params.count);
+
+end;
+
+function txseus.c_sqldoprepared: boolean;
+//needs a connection with open transaction and query
+var ret:ttag;db:tdb;
+begin
+  db:=getdb_sql(curbyele.vali,x_databases);
+ // writeln('<li>prepared: ',db.name);//,':',db.q.params.count);
+
+   if (db.Q=nil) or (db.t=nil) then
+   begin
+     writeln('<li>No query active '+curtoele.xmlis);
+   end;
+   db.sql_doprepared(curbyele.getattributes);
+
+end;
+
+function txseus.c_sqllist: boolean;  //debuggin mainly on mind
+begin
+    //curtoele:=oldto;
+    //logwrite('DidclearS***from:'+curfromele.vari);
+  end;
 
 function txseus.c_test: boolean;
 var
@@ -758,7 +887,6 @@ end;
 //finally   writeln('<li> wrotetoclient');end;
 
 end;  //of browseroutput
-
 
 
 function txseus.c_to: boolean;
@@ -1158,7 +1286,7 @@ begin
         rawtext := _httpsget(fromurl, -1, CurBYEle.getattributes)
       else
         rawtext := _httpget(fromurl, -1, CurBYEle.getattributes);
-      //writeln('<li>FRMURL:',FROMURL,' ! ',fromelem  ,'</li><xmp>',rawtext,'</xmp><hr/>');
+      //writeln('<li>FRMURL:',FROMURL,'! ',fromelem  ,'!</li><xmp>',rawtext,'</xmp><hr/>');
     end;
     if curbyele.att('skipto') <> '' then
     begin
@@ -2459,6 +2587,9 @@ var
 begin
   //exit;
   try
+    for i:=0 to x_databases.count-1 do
+     tdb(x_databases.objects[i]).free;
+    x_databases.free;
 
     ers := 0;    //c:=0;
     x_svars.Free;
@@ -3306,13 +3437,15 @@ type tgrouping=class(tobject)
                 //writeln('<li>Added:<pre>'+result.xmlis,'</pre>',nextpos);
     end;
    end;
+
+
 function txseus.applyall: boolean;
 var
   sels: TList;
    apulist:tlist;
   ocrit,hasrelation,sortascending,sortstr,hadmat: boolean;
   times, i, j, m, apuii, olresi: integer;
-  sel2, asel, atpl, septag, atfirsttag, atlasttag, thetpl, aputpltag,
+  sel2, asel, atpl, septag, atfirsttag, atlasttag, thetpl, aputag,
   rootseltag, //templates1,//xform1,
   respoint, xoldres, oldtemplates, oldbookm, oldappta, oldfrom: ttag;
   seleat, thisout, sepst, aps, countervar, oldprefix, selst, selector,mat: string;
@@ -3326,7 +3459,7 @@ var
   grouping:tgrouping;
   debugst: string;
    compfunc: function(Item1, Item2: Pointer): integer;  //sortcomp
-
+  db,fromdb:tdb;
 begin
 
   try
@@ -3337,6 +3470,7 @@ begin
       grouping:=nil;
       selection1 := CurFromEle;
       apptag := CurBYEle;
+      fromdb:=nil;
       //writeln('<h1>applytemplates:'+curbyele.head,'</h1>');
       //writeln('<pre>'+curbyele.xmlis+'</pre><hr/>');
       //writeln('<h3>applyfrom</h3><pre>'+ttag(curfromele).xmlis+'</pre><hr/>');
@@ -3352,6 +3486,18 @@ begin
       if selection1 = nil then
         exit;
       try
+        if apptag.att('db')<>'' then //very experimental
+        begin
+           try
+           db:=getdb_sql(apptag.att('db'),x_databases);
+           except on e:exception do writeln('<li>errordb:',e.message);end;
+           writeln('<li>using db',x_databases[0],x_databases.count);
+           //fromdb:=_createtempdb(db,apptag.att('select'));
+           try
+           fromdb:=_createtempdb(db,x_databases,apptag.att('select'),apptag.att('table'));
+           except on e:exception do writeln('<li>tmpdb_',e.message);end;
+           sels := TList.Create;
+        end else
         if (CurBYEle.att('list') <> '') then
         begin
            //writeln('<li>apply from list');
@@ -3560,6 +3706,7 @@ begin
       //writeln('<li>dbapply2');
       compfunc:=@_sortcomptags;  //this is only for relations (groupings???)
       times := strtointdef(apptag.att('times'), sels.Count);
+      if fromdb<>nil then times:=99999999;
       if times<0 then times:=sels.count+times;
       if apptag.att('mintimes') <> '' then
       begin
@@ -3595,7 +3742,12 @@ begin
         TRY
         i:=i+1;
         atpl := nil;
-
+        if fromdb<>nil then
+        begin
+         asel:=fromdb.sql_next;
+         if asel=nil then break;
+        end
+        else
         if grouping<>nil then
         begin
           try
@@ -3707,7 +3859,29 @@ begin
               writeln('<li>nogosel3: ' + atpl.vari + atpl.vali);raise;
         end;
         try
-
+          if x_streaming then //experimebntal
+          begin
+            for j:=0 to curtoele.subtags.count-1 do
+            begin
+              aputag:=curtoele.subtags[i];
+            // x_database.q.params.items[j]:=curtoele
+              writeln('<li>-------<pre>',aputag.xmlis+'</pre>',db.q.fieldcount,'////////',
+              db.q.fieldcount);
+              try
+              begin
+                //db.Q.appendrecord([1]);
+                {db.q.Params.ParamByName('url').AsString := aputag.att('a');
+                db.q.Params.ParamByName('date').AsString := aputag.att('b');
+                db.q.Params.ParamByName('name').AsString := aputag.att('c');}
+                //db.q.execSQL;
+              end;
+              //db.q.active:=true;
+              //db.Q.appendrecord([aputag.att('a'),aputag.att('b'),aputag.att('c')]);
+              //db.q.active:=false;
+              except on e:exception do writeln('noprep:'+e.message);end;
+            end;
+            //curtoele.clearmee;
+          end;
           //WRITELN('<li>DIDDOAPPLYLOOP asel:', i, Asel.XMLIS, '<HR/>');
           //if apptag.att('debug') = 'true' then
           //  writeln('<li>debug:<xmp>', CurToEle.xmlis + '</xmp><hr/></li>');
@@ -4290,14 +4464,15 @@ var
   newtag, thistagroot, backto,oldto, progt,startedele,startedpar, oldBY : ttag; //sstartedele,sstartedpar, turha
   alist: TList;
   oldns: string;
-  memlog, taglog: string;
+  ermes,memlog, taglog: string;
 
   //progtag: ttag;
-  did, deb,elsepending,mydebug: boolean;
+  did, deb,elsepending,mydebug,trying: boolean;
 
 begin
   //mydebug := true;
   result:=true;
+  ermes:='';
   mydebug := False;
   deb := False;
   oldto := CurToEle;
@@ -4316,6 +4491,22 @@ begin
    while (progcounter < proglist.Count - 1) do
    //*********main loop**********
    begin
+        if ermes<>'' then
+        begin
+           progcounter:=progcounter+1;
+           writeln('<li>skipping'+ttag(proglist[progcounter]).vari+ermes );
+           if ttag(proglist[progcounter]).vari<>ns+'except' then
+           begin
+           end else
+           begin
+             writeln('<li>skipped to'+ttag(proglist[progcounter]).vari+ermes );
+
+             ermes:='';
+             //dosubelements;
+             break;
+           end;
+
+        end;
         try
         progcounter := progcounter + 1;
         progt := proglist[progcounter];
@@ -4327,6 +4518,7 @@ begin
 
       begin //some special commands, should not be handled here (?)
       try
+      if (progt.att(ns + 'try') <> '') then trying:=true;
         if (progt.att(ns + 'if') <> '') then
         begin  //will take care of this in the main doelementlist-loop and remove from here
             elsepending:=false;
@@ -4394,7 +4586,7 @@ begin
             did := Execute(oldns);
             if progt.vari=oldns + 'if' then  begin elsepending:=not did; end;
             //if progt.vari=oldns + 'start' then begin startedhere:=true;//oldto:=x_started.getele;end;
-          except writeln('failed DO EXEC' + progt.vari + progt.xmlis);    end;
+          except on e:exception do begin writeln('!--failed DO EXEC' + progt.vari + e.message); ermes:=e.message;   end;end;
       end
         //end of ns:command
       else //********************************** PLAIN ELEMENTS
@@ -4418,7 +4610,7 @@ begin
              // + '/from:'+curfromele.vali+ '/oldto:'+oldto.vari+oldto.vali+'  /backto:'+backto.vari+backto.vali+'"');
              // except writeln('failed:',progt.head ,curtoele=nil,curfromele=nil, backto=nil,'/back:',oldto=nil); end;
 
-           except  writeln('failed plain element'); writeln(newtag.head, '</hr>'); raise;  end;
+          except on e:exception do begin writeln('!--failed plain element' + progt.vari + e.message); ermes:=e.message;   end;end;
       end;
          //end of no-ns
       //finally  //both ns: and plain:
@@ -5873,6 +6065,8 @@ begin
     x_cookie := serv.cookie;
     x_session := session;
     x_serving := serv;
+    x_streaming:=false;
+    x_databases:=tstringlist.create;
     randomize;
     x_form := readparamstoform(serv.params);
     if serv.xml then
@@ -8199,7 +8393,7 @@ var
   aps: string;
 begin
   try
-    //#writeln('<li>LISTing:','!</li>');
+   i:=0;
     acom := CurBYEle;
     xform := xml;
     xmllist := TStringList.Create;

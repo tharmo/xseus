@@ -59,7 +59,6 @@
       <Unit2>
         <Filename Value="xseglob.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="xseglob"/>
       </Unit2>
       <Unit3>
         <Filename Value="xseoid.pas"/>
@@ -72,6 +71,7 @@
       <Unit5>
         <Filename Value="xsejunk.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="XSEJUNK"/>
       </Unit5>
       <Unit6>
         <Filename Value="xsesta.pas"/>

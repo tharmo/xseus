@@ -19,3 +19,123 @@ startlistener
 listener created
 ** STARTing LISTEN PORT:8001
 **  LISTENING PORT:8001
+0/get thread, free:10
+Open connection 34181
+started connection0/9@20:49:46
+/mem+0/a:1024
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/debug.htmi
+freelock:/home/t/xseus/www/debug.htmi
+xmlhan
+inited xseus20:49:46 (0) for:/debug.htmi
+/debug.htmi!htmidid:/debug.htmi/mymem:115456
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/debug.htmi/mymem:16032
+freedxseus:
+finishing Non-chunked
+custheads: HTTP/1.0 200
+Content-length: 860
+Content-type: text/html
+Date: Mon, 3 Aug 2015 20:49:46 +0300
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+169!
+finished xseus-serving/mymem:10976
+closing-----------------------------------
+/closed:/debug.htmi for serving 0/a:9344
+Close socket34181
+released thread 0 now at 9/10
+0/get thread, free:10
+started connection1/9@20:50:27
+Open connection 34182
+/mem+1/a:1024
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/debug.htmi
+freelock:/home/t/xseus/www/debug.htmi
+xmlhan
+inited xseus20:50:27 (1) for:/debug.htmi
+/debug.htmi!htmidid:/debug.htmi/mymem:114592
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/debug.htmi/mymem:14560
+freedxseus:
+finishing Non-chunked
+custheads: HTTP/1.0 200
+Content-length: 1015
+Content-type: text/html
+Date: Mon, 3 Aug 2015 20:50:27 +0300
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+170!
+finished xseus-serving/mymem:9504
+closing-----------------------------------
+/closed:/debug.htmi for serving 1/a:7872
+Close socket34182
+released thread 1 now at 9/10
+0/get thread, free:10
+Open connection 34183
+started connection2/9@20:50:44
+/mem+2/a:1024
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/debug.htmi
+freelock:/home/t/xseus/www/debug.htmi
+xmlhan
+inited xseus20:50:44 (2) for:/debug.htmi
+/debug.htmi!htmidid:/debug.htmi/mymem:114592
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/debug.htmi/mymem:14560
+freedxseus:
+finishing Non-chunked
+custheads: HTTP/1.0 200
+Content-length: 1015
+Content-type: text/html
+Date: Mon, 3 Aug 2015 20:50:44 +0300
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+170!
+finished xseus-serving/mymem:9504
+closing-----------------------------------
+/closed:/debug.htmi for serving 2/a:7872
+Close socket34183
+released thread 2 now at 9/10
