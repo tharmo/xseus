@@ -4477,6 +4477,7 @@ begin
   deb := False;
   oldto := CurToEle;
   oldby := curbyele;
+  trying:=false;
   if x_started.count>0 then
   begin
     firststarted:=x_started.pars[0];
@@ -4491,22 +4492,6 @@ begin
    while (progcounter < proglist.Count - 1) do
    //*********main loop**********
    begin
-        if ermes<>'' then
-        begin
-           progcounter:=progcounter+1;
-           writeln('<li>skipping'+ttag(proglist[progcounter]).vari+ermes );
-           if ttag(proglist[progcounter]).vari<>ns+'except' then
-           begin
-           end else
-           begin
-             writeln('<li>skipped to'+ttag(proglist[progcounter]).vari+ermes );
-
-             ermes:='';
-             //dosubelements;
-             break;
-           end;
-
-        end;
         try
         progcounter := progcounter + 1;
         progt := proglist[progcounter];
@@ -4518,7 +4503,7 @@ begin
 
       begin //some special commands, should not be handled here (?)
       try
-      if (progt.att(ns + 'try') <> '') then trying:=true;
+      if (progt.att(ns + 'try') <> '') then begin trying:=true;writeln('<li>trying!');end;
         if (progt.att(ns + 'if') <> '') then
         begin  //will take care of this in the main doelementlist-loop and remove from here
             elsepending:=false;
@@ -4586,7 +4571,7 @@ begin
             did := Execute(oldns);
             if progt.vari=oldns + 'if' then  begin elsepending:=not did; end;
             //if progt.vari=oldns + 'start' then begin startedhere:=true;//oldto:=x_started.getele;end;
-          except on e:exception do begin writeln('!--failed DO EXEC' + progt.vari + e.message); ermes:=e.message;   end;end;
+          except on e:exception do begin writeln('!--failed DO EXEC' + progt.vari + e.message); if trying then ermes:=e.message;   end;end;
       end
         //end of ns:command
       else //********************************** PLAIN ELEMENTS
@@ -4610,10 +4595,28 @@ begin
              // + '/from:'+curfromele.vali+ '/oldto:'+oldto.vari+oldto.vali+'  /backto:'+backto.vari+backto.vali+'"');
              // except writeln('failed:',progt.head ,curtoele=nil,curfromele=nil, backto=nil,'/back:',oldto=nil); end;
 
-          except on e:exception do begin writeln('!--failed plain element' + progt.vari + e.message); ermes:=e.message;   end;end;
+          except on e:exception do begin writeln('!--failed plain element' + progt.vari + e.message); if trying then ermes:=e.message;   end;end;
       end;
          //end of no-ns
       //finally  //both ns: and plain:
+      if ermes<>'' then
+      begin
+         writeln('<li>failure: skip until exec',progcounter,'/',proglist.count);
+         try
+         while (progcounter < proglist.Count) and (ttag(proglist[progcounter]).vari<>ns+'except') do
+         begin
+           writeln('<li>skipping:',progcounter);
+           writeln('...'+ttag(proglist[progcounter]).vari+':'+ermes );
+           progcounter:=progcounter+1;
+
+         end;
+         ermes:='';
+         except writeln('failed skipping');end;
+           //dosubelements;
+           //break;
+           writeln('clean up??');
+
+      end;
       begin //PLACE RESULTS AND CLEANUP
         try
           //if progt.vari<>ns+'stop' then

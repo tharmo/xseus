@@ -73,7 +73,7 @@ begin
   for i:=0 to q.params.count-1 do
   begin
       apar:=q.params[i];
-    //  writeln('<li>',i,'@',apar.Name,'=',atts.values[apar.name]);
+      writeln('<li>',i,'@',apar.Name,'=',atts.values[apar.name]+'</li>');
     apar.Value:=atts.values[apar.name];
     //apar.Assign(atts.values[apar.name]);
     //Q.Params.ParamByName('ID').AsInteger := 1;
@@ -88,8 +88,17 @@ begin
  writeln('<li>oppen',name,':',qs,'!</li>');
  try
  try
- sql_open(qs);
- Q.sql.TEXT:=qs;
+ T:=TSQLTransaction.create(c);
+ writeln('<li> trans.');
+ C.Connected:=true;
+ writeln('<li> con');
+ Q:=TSQLQuery.Create(C);
+ writeln('<li> Q:',qs);
+ Q.SQL.Text := qs;
+ Q.Database:=C;
+ T.Database:=C;
+ Q.Transaction:=T;
+ writeln('<li>','qdb');
  except on e:exception do writeln('<li>ERRORA opening query ',e.message,'!</li>');end;
  q.prepare;
  writeln('<li>prepared');

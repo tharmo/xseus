@@ -20,8 +20,8 @@ listener created
 ** STARTing LISTEN PORT:8001
 **  LISTENING PORT:8001
 0/get thread, free:10
-Open connection 34181
-started connection0/9@20:49:46
+Open connection 51763
+started connection0/9@20:31:22
 /mem+0/a:1024
 OUTBUFFER:0
 assign outoput
@@ -33,8 +33,8 @@ assigned outoput
 created lock for /home/t/xseus/www/debug.htmi
 freelock:/home/t/xseus/www/debug.htmi
 xmlhan
-inited xseus20:49:46 (0) for:/debug.htmi
-/debug.htmi!htmidid:/debug.htmi/mymem:115456
+inited xseus20:31:22 (0) for:/debug.htmi
+/debug.htmi!htmidid:/debug.htmi/mymem:116288
 clear
 <li>vars
 <li>hans
@@ -43,25 +43,25 @@ clear
 <li>goxml
 <li>didgoxml
 cleared
-freed:/debug.htmi/mymem:16032
+freed:/debug.htmi/mymem:11776
 freedxseus:
 finishing Non-chunked
 custheads: HTTP/1.0 200
-Content-length: 860
+Content-length: 901
 Content-type: text/html
-Date: Mon, 3 Aug 2015 20:49:46 +0300
+Date: Mon, 10 Aug 2015 20:31:22 +0300
 Set-Cookie: xseus_session=ikotktit; path=/
 Server: Xseus / Synapse
 
-169!
-finished xseus-serving/mymem:10976
+170!
+finished xseus-serving/mymem:6720
 closing-----------------------------------
-/closed:/debug.htmi for serving 0/a:9344
-Close socket34181
+/closed:/debug.htmi for serving 0/a:5088
+Close socket51763
 released thread 0 now at 9/10
 0/get thread, free:10
-started connection1/9@20:50:27
-Open connection 34182
+Open connection 51764
+started connection1/9@20:31:32
 /mem+1/a:1024
 OUTBUFFER:0
 assign outoput
@@ -73,8 +73,8 @@ assigned outoput
 created lock for /home/t/xseus/www/debug.htmi
 freelock:/home/t/xseus/www/debug.htmi
 xmlhan
-inited xseus20:50:27 (1) for:/debug.htmi
-/debug.htmi!htmidid:/debug.htmi/mymem:114592
+inited xseus20:31:32 (1) for:/debug.htmi
+/debug.htmi!htmidid:/debug.htmi/mymem:121344
 clear
 <li>vars
 <li>hans
@@ -83,25 +83,25 @@ clear
 <li>goxml
 <li>didgoxml
 cleared
-freed:/debug.htmi/mymem:14560
+freed:/debug.htmi/mymem:15808
 freedxseus:
 finishing Non-chunked
 custheads: HTTP/1.0 200
-Content-length: 1015
+Content-length: 1061
 Content-type: text/html
-Date: Mon, 3 Aug 2015 20:50:27 +0300
+Date: Mon, 10 Aug 2015 20:31:32 +0300
 Set-Cookie: xseus_session=ikotktit; path=/
 Server: Xseus / Synapse
 
-170!
-finished xseus-serving/mymem:9504
+171!
+finished xseus-serving/mymem:10752
 closing-----------------------------------
-/closed:/debug.htmi for serving 1/a:7872
-Close socket34182
+/closed:/debug.htmi for serving 1/a:9120
+Close socket51764
 released thread 1 now at 9/10
 0/get thread, free:10
-Open connection 34183
-started connection2/9@20:50:44
+Open connection 51765
+started connection2/9@20:33:20
 /mem+2/a:1024
 OUTBUFFER:0
 assign outoput
@@ -113,8 +113,8 @@ assigned outoput
 created lock for /home/t/xseus/www/debug.htmi
 freelock:/home/t/xseus/www/debug.htmi
 xmlhan
-inited xseus20:50:44 (2) for:/debug.htmi
-/debug.htmi!htmidid:/debug.htmi/mymem:114592
+inited xseus20:33:20 (2) for:/debug.htmi
+/debug.htmi!htmidid:/debug.htmi/mymem:121856
 clear
 <li>vars
 <li>hans
@@ -123,19 +123,19 @@ clear
 <li>goxml
 <li>didgoxml
 cleared
-freed:/debug.htmi/mymem:14560
+freed:/debug.htmi/mymem:16320
 freedxseus:
 finishing Non-chunked
 custheads: HTTP/1.0 200
-Content-length: 1015
+Content-length: 1049
 Content-type: text/html
-Date: Mon, 3 Aug 2015 20:50:44 +0300
+Date: Mon, 10 Aug 2015 20:33:20 +0300
 Set-Cookie: xseus_session=ikotktit; path=/
 Server: Xseus / Synapse
 
-170!
-finished xseus-serving/mymem:9504
+171!
+finished xseus-serving/mymem:11264
 closing-----------------------------------
-/closed:/debug.htmi for serving 2/a:7872
-Close socket34183
+/closed:/debug.htmi for serving 2/a:9632
+Close socket51765
 released thread 2 now at 9/10
