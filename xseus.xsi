@@ -28,7 +28,7 @@ xseus
         map path="/home/t/xseus/" ns="/"
         map path="/home/t/xseus/apps/xpad/xsi/" ns="xpad"
         map path="/home/t/xseus/apps/xpas/xsi/" ns="xpas"
-        map path="/home/t/xseus/apps/xpas//xsi/" ns=""
+        map path="/home/t/xseus/www/stat/" ns="stat"
     urlpaths
         map path="/home/t/xseus/studio/" url="/studio/"
         map path="/home/t/xseus/prettify/" url="/prettify/"

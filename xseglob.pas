@@ -173,7 +173,7 @@ var
   //logord: integer;
   //logicriti: boolean;
   //logcrit:TCriticalSection;
-  g_livesession:pointer;
+  g_livesession:pointer=nil;
   g_threadpoolcriti,g_sesscriti,g_logscriti:trtlcriticalsection;
  // g_objectcache: TStringList;
   g_locks:tlocs;
@@ -181,7 +181,7 @@ var
   {$IFNDEF LAZARUS}//logstream: tfilestream;
     {$ENDIF}
 threadvar             //why not part of a txseus??
-  elements_freed, elements_created: integer;
+  elements_freed, elements_created:integer;
   t_debug: boolean;
   //t_lastopentag:tobject;
   //t_context: tidcontext;
@@ -703,6 +703,7 @@ begin
       //>>inif:=extractfiledir(paramstr(0))+g_ds+'xseus.ini';
       //d := extractfiledir(ParamStr(0));
       //d := extractfiledir(ParamStr(0));
+      logwrite('INIFILE NOT FOUND');
       x := '<xseus>' + crlf + '<urlpaths> <map path="' + g_inidir +
         '/www/" url="/"></map>' + crlf + '</urlpaths><apppahts><xseus path="' +
         g_inidir + '/xseus/"/></appaths></xseus>';

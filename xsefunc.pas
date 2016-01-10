@@ -660,8 +660,8 @@ begin
    for i:=0 to ITEMS-2 do
    begin
          stag:=result.addsubtag(cut_ls(stl[i]),cut_rs(stl[i]));
-         //writeln('<li>created:'+stl[i]+'_'+sep+'_'+ result.xmlis);
    end;
+   //writeln('<li>created:<pre>'+ result.xmlis+'</pre>');
    finally
      stl.free;
    end;
@@ -847,11 +847,11 @@ begin
     if pars.count<2 then exit;
     ordo:=pos(pars[1],pars[0]);
     if ordo<1 then
-      //begin
-      //   if pars.Count>2 then elsest:=true else elsest:=false;
+    begin
+         if pars.Count>2 then result:=pars[0] else result:='';
       //   if elsest then result:=pars[0] else
-    result:=''
-      //end
+      //result:=''
+    end
     else result:=copy(pars[0],1,ordo-1);
     //writeln('<li>before:'+pars[0],'/',pars[1],'('+pars[2]+')'+result);
  end;
@@ -2731,6 +2731,8 @@ var p_part,p_whole:string;
 begin
   namepars(p_part,p_whole,parlist,pars);
   result:=inttostr(pos(p_part,p_whole));
+ // writeln('<li>',result,p_part,'_in_',p_whole);
+ // writeln('<li>',pars.text,pars.count);
 end;
 
 function tfunc.f_posany:string;
@@ -3225,4 +3227,4 @@ end;
 end;
 
 
-
+

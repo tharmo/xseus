@@ -138,7 +138,7 @@ type
 
 type txseusserver = class(TObject)
     gname:string;
-    ssl,chunked:boolean;
+    ssl,serverchunked:boolean;
     sessions: Tsessions;
     sessiontimeout: integer;
     listener:tlistener;
@@ -165,7 +165,7 @@ var   xseuscfg: txseusconfig;
   //ftpserver: txseusftp;
   //sslserver: tsslserver;
   //xseusformi: Txseusformi;
-  connections: integer;
+  //connections: integer;
 
 procedure bitofrest;
 
@@ -352,7 +352,7 @@ var
   b: byte;
   begin
       try
-        logwrite('ALLout'+inttostr(integer(f.bufpos)));
+        logwrite('htmlALLout'+inttostr(integer(f.bufpos)));
         SetString(s, PAnsiChar(f.bufptr), f.bufpos);
         //content-type: chunked means writing these chunks and their legths in HEX
         len := length(s);
@@ -378,13 +378,17 @@ var
   b: byte;
   begin
       try
-        //logwrite('ALLout::'+inttostr(integer(RES.SIZE)));
+       if res<>nil then
+       begin
+       logwrite('allout::'+inttostr(integer(RES.SIZE)));
+       end else logwrite('noallout');
+        //logwrite('tryallout');
         hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html',RES.position);
         Tserving(t_thisprocess).sock.SendString(hdr);
         Tserving(t_thisprocess).sock.SendBuffer(RES.MEMORY,RES.position);
         //logwrite('s:' + s);
       except
-        logwrite('failed htmlallout');
+        logwrite('failed allout');
         //logwrite('s:' + s);
         raise; //GOTTA RAISE THIS ONE, OTHERWISE WE CAN GET MILLIONS OF THESE
         // WHEN BROWSERS QUIT CONNECTIONS
@@ -399,19 +403,20 @@ var
   b: byte;
   begin
      if f.bufpos=0 then exit;
-     if not xseusserver.chunked then
+     if not xseusserver.serverchunked then
         //if 1=0 then
         //if t_keepbuffer then
         begin
+           try
            //SetString(s, PAnsiChar(f.bufptr), f.bufpos);
-           //logwrite('write:'+inttostr(integer(f.bufpos))+s);
+           //logwrite('write:'+inttostr(integer(f.bufpos)));
            t_outbuffer.writebuffer(f.buffer,f.bufpos);
            //logwrite('res from:'+inttostr(f.bufpos)+'/'+inttostr(t_outbuffer.position));
            F.BufPos := 0;
            Result := 0;
+           except logwrite('failed to write to buffer****************');end;
 
          exit;
-
         end
        ;//else begin htmlallout(F);exit;end;
       //should be possible to also keep everything in buffer and
@@ -554,15 +559,19 @@ end;
 
 constructor tserving.Create(CreateSuspended: boolean);
 begin
+  inherited Create(CreateSuspended);//,500000);
   xml:=false;
   FreeOnTerminate := true;
   sock := TTCPBlockSocket.Create;
   HeaderHasBeenWritten := False;
+  resutxt:='';
+  xml:=false;
+  chunked:=false;
   uploads:=tstringlist.create;
   params:=tstringlist.create;
-
-  //inherited Create(CreateSuspended);
-  inherited Create(true);
+  elements_created:=0;
+  elements_freed:=0;
+  //inherited Create(true);
 end;
 
 procedure tserving.ShowStatus;
@@ -646,7 +655,7 @@ var
   i: integer;
   serving: tserving;
 begin
-  //threadCount:=6;
+  threadCount:=6;  //this was xommented out for some reason..???
   freeths := TList.Create;
   all := TList.Create;
   inuseths := TList.Create;
@@ -1016,6 +1025,7 @@ var
   //mystream:tstringstream;
 
 begin
+   keepxseusalive:=false;
   try
   try  //init
      xml:=false;
@@ -1126,7 +1136,7 @@ begin
     try
     try //doxeus
       //logshow('url'+uri);
-      if not xseusserver.chunked then
+      if not xseusserver.serverchunked then
       begin
         //t_keepbuff:=true;
          t_outbuffer:=tmemorystream.Create;
@@ -1145,7 +1155,7 @@ begin
       //logwrite('created xseus');
       //sleep(5000);
       if g_livesession<>nil then
-       txseus(myxseus).continue
+       txseus(myxseus).docontinue
       else
       begin
       txseus(myxseus):=txseus.create(nil);
@@ -1170,7 +1180,9 @@ begin
       try   //clear xseus
       if keepxseusalive then
       begin
-       g_livesession:=self;
+      g_livesession:=self;
+      g_livesession:=nil; //to make sure not used yet
+
       end else
       begin
       logwrite('clear');
@@ -1182,10 +1194,11 @@ begin
       end;
      except   writeln('failed xseus.clear'); raise; end;
              //xseus cleared
-   except logwrite('failed xseus thread');raise;end;
+   except logwrite('failed xseus thread');//raise;
+   end;
    finally
    try
-   if xseusserver.chunked then
+   if xseusserver.serverchunked then
    begin
        if not headerhasbeenwritten then writeln('No output from '+uri);
        Sock.SendString('0000'+crlf+crlf);
@@ -1221,7 +1234,7 @@ begin
   responseheaders.free;
   end;
    //xseus cleared
-   logwrite('/closed:'+uri+' for serving '+inttostr(id)+'/a:'+floattostr(getheapstatus.totalallocated));
+   logwrite('/closed:'+uri+' for serving '+inttostr(id)+'/a:'+floattostr(getheapstatus.TotalFree));
    //sock.closesocket;
    //sock.purge;
 end;
@@ -1266,12 +1279,15 @@ begin
   xseuscfg.get(INIF);
   sessions.sestimeout:=strtointdef(xseuscfg.sessiontimeout,15);
   //xseusformi.memolog('At');
-  if xseuscfg.config.subs('chunked')='false' then chunked:=false else chunked:=true;
+  if xseuscfg.config.subs('chunked')='false' then serverchunked:=false else serverchunked:=true;
   //chunked:=false;
   servs := tthreadpool.Create;
   servs.threadcount:=strtointdef(xseuscfg.config.subs('threadcount'),6);//sorry not elegant to do it here
   servs.init;
- logwrite('did create a xseusserver with inifile:'+inif+' running '+inttostr(servs.threadcount)+' threads');
+  if serverchunked then
+ logwrite('did create a xseusserver with inifile:'+inif+' running '+inttostr(servs.threadcount)+' threads, chunked')
+  else
+  logwrite('did create a xseusserver with inifile:'+inif+' running '+inttostr(servs.threadcount)+' threads, NOT chunked');
  end;
 
 procedure txseusserver.run;

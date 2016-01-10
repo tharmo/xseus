@@ -5,7 +5,7 @@ unit xsexml;
 {$ENDIF}
 
 //EF BB BF
-{$H+}
+{ $H+}
 interface
 
 uses Classes, SysUtils;//,       generics.collections;
@@ -477,7 +477,7 @@ begin //txcond.parse
     if not tillendbrac(path,posi) then writeln('Failed to parse xse-path condition - missing end bracket?');
   finally
    cond:=copy(path,stpos,posi-stpos-1);
-   //writeln('<li>_didcondx<b>(',cond,')</b></li>');
+  //writeln('<li>_didcondx<b>(',cond,')</b></li>');
    //   writeln('<li>rest<b>(',copy(path,posi,999),')</b></li>');
    //writeln('didparsepath');
   end;
@@ -703,8 +703,14 @@ begin
       length(what), length(inwhat));
 end;
 
+function cut_ls(s:string):string;
+var apus:string;apui:integer;
+begin
+    apui:= pos('=',s);
+    if apui>0 then result:=copy(s,1,apui-1) else result:=s;
+end;
 
-function cut_ls(s: string): string;
+function oldcut_ls(s: string): string;
 var
   apui: integer;
 begin
@@ -715,9 +721,31 @@ begin
     Result := '';
 end;
 
+function cut_rs(s:string):string;
+var apui,i:integer;apust:string;
+begin
+  //apui:= length(s)-pos('=',s);
+  apui:=0;
+  apui:=pos('=',s);
+  result:='';
+    apust:='';
+    if apui>0 then //apust:=rightstr(s,apui);
+     for i:=apui+1 to length(s) do
+     try
+     apust:=apust+s[i];
+    //apust:=copy(s,apui+1,length(s)-apui);// else result:='';
+    //§result:=trim(result);
+   // if (pos('"',result)=1) and (length(result)>1) and (result[length(result)]='"') then
+   //  result:=copy(result,2,length(result)-2);
+   result:=apust;
+    except  writeln('<li>cut_rs failed for:',s,'/pos:',apui,'/len:',length(s), ' /at:',i, '   ',s[i],'/'+floattostr(getheapstatus.TotalFree));raise;end;
+   // try
+    //  apust:='zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
+     // except writeln('<li>faild to ad string2');end;
+   end;
 
 
-function cut_rs(s: string): string;
+function oldcut_rs(s: string): string;
 var
   apui: integer;
 begin
@@ -1049,6 +1077,7 @@ begin
                 if tag <> nil then
                   newtag := tag.addsubtag(term, '') else writeln('<h1>ending a nil tag -please report problem</h1>');
                 //writeln('<h4>Start:',curpos,_clean(term),'/under:',tag.vari,'!</h4>');
+                //if (term='head') or (term='body') then writeln('<li>starting tag:',term);
                 tag := newtag;
                 intagword := False;
                 if pos(sts[curpos], whitespace) > 0 then  //attributes forthcomin?
@@ -1082,7 +1111,7 @@ begin
               //if curpos=paslen then begin writeln('<li>atendparse:'+tag.head+'!!!');  end;
               if onetagonly then
               begin
-                 writeln('<h2>did firsttag endtag:',term,'</h2><xmp>!',tag.xmlis,'</xmp>',curpos,'<xmp>!',copy(sts,1,curpos),'</xmp>','<xmp>!',copy(sts,curpos+1,999),'</xmp>');
+                 //writeln('<h2>did firsttag endtag:',term,'</h2><xmp>!',tag.xmlis,'</xmp>',curpos,'<xmp>!',copy(sts,1,curpos),'</xmp>','<xmp>!',copy(sts,curpos+1,999),'</xmp>');
                  posit:=curpos;
                  break;
               end;
@@ -1093,9 +1122,12 @@ begin
               end else
               begin
                 term:=trim(term);
-                //writeln('<li>!closetag:'+tag.vari+'::'+term);
                 //writeln('!<pre>'+basetag.xmlis+'</pre>!!!!!<pre>'+tag.xmlis+'</pre>!!!!');
                 oldtag := tag;
+                //if (term='head') or (term='body') then
+                // begin writeln('<li>ending tag:',term);
+                // writeln('<li>!closetag:'+tag.vari+'::'+term+' under:'+tag.parent.vari);
+                // end;
                 if (ansilowercase(tag.vari) = ansilowercase(trim(term))) then
                 begin
                     if tag=basetag then break;
@@ -1140,11 +1172,12 @@ begin
                          for j:=opentree.count-1 downto 0 do
                          begin
                            atag:=ttag(opentree[j]);
-                           //writeln('<li>autoclosing:'+atag.head+'/reason:/'+term+'/under:'+tagtoclose.xmlis);
+                           //if (term='head') or (term='body') then
+                           //   writeln('<li>autoclosing:'+atag.head+'/reason:/'+term+'/under:'+atag.parent.head+' /for:'+tagtoclose.head);
                            if pos('<'+ansilowercase(atag.vari)+'>',gc_html5voids)>0 then
                            begin
                              if trim(atag.vali)<>'' then tagtoclose.addsubtag('',atag.vali);
-                             //writeln('<li>void-',j,',',opentree.count-1);
+                             //writeln('<li>void-',j,',',atag.head);
                              //tagtoclose.addval(atag.vali);
                              atag.vali:='';
                              while atag.subtags.count>0 do ttag(atag.subtags[0]).moveto(tagtoclose);
@@ -1154,7 +1187,7 @@ begin
                            //else
                             //writeln('<li>UNSTARTED' +term+'/closeup:<b>',tagtoclose.vari+'</b>  ',tagtoclose.head,'<b>',atag.vari,' </b>',atag.head,'!!');
                          end;
-                         tag:=tagtoclose;
+                         tag:=tagtoclose.parent;
                          //opentree.free;opentree:=nil;
                        end;
                         except writeln('<li>failed parse bracket endtag for : /'+term);end;
@@ -1165,6 +1198,7 @@ begin
                   attname := '';
                   inendtag := False;
                   incont := True;
+                  //writeln(' to element '+tag.vari);
                   continue;
                 end;
             except writeln('failed in endtag'); end;
@@ -1189,7 +1223,7 @@ begin
                   addattr;
                   if onetagonly then
                   begin
-                     writeln('<h2>did firsttagtag parvar:',term,'</h2><xmp>!',tag.xmlis,'</xmp>',curpos,'<xmp>!',copy(sts,1,curpos),'</xmp>','<xmp>!',copy(sts,curpos+1,999),'</xmp>');
+                     //writeln('<h2>did firsttagtag parvar:',term,'</h2><xmp>!',tag.xmlis,'</xmp>',curpos,'<xmp>!',copy(sts,1,curpos),'</xmp>','<xmp>!',copy(sts,curpos+1,999),'</xmp>');
                   end;
 
                   incont := True;
@@ -1241,7 +1275,7 @@ begin
                 inparval := False;
                 term := _cleanattr(term);
                 //tag.attributes.add(param + '=' + term);
-                tag.setatt(attname,term);
+                addattr;//tag.setatt(attname,term);
                 term := '';
                 attname := '';
                 if sts[curpos] = '>' then
@@ -1261,7 +1295,7 @@ begin
               if pos(sts[curpos], whitespace) > 0 then
               begin
                 //tag.attributes.add(param + '=' + _cleanattr(term));
-                tag.setatt(attname,_cleanattr(term));
+                addattr;//tag.setatt(attname,_cleanattr(term));
                 term := '';
                 attname := '';
                 inparval := False;
@@ -1281,7 +1315,7 @@ begin
             begin
               if onetagonly then
               begin
-                 writeln('<h2>did firsttag cont:',term,'</h2><xmp>!',tag.xmlis,'</xmp>',curpos,'<xmp>!',copy(sts,1,curpos),'</xmp>','<xmp>!',copy(sts,curpos+1,999),'</xmp>');
+                 //writeln('<h2>did firsttag cont:',term,'</h2><xmp>!',tag.xmlis,'</xmp>',curpos,'<xmp>!',copy(sts,1,curpos),'</xmp>','<xmp>!',copy(sts,curpos+1,999),'</xmp>');
                  posit:=curpos;
                  break;
               end;
@@ -1386,6 +1420,8 @@ begin
     //if t_lastopentag<>nil then Writeln('<h3>!!-!2OPeNTAG'+ttag(t_lastopentag).xmlis+'!-!!</h3>');
 
   end;
+  //writeln('PARSED:<pre>'+result.xmlis+'</pre>');
+  //writeln('<h1>didparsec</h1> ');
 end;
 
 
@@ -1729,7 +1765,7 @@ begin //note does not clear subtags in testmem-state
       if subtags <> nil then
       subtags.clear;
     except
-      writeln('<li>subtags of ', vari, ' free-error</li>');
+      writeln('<li>subtags of ', vari, ' clear-error</li>');
     end;
     try
     //this gives errors in killtree. why)
@@ -2390,24 +2426,52 @@ begin
   Result := stringreplace((adjustlinebreaks(st)), crlf, ind + '', [rfreplaceall]);
 end;}
 function _addtores(atts,ind: string): string;
-var line,mywrap:string;
+var aline,mywrap:ansistring;
 begin
+   try
+
  //if vari='' then line:=line+'X';
  //line:= line+' sub='+inttostr(subtags.count);
  //if vari='' then mywrap:=ind else mywrap:=ind+'  ';
  //if (trim(vari)='') and (trim(atts)='') and (trim(vali)='') then exit;
  //if vari='' then line:=ind+'__' else
- line:=ind+vari;
- if trim(atts)<>'' then line:=line+' '+trim(atts);
- if (vali='') then begin if (vari<>'') then res.add(line); end
- else
+ //if atts=nil then writeln('<li>attributes not initialized');
+ try
+ aline:=ind+vari;
+ except writeln('<li>failed to add ind/line');end;
+ try
+ try
+     //if trim(atts)<>'' then
+     //  aline:=aline+' '+trim(atts);
+   //atts:='juu="jaa"';
+   aline:=concat(aline,' '+atts);
+   //aline:=aline+' juu="jaa"';
+ except writeln('<li>failed to list atts');writeln(aline);aline:=ind+vari;writeln('??????????'); end;
+ except writeln('<li>failed to fail to list atts'); end;
+// except on e:exception do begin writeln('<li>!!!failed to add ats:'+e.message);logwrite(aline+'################'+atts);
+//  writeln('<li>'+'<b>'+aline+'</b></li>');end;end; //line+'!'+vari+''+vali);end;
+ try
+  if (vali='') then
+  begin
+    if (vari<>'') then
+     res.add(aline);
+
+  end
+ except writeln('<li>failed to add shortline:');// +line+'!'+vari+''+vali);
+ end;
+ try
+ if vali<>'' then //else
  begin
    //if length(vali)+length(line)<3 then res.add(line+': '+vali) else
-   if (xquoted) or (att('xse:format')='quoted') then res.add(line + ': ''''''' + crlf +vali  + '''''''') else
+  try
+   if (xquoted) or (att('xse:format')='quoted') then res.add(aline + ': ''''''' + crlf +vali  + '''''''') else
    //if length(vali+line)<70 then  res.add(line+': '+vali)
    //else
-   if inlinexml then res.add(line+': '+vali) else
-   res.add(line+': '+_xwrap(vali,ind,80));//+' ('+vali+')');
+   if inlinexml then res.add(aline+': '+vali) else
+   res.add(aline+': '+_xwrap(vali,ind,80));//+' ('+vali+')');
+
+   except writeln('<li>failed to add line:');// +line+'!'+vari+''+vali);
+   end;
    //if pos('taaseka',vali)>0 then
    //if pos(vali,crlf)=1 then res.add(line+': ['+_xwrap(vali,ind+'',65)+']')
    //else res.add(line+': {'+_xwrap(vali,ind+'  ',65)+'}')
@@ -2416,15 +2480,18 @@ begin
    //else
    //res.add(line+': '+_xwrap(vali,ind+'  ',65))
  end;
+    except writeln('<li>failed to add linewith vali:');end;
+
  //logwrite('listed:'+var7i+'/line;'+line);
  //writeln('<li>addto:'+vari+'<xmp>%'+listxml(' ',false)+'%</xmp>topar:<pre>'+_clean(parent.listxml(' ',false))+'!!</pre>###',parent.vari,length(inde),'</li>');
+   except writeln('failed addon elin e');end;
 
 end;
 
 var
   i, vals: integer;
   //sls: TStringList;
-  atts, st, values, tvali: string;
+  atts, st, values, tvali,ost: string;
   isnew: boolean;
   asubi: ttag;
  // function _owrap(st,x:integer;inde:string);
@@ -2438,26 +2505,45 @@ var
     res := TStringList.Create;
   end;
   try
+  if attributes<>nil then
   for i := 0 to attributes.Count - 1 do
   begin
     st := attributes.strings[i];
+    ost:=st;
+    if length(st)>0 then
+    begin
     //st := StringReplace(st, ^M, '\r', [rfreplaceall]);
     //st := StringReplace(st, ^J, '\n', [rfreplaceall]);
     st := StringReplace(st, '"', '&quot;', [rfreplaceall]);
     st := StringReplace(st, crlf, '&#xA;', [rfreplaceall]);
     st := StringReplace(st, ^M, '&#xA;', [rfreplaceall]);
     st := StringReplace(st, ^J, '&#xA;', [rfreplaceall]);
+    ost:=st;
     //if cut_ls(st)='value' then writeln('!!class:<xmp>'+st+'</xmp><hr/>');
+    try
     st := cut_ls(st) + '="' + cut_rs(st) + '"';
-    atts:=atts+' '+st;
+     except st:=ost;writeln('<li>failed xmlis corrupt attribute!!'+ost+'??',length(ost));end;
+    end;
+    try
+    atts:=concat(atts,' ',st);
+    except writeln('<li>failed add attribute!!',st,'!!!',ost,'///');end;
     //atts:=st;
   end;
-  except writeln('failed xmlis corrupt attributes');raise;end;
+
+
+  except writeln('failed xmlis corrupt attributes');
+     writeln(vari+''+vali+'!'+attributes.text+'!!',attributes.count);
+    for i:=0 to attributes.count-1 do
+     try
+    writeln('<li>::',i,attributes.strings[i]);
+
+     except writeln('unininted element');end;
+  end;
   try
   _addtores(atts,inde);
    //writeln('<li>to:'+vari+'/',vali,length(inde),'</li>');
 
-  except writeln('<li>failed list one line'+head);end;
+  except writeln('<li>failed addtores one line'+head+'</li>');end;
   try
   if subtags <> nil then
     for i := 0 to subtags.Count - 1 do
@@ -2471,7 +2557,7 @@ var
     end;
    except
      writeln('<li>FAILED list XMLIS','</li>');
-     raise;
+     //raise;
   end;
 
  end;
@@ -2694,6 +2780,7 @@ var
   st, subc: string;
   i: integer;
 begin
+  try
   Result := '';
   if vari = 'xxxcdata' then
   begin
@@ -2710,13 +2797,21 @@ begin
     Result := '<' + vari //+' inde="'+inde+'"'
     else
     Result := crlf + inde+'<' + vari ;//inde="'+inde+'"';
+    try
+    //if attributes<>nil then
     for i := 0 to attributes.Count - 1 do
       Result := Result + ' ' + cut_ls(attributes[i]) + '="' +
         cut_rs(attributes[i]) + '"';
+    except writeln('<li>failes list atts #'+'!'+vari);end;
   end;
   subc := '';
+  except writeln('<li>failes tag #'+'!');raise;end;
+  try
+  if subtags<>nil then
+  if subtags.count>0 then
   for i := 0 to subtags.Count - 1 do
   begin
+   //try    if ttag(subtags[i]).vari<>'' then writeln('');  except writeln('failing subtag');raise;end;
     if ttag(subtags[i]).vari = 'cdata' then
       subc := subc + '<![CDATA[' + StringReplace(ttag(subtags[i]).vali,
         ']]>', ']]]]><![CDATA[>', [rfreplaceall]) + ']]>'
@@ -2727,11 +2822,12 @@ begin
       //subc := subc + '!'+(ttag(subtags[i]).vali)+'/'+inttostr(i);
       //writeln('<li>',vari,'vali:'+'/'+ ttag(subtags[i]).vali+ '\');
      end
-    else   //never happens:
-    //VALUE if (ttag(subtags[i]).vari='value') and (ttag(subtags[i]).subtags.count=0)  then
+    else   //never happens:   //VALUE if (ttag(subtags[i]).vari='value') and (ttag(subtags[i]).subtags.count=0)  then
     if (ttag(subtags[i]).vari = '') and (ttag(subtags[i]).subtags.Count = 0) then
       subc := subc + (ttag(subtags[i]).vali)
     else
+    try
+    begin
       //if (inde<>'')  then
       //begin
       // subc := subc + (ttag(subtags[i]).listxml('', ents));
@@ -2739,7 +2835,11 @@ begin
     if inde='' then
     subc := subc + (ttag(subtags[i]).listxml('', ents)) else
     subc := subc + (ttag(subtags[i]).listxml(inde+'    ', ents));
+
+    end;except writeln('<li>failes subbtag #'+inttostr(i));end;
   end;
+  except writeln('<li>could not write subbtags to res:');writeln(ttag(subtags[i]).vari+inttostr(subtags.count)+'!'+inde+'!'+booltostr(ents));end;
+  try
   if (vari = '') then
   begin
     if inde<>'' then
@@ -2758,6 +2858,7 @@ begin
     else
       Result := Result + '>' + vali + (subc) + '</' + vari +'>';
    end;
+  except writeln('<li>could not write tags to res');end;
   //logwrite('**!!'+result+'!!**');
   {if ents then
    Result := Result + '>' + _clean(vali) + (subc) + '</' + vari +crlf+ '>'
@@ -3296,6 +3397,7 @@ begin
       if  xsub <> '' then
       begin
          possi:=strtointdef(xsub,-99999);
+         writeln('<li>testing numeric cond:',xsub,':',possi,'!',posi,'/',axisz.count);
          if possi<>-99999 then //pos(xsub[1], '0123456789') > 0 then
         begin
           if possi<0 then
@@ -3324,7 +3426,12 @@ begin
             if xsub[1]='#' then
             {INFIX res := _p_infix(copy(xsub,2,9999) , apui, t_currentxseus,'') else
             res := _p_infix(xsub , apui, t_currentxseus,'');}
-            res := _p_condition(copy(xsub,2,9999),tag ) else
+            begin
+                        res := _p_condition(copy(xsub,2,9999),tag );
+                        writeln('<li>cond:',xsub,'=',res);
+            end
+
+                        else
             res := _p_condition(xsub , tag);
             //if xsub='$i' then writeln('<li>triedtoget:'+tag.xmlis+'!'+res+'!');
             //res := _p_infix(xsub , apui, txseus(t_currentxseus),'')
@@ -3373,7 +3480,7 @@ var
   reslist,maybehits: TList; acond:txcond;
 begin
   try
-   // logwrite('doselectvvv from '+inttostr(subtags.count));
+  //  logwrite('doselectvvv from '+root.vari+inttostr(subtags.count));
 
   try
     path := txpath(pathp);
@@ -3396,13 +3503,17 @@ begin
         if (path.ele = '.') or (path.ele = '..') or (path.ele='*') or  (_matches(path.ele, ttag(subtags[i]).vari)) then
         begin
         maybehits.add(subtags[i]);
-        // writeln('<li>maybe:',i,'/',maybehits.count,ttag(subtags[i]).head,'/num:',numcond);
+        //if numcond=2 then  writeln('<li>maybe:',i,'/',maybehits.count,ttag(subtags[i]).head,'/num:',numcond);
         end;
-       if numcond<0 then numcond:=maybehits.count+numcond;
-       if (numcond<0) or (numcond>=maybehits.count) then
-        writeln('<!--wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'-->') else
+       //if numcond<0 then numcond:=maybehits.count+numcond;
+       //if (numcond<0) or (numcond>=maybehits.count) then
+        if numcond<0 then numcond:=maybehits.count-numcond;
+        if (numcond<0) or (numcond>maybehits.count) then
+          //writeln('<li>wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'')
+        else
         //writeln('<li>o:',numcond,'/',maybehits.count,'=');//+ttag(maybehits[numcond]).head);
-        hitlist.add(maybehits[numcond]);
+        begin //writeln('<li>hitnum',i,'::',numcond,ttag(maybehits[numcond-1]).head);
+         hitlist.add(maybehits[numcond-1]);end;
        except //writeln('fail numcond:',numcond,'/',maybehits.count);;
           //
        end;
@@ -4985,7 +5096,7 @@ begin
     Next.list;
 end;
 
-function txcond.parse(path: string; var posi: integer): boolean;
+function txcond.parsepaska(path: string; var posi: integer): boolean;
 var
   debug,numonly: boolean;
 

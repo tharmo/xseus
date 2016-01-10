@@ -604,7 +604,7 @@ begin
       //t_debug:=true;
      //if t_debug then
      //writeln('<li>GOTpar:'+subexp[subexp.count-1],'/at:',ch,sto,'/rest:',copy(st,sto,stlen),'|stext:'+subexp.text,'_',subexp.count,'!</li>');
-    except  writeln('failed to parse function parameters for ',fname,' at pos ',sto);
+    except  writeln('Ffailed to parse function parameters for ',fname,' at pos ',sto);
     end;
     //if t_debug then writeln('<li>GOonfparts:','/at:',ch,sto,'/rest:',copy(st,sto,stlen),'!</li>');
     while (sto<stlen) and (pos(st[sto], whitespace)>0) do sto:=sto+1;

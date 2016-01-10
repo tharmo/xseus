@@ -4,7 +4,7 @@ unit xsemisc;
 {$ELSE}
  {$DEFINE DELPHI}
 {$ENDIF}
-{$H+}
+{ $H+}
  {$UNDEF INDY}
  {$DEFINE TIBURON}
 {$M+}
@@ -323,7 +323,7 @@ function _httpget(urli:string;wait:integer;acomatts:tstringlist):string;
  var HTTP:THTTPSend;Resultb:boolean;st:string;i:integer;
  begin
   HTTP := THTTPSend.Create;
-  //riteln('<li>GET', urli);
+  //writeln('<li>GET', urli);
   try
   //SynHttp.HTTPMethod('GET', 'https://www.google.com');  try
     //http.UserName:='';
@@ -853,12 +853,15 @@ end;
 function _filetostr(fname:string):string;
 var stf:tfilestream;sts:tstringstream;i:integer;
 begin
+ try
    stf:=tfilestream.create(fname,fmopenread);
    //for i:=0 to sts.length do
    SetLength(result, stf.Size);
    stf.Read(PChar(result)^, stf.Size);
-   //writeln('ST<xmp>',st,'</xmp>');
+   //result:=
+  // if pos('inon',fname)>0 then writeln('didfiletostr:!!!!!!!!!<xmp>',result,'</xmp>');
    stf.free;
+   except writeln('<li>Failed to read file '+fname);end;
 end;
 
 function _quicksearch(needle,hay: string): integer;
@@ -3892,15 +3895,16 @@ begin
    arec.orde:=1;
    arec.numcomp:=false;
    if pos('#',recs[i])=1 then
-       begin
-         recs[i]:=copy(recs[i],2,999);
-         arec.numcomp:=true;
-       end;
-         if pos('-',recs[i])=1 then
-         begin
-           recs[i]:=copy(recs[i],2,999);
-           arec.orde:=-1;
-         end else       if pos('+',recs[i])=1 then
+   begin
+     recs[i]:=copy(recs[i],2,999);
+     arec.numcomp:=true;
+   end;
+   if pos('-',recs[i])=1 then
+   begin
+      recs[i]:=copy(recs[i],2,999);
+      arec.orde:=-1;
+   end else
+   if pos('+',recs[i])=1 then
    begin
      recs[i]:=copy(recs[i],2,999);
      arec.orde:=1;
@@ -3908,6 +3912,7 @@ begin
    recs.objects[i]:=arec;
    //arec.orde:=1;
 end;
+// writeln('<li>sssssssoort', recs.text,recs.count);
 end;
 
 destructor ttagsorter.free;
@@ -3968,13 +3973,15 @@ begin
       //writeln('<li>',result,'  ', s1,'!',s2,'!!',t_listsorter.recs[i]);
 
 end;
-  //writeln('<li>compare:'+str,': ',ttag(a1).vari,'(',s1,'/',ttag(a2).vari,'(',s2,')=',result);
+  //writeln('<li>compare:'+str,': ',ttag(a1).vari,'(',s1,')   /  ',ttag(a2).vari,'(',s2,')=',result);
 
 end;
 function _dosort(slist:tlist;st:string): boolean;
 var //slist:tlist;
     i:integer;
 begin
+
+ //for i:=0 to slist.count-1 do writeln('<li>o:',i,'/'+ttag(slist[i]).head);
 
    try  t_listsorter:=ttagsorter.create(st);  except writeln('<li>failed to create sorter');end;
    try  slist.sort(@mycompare);    except writeln('<li>failed to sortby sorter');raise;
@@ -3988,7 +3995,7 @@ begin
  //    except writeln('<li>failed to list unsorted');end;
   //writeln('<li>gosort:',slist.count,curfromele.head);
 // try
-  //for i:=0 to slist.count-1 do writeln('<li>',i,'/'+ttag(slist[i]).head);
+ // for i:=0 to slist.count-1 do writeln('<li>s:',i,'/'+ttag(slist[i]).head);
   //  except writeln('<li>failed to list sorted');end;
 end;
 

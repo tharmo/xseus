@@ -9,7 +9,7 @@ interface
 {$ELSE}
  {$DEFINE DELPHI}
 {$ENDIF}
-{$H+}
+{ $H+}
 {$M+}
 uses
   {$IFNDEF LCL}
@@ -121,7 +121,7 @@ txseus = class(TObject)
     function doelementlist(proglist: TList): boolean;
     //function doelement(progt: Tttag): boolean;
     procedure doit;
-    procedure continue;
+    procedure docontinue;
     function init(url, host, protocol: string; session: ttag; ser: pointer): boolean;
     //form,uploads:tstringlist);
     function Clear: integer;
@@ -375,7 +375,7 @@ implementation
 
 uses  xsemisc, xsefunc, synacode,
   xseexp,  //xseftp,
-  xseoid,xsetrie,//xsmarkd,
+  xseoid,//xsetrie,//xsmarkd,
   xsemarkd,       sqldb,
   xserver, xsereg;
 {tolist,fromlist:tlist;
@@ -614,8 +614,7 @@ begin
 end;
 
 function txseus.c_checkopenid: boolean;
-var
-  oid: toid;
+var                                 oid: toid;
   resform: ttag;
 begin
   oid := toid.Create;
@@ -760,9 +759,9 @@ var
   stf: tfilestream;
   stl:tstringlist;
 begin
- // copytosfile;exit;
+{ // copytosfile;exit;
   //sts:=tstringstream.create;
-  if curbyele.att('debug')<>'' then trie_debug:=true else trie_debug:=false;
+ // if curbyele.att('debug')<>'' then trie_debug:=true else trie_debug:=false;
   if curbyele.att('big')<>'' then
   begin
     //readrdfstream(strtointdef(curbyele.att('bytes'),10000));
@@ -778,7 +777,7 @@ begin
   //st := _filetostr('/home/t/xseus/www/kungpao.xsi');
   //stf.filename='/home/t/xseus/www/kungpao.xsi';
   //stf.
-
+ }
 {  st:='';
   needle:=curbyele.att('st');
   len:=strtointdef(curbyele.att('len'),100);
@@ -1061,7 +1060,11 @@ begin
       end;
       if place<>'' then  getresupoint;
       if pseudoroot=nil then
-      curtoele:=resupar else
+      begin
+       //if resupar<>nil then
+       curtoele:=resupar
+      end
+      else
       curtoele:=pseudoroot;
       //resupar := rootsel.subt('+' + trim(rest));
       //writeln('<li>doin_'+ele+'_place:'+place+'_res:'+copy(resupar.xmlis,1,50)+'___to:'+copy(curtoele.head,1,50)+'!!!by:'+curbyele.head);
@@ -1270,7 +1273,12 @@ begin
       //writeln('<li>fromfile:',fromfile);
 
       rawtext := _filetostr(fromfile);
-      //writeln('<li>fromfile:',fromfile,'<xmp>',rawtext,'</xmp>');
+      try
+      //logwrite('fromfile'+inttostr(length(rawtext))+rawtext);//+':'+:rawtext);
+      //if pos('inon',fromfile)>0 then writeln('didfiletostr:!!!!!!!!!<xmp>',rawtext,'</xmp>');
+      //writeln('<li>didreadraw'+inttostr(length(rawtext))+'<xmp>'+_clean(rawtext)+'</xmp>');
+      except writeln('<li>could not write rawtext');
+      end;
     end
     else //url
     begin
@@ -1286,7 +1294,7 @@ begin
         rawtext := _httpsget(fromurl, -1, CurBYEle.getattributes)
       else
         rawtext := _httpget(fromurl, -1, CurBYEle.getattributes);
-      //writeln('<li>FRMURL:',FROMURL,'! ',fromelem  ,'!</li><xmp>',rawtext,'</xmp><hr/>');
+       //writeln('<li>FRMURL:',FROMURL,'! ',fromelem  ,'!</li><xmp>',rawtext,'</xmp><hr/>');
     end;
     if curbyele.att('skipto') <> '' then
     begin
@@ -1297,7 +1305,10 @@ begin
     end;
     //g_debug:=true;
     //writeln('<h2>parsefromurl</h2>');
+    try
     fromtag := strtotag(rawtext, isxsi);
+    except writeln('<li>failed to parse fromtext');    end;
+    //if fromtag<>nil then writeln('<pre>'+fromtag.xmlis+'</pre>');
     //g_debug:=false;
      //writeln('<li>parsedFRM:',FROMurl,'::', fromelem,'<xmp>', rawtext,'</xmp><h2>',fromtag.vari,'</h2><xmp>',fromtag.xmlis, '</xmp>xxxxxxxxxxxxxx<b>',fromelem,'</b></li>');
   end  //file or url
@@ -1316,8 +1327,12 @@ begin
       //writeln('REGSPLIT:<pre>'+fromtag.xmlis+'</pre>');
     end
     else
+     try
       fromtag := tagparse(fromtext, False, True);
-    fromelem := '';
+
+     except writeln('<li>failed to parse '+fromfile);
+     end;
+     fromelem := '';
     //writeln('from<xmp>',fromtag.xmlis,'</xmp>');
   end
   else
@@ -3542,7 +3557,7 @@ begin
       begin
         //writeln('<h4>gettemplatesfrom'+apptag.head+'</h4>');
         if (ttag(apptag.subtags[0]).vari = ns + 'templates') or
-          (ttag(apptag.subtags[0]).vari = 'templates') then
+           (ttag(apptag.subtags[0]).vari = 'templates') then
         begin
           //templates1:=apptag.subtags[0];
           curtemplates := apptag.subtags[0];
@@ -3795,14 +3810,15 @@ begin
           for j := 0 to curtemplates.subtags.Count - 1 do
           begin
             try
-              //writeln('<li>match?'+selst+'!',ttag(curtemplates.subtags[j]).head,'!');
+              //writeln('<li>match?'+selst+'!',ttag(curtemplates.subtags[j]).att('match'),'!');
               mat:=ttag(curtemplates.subtags[j]).att('match');
               iF mat<>'' then hadmat:=true;
               if _matches(mat, selst) then
               begin
                 atpl := curtemplates.subtags[j];
+                //writeln('<li>OK',selst);
                 break;
-              end  else   writeln('<li>failtpl:'+mat,'!',selst,'</li>');
+              end;//  else   writeln('<li>failtpl:'+mat,'!',selst,'</li>');
 
             except
               writeln('<li>failed apply find template in:', ttag(curtemplates.subtags[j]).head, '/');
@@ -4144,7 +4160,7 @@ var
       //vali:=parsexse(thisval, self);
       vali := parsexse(vali, self);
       if pos('http://', lowercase(vali))<1 then vali:='http://'+vali;
-      writeln('<li>fromurl:'+vali);
+     // writeln('<li>fromurl:'+vali);
     end
     else
     if  (pos('!https(', thisval) = 1) then
@@ -4588,14 +4604,14 @@ begin
                   dosubelements;
                   //writeln('</ul></li><li>didsub:<b>'+curtoele.head+'</b>',curtoele.parent.head);
                   //if x_started.count=0 then curtoele:=curtoele.parent else curtoele:=x_started.getele;
-                except   writeln('FAILED DOELE noXSE:', progt.vari);    raise;    end;
+                except   writeln('FAILED DOELE noXSE:', progt.vari); logwrite('FAILED DOELE noXSE:'+ curtoele.head);    raise;    end;
                end;
              //try
              // thistagroot.addatt('debug="to:'+curtoele.vali+'/started:'+inttostr(x_started.count)+'/olstarts'+inttostr(oldstarts)+'/'
              // + '/from:'+curfromele.vali+ '/oldto:'+oldto.vari+oldto.vali+'  /backto:'+backto.vari+backto.vali+'"');
              // except writeln('failed:',progt.head ,curtoele=nil,curfromele=nil, backto=nil,'/back:',oldto=nil); end;
 
-          except on e:exception do begin writeln('!--failed plain element' + progt.vari + e.message); if trying then ermes:=e.message;   end;end;
+          except on e:exception do begin writeln('<li>failed plain element' + progt.vari + e.message); if trying then ermes:=e.message;   end;end;
       end;
          //end of no-ns
       //finally  //both ns: and plain:
@@ -6043,9 +6059,9 @@ begin
   //logwrite('FRM:'+result.xmlis+'!');
 end;
 
-procedure txseus.continue;
+procedure txseus.DOcontinue;
 begin
-  writeln('<h1>hello again</h1>');
+  writeln('<h3>Continue error</h3>');
   curbyele:=ttag.create;
   curbyele.ADDsUbtag('xse:debug','');
   curbyele.ADDsUbtag('H1','now is {?now}');

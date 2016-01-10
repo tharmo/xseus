@@ -6,6 +6,7 @@
       <Flags>
         <MainUnitHasUsesSectionForAllUnits Value="False"/>
         <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
@@ -59,6 +60,7 @@
       <Unit2>
         <Filename Value="xseglob.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="xseglob"/>
       </Unit2>
       <Unit3>
         <Filename Value="xseoid.pas"/>
@@ -98,7 +100,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="/home/t/xseus/x6" ApplyConventions="False"/>
+      <Filename Value="/home/t/xseus/x6"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
@@ -111,13 +113,23 @@
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
+      <RelocatableUnit Value="True"/>
       <HeapSize Value="1000000000"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <UseLineInfoUnit Value="False"/>
+        <UseValgrind Value="True"/>
+      </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
     <Other>
       <Verbosity>
+        <ShowDebugInfo Value="True"/>
         <ShowHintsForUnusedUnitsInMainSrc Value="True"/>
       </Verbosity>
       <WriteFPCLogo Value="False"/>
