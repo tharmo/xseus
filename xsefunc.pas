@@ -728,7 +728,6 @@ begin
  if pars.count<3 then ordo:=1 else
  ordo:=strtointdef(pars[2],1);
  _split(str,substr,slist);
- //writeln('<li>: after1:',ordo,'/short:',substr,'/long'+str,'/parts:',slist.count,'::'+slist.text,'/',slist[0]);
  if slist.count>ordo then result:=slist[ordo];
  //if slist.count>1 then for i:=slist.count-ordo+1 to slist.count-1 do result:=result+substr+slist[i];
                                  //  3    - 1 +1=4          1
@@ -736,6 +735,7 @@ begin
 
                                  //writeln('<li>: after:',result);
 
+          // writeln('<li>: after1:',ordo,'/short:',substr,'/long'+str,'/parts:',slist.count,'::'+slist.text,'/<b>',RESULT,'</b>');
  finally
    slist.free;
  end;
@@ -928,6 +928,7 @@ begin
   x1:=pars[0];
   if pars.count>1 then x2:=pars[1] else x2:='';
   if pos(x2,x1)>0 then result:='1' else result:='0';
+  //writeln('<li>contains?:',pars[0],'??',pars[1],result,'</li>');
  end;
 
  function tfunc.f_startswith: string;
@@ -1298,7 +1299,8 @@ end;
   if xs.curselectionset<> nil then
   begin
  result:=IntToStr(xs.curselectionset.indexof(xs.CurFromEle)+1);
-  if t_debug then writeln('<li>POS:',xs.curfromele.vari+xs.curfromele.vaLi,'=',result,'!</li>');
+  //if t_debug then
+  //writeln('<li>POS:',xs.curfromele.vari+xs.curfromele.vaLi,'=',result,'!',xs.curselectionset.count,'</li>');
  //for i:=0 to xs.curselectionset.count-1 do writeln('!',ttag(xs.curselectionset[i]).vari);
  end
  else

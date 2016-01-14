@@ -43,7 +43,7 @@ function parsexse(st:ansistring;xs:txseus):ansistring;
 function p_selroot(st:string;xs:txseus;curtag:ttag; var sta:integer;  needtowrite: boolean; var gottafree:ttag): ttag;
 function parsexpart(st:ansistring;var sta:integer;xs:txseus;ininfix,needtowrite:boolean):ansistring;
 function parsefromele(ele:ttag;st:string):string;
-function _p_condition(condst:string; ele:ttag):string;
+//function _p_condition(condst:string; ele:ttag):string;
 
 implementation
 uses xsemisc,Synautil;
@@ -68,14 +68,15 @@ var needtowrite:ttag;
 begin
   result:=parsexpart(st,sta,xs,ininfix,false);//,true);
 end;
+{
 function _p_condition(condst:string; ele:ttag):string;
 var i,len:integer;ch:char;st1,st2,con:string;
 //function onetest:boolean;
 function onetest:boolean;
- var con:string;int1,int2:integer;compa:boolean;
+ var int1,int2:integer;compa:boolean;
   begin
     st1:=parsexpart(condst,i,t_currentxseus,false,false);
-    if (i>len) or (pos(condst[i],'<>=')<0) then begin result:=st1='1';exit;end; //was a truth function
+    if (i>len) or (pos(condst[i],'<>=')<0) then begin writeln('<li>cond[',i,']=',condst[i],'/in:',condst);result:=st1='1';exit;end; //was a truth function
     con:=condst[i];i:=i+1;  //take later care of >=, =>, <>, !=,
     if (i<len) and (pos(condst[i],'<>=')>0) then begin con:=con+condst[i];end;
     if i>len then st2:='' else
@@ -96,7 +97,6 @@ function onetest:boolean;
     if con='<>' then result:=ST1<>st2 else
     if con='<=' then result:=st1<=st2;
     end;
-    //writeln('<xmp>tested:',st1,'?',con,'?',st2,result,i,'</xmp>');
 
  // a=1&b<>2  a=a/b/c/@d<>3
 end;
@@ -118,10 +118,10 @@ begin
 
     end;
     if res then result:='1' else result:='0';
-    //writeln('<li>eotest:', result,'</xmp>');
+    //Fnum;writeln('<li>tested:',st1,'/cmp:',con,'/2:',st2,'/res:',result,'/i:',i,'/in'+condst);
 
 end;
-
+ }
 function _getstring(st:string;sta:integer;var sto:integer):string;
 begin
   result:='';
@@ -547,27 +547,27 @@ ok,hasparams,debug:boolean;fun:tfunc;
       result:=copy(st,sto,i-sto);
       if st[i]='(' then
       begin
+         //writeln('<li>gettinfun:',st,'/',i,st[i],st[i+1],hasparams,'<b>',result,'!</b>');
         if (stlen>i) and (st[i+1]=')') then
         begin
-        sta:=i+2;
+        sta:=i+2;exit;
         end
         else
         begin
         hasparams:=true;
-        sta:=i+1;
+        sta:=i+1;exit;
         end;
       end
       else sta:=i;
 //!!      if pos(st[i],whitespace+'(;,')>0 then
 //!!      sta:=i+1 else sta:=i;//what else is there? operators +-<>&
-       //writeln('<li>fname:',result+'/at:',st[sta],'/', en,'/', i,'/rest:',copy(st,sta,999));
       exit;
      end;
      sta:=i;
      except writeln('fail p_func getname');
      end;
    end;
-  // write('<li>',st, i,',',sta,',',sto,'=',copy(st,sto,sta));
+   write('<li>onoononon',st, i,',',sta,',',sto,'=',copy(st,sto,sta));
    result:=copy(st,sto,sta-sto+1);
    //sto:=sta+1;
 
@@ -576,12 +576,12 @@ ok,hasparams,debug:boolean;fun:tfunc;
 begin
  //t_debug:=true;
  // writeln('<li>parsefun ',fname,'/from:',copy(st,sta,length(st)),'      at!',sto,st[sto-1],hasparams,'<ul>');
+ stlen:=length(st);
   fname:=_getfunname;
   //writeln('<li>parsedname: ',fname,'/from:',copy(st,sta,length(st)),'      at!',sto,st[sto-1],hasparams,'<ul>');
   if fname='' then exit;  //just ?: ?_, ?; ?xse:$myfun? throw some error!
   subexp:=tstringlist.create;
   pars:=tstringlist.create;
-  stlen:=length(st);
   sto:=sta;
   para:='';
   //if t_debug then
@@ -629,7 +629,6 @@ begin
   for j:=0 to subexp.count-1 do
      pars.add(subexp[j]);
    //if t_debug then
-   //writeln('<li>getfun:<b>',fname,'!</b>',subexp.count, '/left:',copy(st,sto,999),'/pars:<b>',subexp.text+'!</b></li>');
    fun:=tfunc.create(fname,pars,xs);
    try
       result:=fun.execute;
@@ -637,6 +636,8 @@ begin
       fun.Free;
      //writeln('</ul><li>failed function:?',fname,'!<b>',result,'</b>!',pars.text,pars.count,' (...',copy(st,sto,9999),')');
   try
+    if pos('contains',st)>0 then
+  //writeln('<li>gtfun:<b>',fname,'!</b>',subexp.count, '/left:',copy(st,sto,999),'/pars:<b>',subexp.text+'!</b>',result,'</li>');
    subexp.Free;
    except  writeln('failed free p_func sub');  end;
    try
@@ -778,6 +779,8 @@ begin
 
 except writeln('<li>failed to parse xpart</li>');
 end;
+//if pos('contains',st)>0 then writeln('<li>containsx:',result);
+
 end;
 
 

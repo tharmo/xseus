@@ -105,8 +105,7 @@ ttag = class(TObject)
     function listst: string;
     function listraw: string;
     function listjson(inde: string): string;
-    function saveeletofile(t: string; xhead: boolean; head: string;
-      compact: boolean): boolean;
+    function saveeletofile(t: string; xhead: boolean; head: string; compact: boolean): boolean;
     //procedure fromfile(fil: string; hdr: TStringList);
     //procedure fromfileind(fil: string);
     //procedure fromfiledots(fil: string);
@@ -196,6 +195,7 @@ function tagfromfileind(fil: string): ttag;
 function tagfromfiledots(fil: string): ttag;
 procedure registertagowner(xse: TObject; e,r: TList);
 function createtag(par: ttag; vars: string):ttag;
+function _p_condition(condst:string; ele:ttag):string;
 
 implementation
 
@@ -451,19 +451,25 @@ end;
 
 function txcond.parsest(path: string; var posi: integer): boolean;
   function tillendbrac(path: string; var posi: integer): boolean;
-  var  bracks, quotes,apos:integer;
+  var  bracks, quotes,apos,len:integer;
   begin
     result:=true;quotes:=0;
-    while posi<length(path) do
+    len:=length(path);
+    while posi<len do
     begin
      posi:=posi+1;
      //writeln('-'+path[posi],path[posi]=']', '-');
      if quotes>0 then begin if path[posi]='''' then quotes:=quotes-1;end  else
      begin
       if path[posi]='''' then quotes:=quotes+1 else
-      if path[posi]=']' then begin result:=true;posi:=posi+1;break;end else
+      if path[posi]=']' then
+      begin
+       if (posi<len) and (pos(path[posi],'[&!|')>0) then result:=tillendbrac(path,posi) else
+       result:=true;posi:=posi+1;break;
+
+      end else
       if path[posi]='[' then if not tillendbrac(path,posi) then
-        writeln(' end bracket not found');
+        writeln(' end bracket not found');//[x][y] ... not doing anything...???
      end;
   end;
 
@@ -477,9 +483,9 @@ begin //txcond.parse
     if not tillendbrac(path,posi) then writeln('Failed to parse xse-path condition - missing end bracket?');
   finally
    cond:=copy(path,stpos,posi-stpos-1);
-  //writeln('<li>_didcondx<b>(',cond,')</b></li>');
-   //   writeln('<li>rest<b>(',copy(path,posi,999),')</b></li>');
-   //writeln('didparsepath');
+   //writeln('<li>_didcondx<b>(',cond,')</b></li>');
+   // writeln('<li>rest<b>(',copy(path,posi,999),')</b></li>');
+  //writeln('didparsepath');
   end;
 end;
 
@@ -3365,12 +3371,71 @@ begin
   end;
   //if (pos('*',x+y)>0 then writeln(
 end;
+function _p_condition(condst:string; ele:ttag):string;
+var i,len:integer;ch:char;st1,st2,con:string;
+//function onetest:boolean;
+function onetest:boolean;
+ var int1,int2:integer;compa:boolean;
+  begin
+    st1:=parsexpart(condst,i,t_currentxseus,false,false);
+    if (i>len) or (pos(condst[i],'<>=')<0) then
+    begin
+      result:=st1='1';
+     exit;
+    end;
+      //then begin writeln('<li>cond[',i,']=',condst[i],'/in:',condst);result:=st1='1';exit;end; //was a truth function
+    con:=condst[i];i:=i+1;  //take later care of >=, =>, <>, !=,
+    if (i<len) and (pos(condst[i],'<>=')>0) then begin con:=con+condst[i];end;
+    if i>len then st2:='' else
+    st2:=parsexpart(condst,i,t_currentxseus,false,false);
+    try
+    int1:=strtoint(st1);
+    int2:=strtoint(st2);
+    if con='=' then result:=int1=int2 else
+    if con='>' then result:=int1>int2 else
+    if con='<' then result:=int1<int2 else
+    if con='<>' then result:=int1<>int2 else
+    if con='>=' then result:=int1>=int2 else
+    if con='<=' then result:=int1<=int2;
+    except
+    if con='=' then result:=st1=st2 else
+    if con='>' then result:=st1>st2;
+    if con='<' then result:=st1<st2 else
+    if con='<>' then result:=ST1<>st2 else
+    if con='<=' then result:=st1<=st2;
+    end;
+
+ // a=1&b<>2  a=a/b/c/@d<>3
+end;
+var res:boolean;
+begin
+    i:=1;
+    len:=length(condst);
+    //writeln('<li>part:',txseus(t_currentxseus).curfromele.xmlis);
+    res:=onetest;
+    //writeln('<li>TESTed:',condst,':',res,'!!',copy(condst,i,99));
+    while (i<len) do
+    begin
+       ch:=condst[i];
+       i:=i+1;
+       if i>1000 then begin writeln('<li>failed, too much testing </li>');result:='0';EXIT;end;
+       //if i<len then  writeln('<li>MOretest',ch, result,'</xmp>');
+       if ch='&' then begin if res then res:=onetest else break; end
+       else if ch='|' then
+         if res then break else res:=onetest;
+
+
+    end;
+    if res then result:='1' else result:='0';
+    //writeln('<li>tested:',st1,'/cmp:',con,'/2:',st2,'/res:',result,'/i:',i,'/in'+condst);
+
+end;
 
 
 function _cond(pathcon: txcond; tag, root: ttag; posi:integer;axisz: TList): boolean;
 var
   at,xsub,res: string;
-  i, apui,possi: integer;
+  i, j,apui,possi: integer;
   apus: TList;
   otag: ttag;
   oldselectionset:tlist;
@@ -3394,17 +3459,18 @@ begin
       xsub:=pathcon.cond;
       except writeln('failed to get condition_');pathcon.list;
       end;
+
       if  xsub <> '' then
       begin
          possi:=strtointdef(xsub,-99999);
-         writeln('<li>testing numeric cond:',xsub,':',possi,'!',posi,'/',axisz.count);
          if possi<>-99999 then //pos(xsub[1], '0123456789') > 0 then
         begin
+          writeln('<li>Testing numeric cond:',xsub,':',possi,'!',posi,'/',axisz.count);
           if possi<0 then
             possi:=axisz.count+possi+1;
           for i:=0 to axisz.count-1 do
              if i=possi then writeln('<li><b>pos_',i,ttag(axisz[i]).head,'</b>')
-             else writeln('<li>nopos:',i,ttag(axisz[i]).head);
+             else writeln('<li>nopos:',i,'/',axisz.count,' ',possi,' ',ttag(axisz[i]).head);
           if possi=posi then res:='1' else res:='0';  //posi+1?
         end
         else
@@ -3416,6 +3482,113 @@ begin
           if t_currentxseus<>nil then
           begin
           txseus(t_currentxseus).Curselectionset:=axisz;
+          txseus(t_currentxseus).CURFROMELE := tag;
+          //if pos('a',tag.vari)=1 then         for j:=0 to axisz.Count-1 do writeln('<li>test: ',ttag(axisz[j]).head);
+          end;
+          try
+            if txseus(t_currentxseus).curfromele=nil then
+             writeln('<li>fail:nil to choose from');
+            // res := _p_infix(xsub , apui, nil,'')
+            //else
+            if xsub[1]='#' then
+            {INFIX res := _p_infix(copy(xsub,2,9999) , apui, t_currentxseus,'') else
+            res := _p_infix(xsub , apui, t_currentxseus,'');}
+            begin //no sense in this
+                        res := _p_condition(copy(xsub,2,9999),tag );
+                        writeln('<li>cond:',xsub,'=',res);
+            end
+
+                        else
+            res := _p_condition(xsub , tag);
+            //if xsub='$i' then writeln('<li>triedtoget:'+tag.xmlis+'!'+res+'!');
+            //res := _p_infix(xsub , apui, txseus(t_currentxseus),'')
+           //res:='1';
+          except writeln('failed !infix:',apui,'/',xsub);end;
+         finally
+          if t_currentxseus<>nil then
+           begin
+             txseus(t_currentxseus).CURFROMELE := otag;
+             txseus(t_currentxseus).Curselectionset:=oldselectionset;
+
+           end;
+          end;
+        end;
+
+      end;
+  except
+    writeln('failed to test)');
+  end;
+  //if t_debug then
+  result:=res='1';
+  if xsub[1]='#' then
+   begin
+     result:=res=inttostr(posi); //?
+    // writeln('<h5>numeric condition:',POSI,'='+xsub,'!',RES,result,'</h5>')
+
+            end;
+  if t_debug then
+  writeln('<li>condition:' + xsub, '/res:',res,'/pos:',posi+1,'=',result,'</li>');
+  //if pathcon.negat then      Result := not (Result);
+  if Result then
+        pathcon.hits := pathcon.hits + 1;
+  //if xsub='$i' then writeln('<li>TEST:',xsub,'!',res,result, '/</li>');
+  //pathcon.list;
+
+end;
+
+function _newcond(pathcon: txcond; tag, root: ttag; posi:integer;maybelist: TList): boolean;
+var
+  at,xsub,res: string;
+  i, apui,possi: integer;
+  apus: TList;
+  otag: ttag;
+  oldselectionset:tlist;
+begin
+  try
+      if pathcon = nil then
+      begin
+        Result := True;
+        exit;
+      end;
+      try
+        Result := true;
+     //if t_debug then
+     //writeln('<li>TRYCOND1');
+     //writeln('<li>TRYCOND prev:',pathcon.tries,' hits:',pathcon.hits,'x:',pathcon.cond,'|',tag.vari,'</li>');
+      //if prevhits <= pathcon.hits then
+      //  pathcon.hits := prevhits - 1;
+//      pathcon.tries:=pathcon.tries+1;
+      Result := true;
+      if t_currentxseus<>nil then otag := txseus(t_currentxseus).CURFROMELE;
+      xsub:=pathcon.cond;
+      except writeln('failed to get condition_');pathcon.list;
+      end;
+
+      if  xsub <> '' then
+      begin
+         {possi:=strtointdef(xsub,-99999);
+         if possi<>-99999 then //pos(xsub[1], '0123456789') > 0 then
+        begin
+          writeln('<li>testing numeric cond:',xsub,':',possi,'!',posi,'/',maybelist.count);
+          if possi<0 then
+            possi:=maybelist.count-possi;
+          if possi>=maybelist.count then exit;
+          result.add(maybelist[possi];
+         // for i:=0 to axisz.count-1 do
+         //    if i=possi then writeln('<li><b>pos_',i,ttag(axisz[i]).head,'</b>')
+         //    else writeln('<li>nopos:',i,ttag(axisz[i]).head);
+         // if possi=posi then res:='1' else res:='0';  //posi+1?
+        end
+        else}
+        begin
+         for i:=0 to maybelist.count-1 do
+         try
+          //if pos('ext',xsub[1])>0 then
+          //writeln('<li>Condi:'+xsub+'!');
+          apui := 1;
+          if t_currentxseus<>nil then
+          begin
+          txseus(t_currentxseus).Curselectionset:=maybelist;
           txseus(t_currentxseus).CURFROMELE := tag;
           end;
           try
@@ -3472,6 +3645,7 @@ end;
 
 
 //check conditions, add subtags by "//", skip empties
+
 procedure _doselect(hitlist, subtags: TList; var hitmees:integer;
   pathp: pointer; root: ttag; onlyone: boolean; empties: boolean);
 var
@@ -3483,9 +3657,11 @@ begin
   //  logwrite('doselectvvv from '+root.vari+inttostr(subtags.count));
 
   try
+    maybehits:=tlist.create;
     path := txpath(pathp);
-    numcond:=-9999;
-    if path.con<>nil then numcond:=strtointdef(path.con.cond,-9999);
+    numcond:=-99999;
+    //if path.ele='a*' then writeln('<li>NUM;',numcond);
+    if path.con<>nil then numcond:=strtointdef(path.con.cond,-99999);
     if subtags <> nil then
     if _isinteger(path.ele) then
     begin //vow.. paths like /ele/ele/1/xxx  what have i'ce been thinking?
@@ -3495,11 +3671,7 @@ begin
         hitlist.add(subtags[i-1]);
     end else
     //logwrite('trycond:'+path.ele+'.vs.'+ttag(subtags[i]).vari);
-    if numcond<>-9999 then
-    begin  //not pretty- the [index] -conditions handled separately. Problems with xxx[xse:$test;] -type conds
-     try
-      maybehits:=tlist.create;
-       for i := 0 to subtags.Count - 1 do
+    for i := 0 to subtags.Count - 1 do
         if (path.ele = '.') or (path.ele = '..') or (path.ele='*') or  (_matches(path.ele, ttag(subtags[i]).vari)) then
         begin
         maybehits.add(subtags[i]);
@@ -3507,9 +3679,12 @@ begin
         end;
        //if numcond<0 then numcond:=maybehits.count+numcond;
        //if (numcond<0) or (numcond>=maybehits.count) then
-        if numcond<0 then numcond:=maybehits.count-numcond;
+    if numcond<>-99999 then
+    begin  //not pretty- the [index] -conditions handled separately. Problems with xxx[xse:$test;] -type conds
+      try
+       if numcond<0 then numcond:=maybehits.count-numcond;
         if (numcond<0) or (numcond>maybehits.count) then
-          //writeln('<li>wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'')
+          writeln('<li>',path.con.cond,'wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'')
         else
         //writeln('<li>o:',numcond,'/',maybehits.count,'=');//+ttag(maybehits[numcond]).head);
         begin //writeln('<li>hitnum',i,'::',numcond,ttag(maybehits[numcond-1]).head);
@@ -3517,7 +3692,6 @@ begin
        except //writeln('fail numcond:',numcond,'/',maybehits.count);;
           //
        end;
-       maybehits.free;
     end else
     begin
       for i := 0 to subtags.Count - 1 do
@@ -3535,18 +3709,11 @@ begin
           if (path.ele = '.') or (path.ele = '..') or (path.ele='*') or
             (_matches(path.ele, ttag(subtags[i]).vari)) then
           begin
-            //if (pos('*',x+y)>0 then writeln(
-            //if (path.ele = '*')
-            //  then  logwrite('<li>'+path.ele+' fuond'+ttag(subtags[i]).vari+'</li>');
-            //else
-            // logwrite('<li>'+path.con.cond+'test:'+ttag(subtags[i]).vari+'</li>');
-            //if path.con<>nil then
-            //writeln('cond:'+path.ele, '_con:',path.con.cond);
             hitmees := hitmees + 1;
-            //if path.ele='type' then writeln('<li>test:',path.con.cond,'?', ttag(subtags[i]).xmlis+'!</li>');
-            //if path.ele='type' then writeln('<li>test:','?', ttag(subtags[i]).xmlis+'!</li>');
-            if ((path.con = nil) or
-            (_cond(path.con, ttag(subtags[i]), root,hitmees, subtags))) then
+            //if (numcond<>-99999) and hitlist.count=
+            if ((path.con = nil)  or
+            //(_cond(path.con, ttag(subtags[i]), root,hitmees, subtags))) then
+            (_cond(path.con, ttag(subtags[i]), root,hitmees, maybehits))) then
             //(_cond(path.con, ttag(subtags[i]), root,i, subtags))) then
             begin
               hitlist.add(subtags[i]);
@@ -3578,6 +3745,91 @@ begin
        //if path.con<>nil then writeln('<hr/>');
 
     end;
+  except
+    logwrite('doselect subtags failed');
+    raise;
+  end;
+
+  finally
+    maybehits.free;
+    //if (path.ele='hui') then writeln('<li>///////.:',hitlist.Count,' from ',i, 'tried:',hitmees);
+  end;
+end;
+
+procedure test_doselect(hitlist, subtags: TList; var hitmees:integer;
+  pathp: pointer; root: ttag; onlyone: boolean; empties: boolean);
+var
+  path: txpath;//debug:boolean;
+  i, j, xhitmees, ivalx, ivaly,numcond: integer;
+  reslist,maybehits: TList; acond:txcond;
+begin
+  try
+  //  logwrite('doselectvvv from '+root.vari+inttostr(subtags.count));
+
+  try
+    path := txpath(pathp);
+    numcond:=-9999;
+    if path.con<>nil then numcond:=strtointdef(path.con.cond,-9999);
+    if subtags <> nil then
+    if _isinteger(path.ele) then
+    begin //vow.. paths like /ele/ele/1/xxx  what have i'ce been thinking?
+      i:=strtoint(path.ele);
+      if i<=subtags.count then
+       if ((path.con = nil) or    (_cond(path.con, ttag(subtags[i]), root,hitmees, subtags))) then
+        hitlist.add(subtags[i-1]);
+       exit;
+    end else
+    begin
+    maybehits:=tlist.create;
+    for i := 0 to subtags.Count - 1 do
+    begin
+      try
+        if (not empties) and ((ttag(subtags[i]).vari = 'nonono_value') or
+          (ttag(subtags[i]).vari = '')) and (trim(ttag(subtags[i]).vali) = '') and
+          (ttag(subtags[i]).subtags.Count = 0) then
+          continue;
+        except
+        writeln('failed to skip empty value');
+        end;
+      if (path.ele = '.') or (path.ele = '..') or (path.ele='*') or  (_matches(path.ele, ttag(subtags[i]).vari)) then
+      begin
+       maybehits.add(subtags[i]);
+        //if numcond=2 then  writeln('<li>maybe:',i,'/',maybehits.count,ttag(subtags[i]).head,'/num:',numcond);
+       end;
+    end;
+    for i:=0 to maybehits.count-1 do
+    begin
+       try        //skip empty, whitespace-caused tags
+            hitmees := hitmees + 1; //what is this
+            //if path.ele='type' then writeln('<li>test:',path.con.cond,'?', ttag(subtags[i]).xmlis+'!</li>');
+            //if path.ele='type' then writeln('<li>test:','?', ttag(subtags[i]).xmlis+'!</li>');
+            if ((path.con = nil) or
+            (_newcond(path.con, ttag(subtags[i]), root,hitmees, maybehits))) then
+            //(_cond(path.con, ttag(subtags[i]), root,i, subtags))) then
+            begin
+              hitlist.add(maybehits[i]);
+            end;
+        except  writeln('doselect matching failed'); raise;end;
+     end;
+    try
+     if path.dochils and ((hitlist.Count < 1) or (not onlyone)) then     //   "//" in path
+     for i:=0 to subtags.count-1 do
+          begin
+            try
+              //writeln('<li>trysub:'+ttag(subtags[i]).vari);
+              _doselect(hitlist, ttag(subtags[i]).subtags, HITMEES,
+                path, root, onlyone, empties);
+            except
+              writeln('failed recursive doselect');
+            end;
+          end;
+        except writeln('not happy with childen'); end;
+        if onlyone and (hitlist.Count > 0) then
+          exit;
+      end;//loop
+      //if (path.ele='..') then writeln('<li>sel.:',hitlist.Count,' from ',subtags.Count, 'tried:',hitmees);
+       //if path.con<>nil then writeln('<hr/>');
+
   except
     logwrite('doselect subtags failed');
     raise;
@@ -4509,7 +4761,11 @@ begin
           if at = 'position()' then
           begin
             if tag.parent <> nil then
-              Result := IntToStr(tag.parent.subtags.indexof(tag) + 1)
+            begin
+              Result := IntToStr(tag.parent.subtags.indexof(tag) + 1);
+              writeln('<li>position: ',result,'/',tag.parent.subtags.count);
+
+            end
             else
               Result := '-1';
           end

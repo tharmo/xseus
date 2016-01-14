@@ -1178,7 +1178,7 @@ begin
       begin
         try
           if curtoele.subtags.Count > 0 then
-            if not ttag(CurToEle.subtags[0]).saveeletofile(apus, False, '', True) then
+            if not ttag(CurToEle.subtags[0]).saveeletofile(apus, False, curbyele.att('header'), True) then
               writeln('failed to create file:' + apus)
         except
           writeln('faileedtowrite out:' + apus);
@@ -1282,6 +1282,7 @@ begin
     end
     else //url
     begin
+      //writeln('<li>FRMURL:',FROMURL,'! ');
       apui := pos(';', fromurl);
       if apui > 0 then
       begin
@@ -7194,6 +7195,7 @@ var
   test, past: boolean;
   resucoms: TList;
   i, apui: integer;
+  testst:string;
 begin
     apui := 1;
     if curbyele.att('test')='' then
@@ -7202,8 +7204,9 @@ begin
     test:=_p_condition(curbyele.vali,curfromele) = '1'
       else  {INFIX test := _p_infix(curbyele.att('test'), apui, self, '') = '1';}
       //test:=parsefromele(curfromele, curbyele.att('test'))='1';
-     test:=_p_condition(curbyele.att('test'),curfromele )='1';
-     //writeln('<li>didif:',curbyele.head);
+     testst:=_p_condition(curbyele.att('test'),curfromele );
+     test:=testst='1';
+     //writeln('<li>didif:',curbyele.head,test,curbyele.att('test'),'=',testst,'/</li>');
     if test then
     begin
       result:=true;
