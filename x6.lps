@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="19">
+    <Units Count="20">
       <Unit0>
         <Filename Value="x6.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,7 +59,7 @@
         <Filename Value="xsejunk.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="XSEJUNK"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="29"/>
         <CursorPos X="45" Y="46"/>
         <UsageCount Value="202"/>
@@ -112,8 +112,8 @@
         <Filename Value="xsemisc.pas"/>
         <UnitName Value="xsemisc"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="1104"/>
-        <CursorPos X="19" Y="1106"/>
+        <TopLine Value="321"/>
+        <CursorPos X="16" Y="325"/>
         <UsageCount Value="369"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -121,10 +121,9 @@
       <Unit12>
         <Filename Value="xsexse.pas"/>
         <UnitName Value="xsexse"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="1160"/>
-        <CursorPos X="95" Y="1181"/>
+        <TopLine Value="7815"/>
+        <CursorPos X="24" Y="7801"/>
         <UsageCount Value="104"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -132,14 +131,15 @@
       <Unit13>
         <Filename Value="xsexml.pas"/>
         <UnitName Value="xsexml"/>
-        <EditorIndex Value="9"/>
-        <TopLine Value="88"/>
-        <CursorPos X="67" Y="108"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="2511"/>
+        <CursorPos X="9" Y="2539"/>
         <UsageCount Value="122"/>
         <Bookmarks Count="3">
           <Item0 X="26" Y="895" ID="2"/>
-          <Item1 X="18" Y="3539"/>
-          <Item2 X="22" Y="3807" ID="1"/>
+          <Item1 X="18" Y="3545"/>
+          <Item2 X="22" Y="3813" ID="1"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -147,9 +147,9 @@
       <Unit14>
         <Filename Value="xseexp.pas"/>
         <UnitName Value="xseexp"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="822"/>
-        <CursorPos X="117" Y="843"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="751"/>
+        <CursorPos X="5" Y="766"/>
         <UsageCount Value="116"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -157,7 +157,7 @@
       <Unit15>
         <Filename Value="xsedb.pas"/>
         <UnitName Value="xsedb"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <CursorPos X="61" Y="53"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
@@ -168,142 +168,150 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="880"/>
         <CursorPos X="3" Y="887"/>
-        <UsageCount Value="82"/>
+        <UsageCount Value="75"/>
       </Unit16>
       <Unit17>
         <Filename Value="/usr/share/fpcsrc/2.6.4/packages/fcl-db/src/base/datasource.inc"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="82"/>
+        <UsageCount Value="75"/>
       </Unit17>
       <Unit18>
         <Filename Value="xsefunc.pas"/>
         <UnitName Value="xsefunc"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="197"/>
-        <CursorPos X="18" Y="231"/>
+        <TopLine Value="1439"/>
+        <CursorPos X="11" Y="1458"/>
         <UsageCount Value="107"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
+      <Unit19>
+        <Filename Value="synapse/httpsend.pas"/>
+        <UnitName Value="httpsend"/>
+        <EditorIndex Value="6"/>
+        <CursorPos X="18" Y="282"/>
+        <UsageCount Value="44"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit19>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="xsefunc.pas"/>
-        <Caret Line="145" Column="19" TopLine="124"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1009" Column="19" TopLine="968"/>
       </Position1>
       <Position2>
-        <Filename Value="xsemisc.pas"/>
-        <Caret Line="1664" TopLine="1651"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1017" Column="21" TopLine="981"/>
       </Position2>
       <Position3>
-        <Filename Value="xsemisc.pas"/>
-        <Caret Line="108" Column="18" TopLine="86"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1090" Column="27" TopLine="1055"/>
       </Position3>
       <Position4>
-        <Filename Value="xsemisc.pas"/>
-        <Caret Line="348" TopLine="305"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1195" Column="50" TopLine="1157"/>
       </Position4>
       <Position5>
-        <Filename Value="xserver.pas"/>
-        <Caret Line="562" Column="39" TopLine="526"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1476" Column="34" TopLine="1440"/>
       </Position5>
       <Position6>
-        <Filename Value="xseglob.pas"/>
-        <Caret Line="42" Column="2" TopLine="21"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2442" Column="34" TopLine="2406"/>
       </Position6>
       <Position7>
         <Filename Value="xsexml.pas"/>
-        <Caret Line="3431" Column="7" TopLine="3396"/>
+        <Caret Line="3004" Column="33" TopLine="2968"/>
       </Position7>
       <Position8>
         <Filename Value="xsexml.pas"/>
-        <Caret Line="1497" Column="17" TopLine="1475"/>
       </Position8>
       <Position9>
         <Filename Value="xsexml.pas"/>
-        <Caret Line="1557" Column="11" TopLine="1535"/>
+        <Caret Line="190" Column="22" TopLine="154"/>
       </Position9>
       <Position10>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="7208" Column="8" TopLine="7185"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="191" Column="20" TopLine="155"/>
       </Position10>
       <Position11>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1298" Column="10" TopLine="1233"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="822" Column="21" TopLine="784"/>
       </Position11>
       <Position12>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1617" Column="16" TopLine="1581"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2442" Column="34" TopLine="2406"/>
       </Position12>
       <Position13>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1628" Column="66" TopLine="1592"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2851" Column="30" TopLine="2816"/>
       </Position13>
       <Position14>
-        <Filename Value="xsemisc.pas"/>
+        <Filename Value="xsexml.pas"/>
       </Position14>
       <Position15>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1635" Column="14" TopLine="1599"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="190" Column="22" TopLine="154"/>
       </Position15>
       <Position16>
-        <Filename Value="xsexse.pas"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="191" Column="20" TopLine="155"/>
       </Position16>
       <Position17>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="162" Column="18" TopLine="127"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1315" Column="33"/>
       </Position17>
       <Position18>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="165" Column="20" TopLine="130"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="1518" Column="51" TopLine="1483"/>
       </Position18>
       <Position19>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="948" Column="21" TopLine="906"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="3458" Column="76" TopLine="3422"/>
       </Position19>
       <Position20>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="987" Column="19" TopLine="952"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="3562" Column="76" TopLine="3526"/>
       </Position20>
       <Position21>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1056" Column="12" TopLine="1021"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="5354" Column="15" TopLine="5318"/>
       </Position21>
       <Position22>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1095" Column="102" TopLine="1060"/>
+        <Filename Value="xsexml.pas"/>
       </Position22>
       <Position23>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1134" Column="20" TopLine="1099"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="446" Column="9" TopLine="410"/>
       </Position23>
       <Position24>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1136" Column="30" TopLine="1101"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="3458" Column="76" TopLine="3422"/>
       </Position24>
       <Position25>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1144" Column="34" TopLine="1102"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="3561" Column="76" TopLine="3526"/>
       </Position25>
       <Position26>
         <Filename Value="xsexml.pas"/>
-        <Caret Line="1557" Column="11" TopLine="1535"/>
+        <Caret Line="1242" Column="99" TopLine="1237"/>
       </Position26>
       <Position27>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1181" Column="59" TopLine="1158"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2316" Column="15" TopLine="2280"/>
       </Position27>
       <Position28>
         <Filename Value="xsexml.pas"/>
-        <Caret Line="5009" Column="15" TopLine="4987"/>
+        <Caret Line="2333" Column="25" TopLine="2297"/>
       </Position28>
       <Position29>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1181" Column="59" TopLine="1158"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2395" Column="22" TopLine="2359"/>
       </Position29>
       <Position30>
-        <Filename Value="xsexse.pas"/>
-        <Caret Line="1138" Column="27" TopLine="1117"/>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2449" Column="7" TopLine="2427"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>
@@ -328,7 +336,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="xsexse.pas"/>
-        <Line Value="4455"/>
+        <Line Value="4457"/>
       </Item3>
       <Item4>
         <Kind Value="bpkSource"/>

@@ -361,7 +361,7 @@ function _httpget(urli:string;wait:integer;acomatts:tstringlist):string;
     end
     else
       begin
-      writeln('<li>nogot:'+urli);
+      writeln('<li>nogot:'+urli+'!');
       end;
   finally
     HTTP.Free;
@@ -2299,7 +2299,7 @@ begin
   end else
     result:=url;//jos urlin alussa on http:
     // niin se annetaan sellaisenaan
-    result:=StringReplace(result,'http://','',[RFReplaceAll]);
+   // result:=StringReplace(result,'http://','',[RFReplaceAll]);
 end;
 
 

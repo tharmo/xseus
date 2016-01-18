@@ -15,3 +15,331 @@ startlistener
 listener created
 ** STARTing LISTEN PORT:8001
 **  LISTENING PORT:8001
+0/get thread, free:6
+started connection0/5@21:07:54
+Open connection 52939
+/mem+0/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:07:54 (0) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::0
+custheads: HTTP/1.0 200
+Content-length: 0
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:07:55 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+168!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 0/a:0
+Close socket52939
+released thread 0 now at 5/6
+0/get thread, free:6
+started connection1/5@21:10:27
+Open connection 52951
+/mem+1/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:10:27 (1) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::0
+custheads: HTTP/1.0 200
+Content-length: 0
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:10:28 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+168!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 1/a:0
+Close socket52951
+released thread 1 now at 5/6
+0/get thread, free:6
+started connection2/5@21:17:15
+Open connection 52956
+/mem+2/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:17:15 (2) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::29640
+custheads: HTTP/1.0 200
+Content-length: 29640
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:17:16 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+172!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 2/a:0
+Close socket52956
+released thread 2 now at 5/6
+0/get thread, free:6
+started connection3/5@21:18:17
+Open connection 52958
+/mem+3/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:18:17 (3) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::29614
+custheads: HTTP/1.0 200
+Content-length: 29614
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:18:17 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+172!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 3/a:0
+Close socket52958
+released thread 3 now at 5/6
+0/get thread, free:6
+started connection4/5@21:22:14
+Open connection 52963
+/mem+4/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:22:14 (4) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::29713
+custheads: HTTP/1.0 200
+Content-length: 29713
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:22:14 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+172!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 4/a:0
+Close socket52963
+released thread 4 now at 5/6
+0/get thread, free:6
+started connection5/5@21:23:00
+Open connection 52965
+/mem+5/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:23:00 (5) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::29703
+custheads: HTTP/1.0 200
+Content-length: 29703
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:23:01 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+172!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 5/a:0
+Close socket52965
+released thread 5 now at 5/6
+0/get thread, free:6
+started connection0/5@21:23:47
+Open connection 52966
+/mem+0/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:23:47 (0) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::29706
+custheads: HTTP/1.0 200
+Content-length: 29706
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:23:47 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+172!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 0/a:0
+Close socket52966
+released thread 0 now at 5/6
+0/get thread, free:6
+started connection1/5@21:24:39
+Open connection 52967
+/mem+1/a:0
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+created lock for /home/t/xseus/www/stat/stat.htmi
+freelock:/home/t/xseus/www/stat/stat.htmi
+xmlhan
+inited xseus21:24:39 (1) for:/stat/stat.htmi
+/stat/stat.htmi!htmidid:/stat/stat.htmi/mymem:0
+clear
+<li>vars
+<li>hans
+<li>rigs
+<li>bms
+<li>goxml
+<li>didgoxml
+cleared
+freed:/stat/stat.htmi/mymem:0
+freedxseus:
+finishing Non-chunked
+allout::29712
+custheads: HTTP/1.0 200
+Content-length: 29712
+Content-type: text/html
+Date: Sun, 17 Jan 2016 21:24:39 +0200
+Set-Cookie: xseus_session=ikotktit; path=/
+Server: Xseus / Synapse
+
+172!
+finished xseus-serving/mymem:0
+closing-----------------------------------
+/closed:/stat/stat.htmi for serving 1/a:0
+Close socket52967
+released thread 1 now at 5/6

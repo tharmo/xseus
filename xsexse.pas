@@ -3795,6 +3795,7 @@ begin
             else
             begin
               selst := parsefromele(asel,selector);
+              //writeln('<li>selex:',selector,'///',selst);
             end;
 
           except
@@ -4148,6 +4149,7 @@ var
       //vali := copy(thisval, 8, 999);
        vali := parsexse(vali, self);
       vari := 'file';
+      //writeln('<li>getfile:',vari,'=',vali)
     end
     else
     if (pos('!http(', thisval) = 1)  then
@@ -8107,6 +8109,7 @@ end;
 
 function txseus.c_attribute: boolean;
 {D: adds an attribute to current result element
+  problem: curtoele is the one where we are adding, not what we are adding
 }    var ele:ttag;
 begin
 

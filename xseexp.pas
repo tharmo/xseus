@@ -712,6 +712,8 @@ var aps:ansistring;apui:integer;aput:ttag;
   result:='';
   if xs=nil then exit;
    aps:='';
+
+   try
     while true do //(sta<length(st)+1) do
     begin
       sta:=sta+1;
@@ -725,10 +727,14 @@ var aps:ansistring;apui:integer;aput:ttag;
       end;}
       if pos(st[sta],'-<>=+*/ ;.,)([]''')>0 then break else aps:=aps+st[sta];
     end;
+
     //writeln('<li>',st,'/VAR_'+aps+'/rest:'+copy(st,sta,99),'!');//+xs.x_svars.ToString);
     //xs.x_svars.list;
     //result:=xs.x_svars.values[aps];
+    if aps<>'' then
     result:=xs.x_svars.values[aps];   //find(aps);
+    //  if pos('furl',st)>0 then begin writeln('<li>',result,'/somtthing wrong with  var:'+st+'!',sta,'/',aps,'!', xs.x_svars.text,xs.x_svars.count);result:=''; end;// else
+    except   result:='';writeln('<li>failed parse var:'+st+'!') end;
     //sta:=sta-1;
     //if result='' then result:='0';
     //writeln('<li>VAR:',aps,'=',result+'!');
@@ -755,9 +761,19 @@ begin
  if ch='?' then
  begin
   sta:=sta+1;
+
+  try
+  //if pos('normalizeurl',st)>0 then begin result:='';writeln('<li>parsenormalisx:'+st+'!');end else
    result:=_p_func(st,sta,sta,xs);
+
+   except
+     writeln('<li>failed parse function:'+st+'!');
+   end;
  end else
- if ch='$' then result:=_p_var(st,sta,xs) else
+ if ch='$' then begin try
+  //if pos('furl',st)>0 then begin result:='';writeln('<li>try parse var:'+st+'!') end else
+  result:=_p_var(st,sta,xs);//if pos('furl',st)>0 then writeln('<li>tried parse var:'+st+'!')
+  except  writeln('<li>failed parse var:'+st+'!')end;end else
  //none of the above chars
  begin
    apui:=sta;
@@ -788,7 +804,7 @@ end;
 //    xse:$var_xse:$varind;; {$var_{$varind}}
 function parsexse(st:ansistring;xs:txseus):ansistring;
 var len,ii:integer;
-function doapart:string;
+function doapart(dep:integer):string;
 var ch:char;myst:string;sto,apui:integer;
 begin
  try
@@ -802,15 +818,21 @@ begin
     //writeln(':',ii,'-',ch);
     if ch='{' then
     begin
-      if (ii>=len) or (pos(st[ii+1],whitespace)>0) then
+      //if DEP>0 then begin logwrite('<li>STILLDEEPER:'+st+'!'+inttostr(ii));end;;// else
+      if (ii<len) AND (pos(st[ii+1],whitespace)>0) then
       begin
        ii:=ii+1;
        result:=result+'{';
        continue;
       end;
-     //ii:=ii+1;
-          result:=result+doapart;
+     ii:=ii+1;
+     try
+     //if pos('normalizeurl',st)>0 then begin logwrite('<li>doparsepart:'+copy(st,ii,9999)+'!');end;// else
+          result:=result+doapart(dep+1);
+      //if pos('normalizeurl',st)>0 then begin logwrite('<li>didparsepart:'+st+'!');end;// else
           //writeln('<li>gotpart:',result+'/left:'+copy(st,ii,999)+'!');
+       except logwrite('<li>failparsepart:'+st+'!');// else
+       end;
     end  else
     if ch='}' then begin
      //writeln('<li>get:',ii,result+'!');
@@ -841,7 +863,7 @@ begin
    if st[ii]='{' then
    begin
     //if (ii<len) and (st[ii+1]='}') then
-     if (ii>=len) or (pos(st[ii+1],whitespace)>0) then
+     if (ii<len) and (pos(st[ii+1],whitespace)>0) then
      begin
        //writeln('nonmacrobracket');
        ii:=ii+1;
@@ -849,9 +871,9 @@ begin
        continue;
      end;
      ii:=ii+1;
-     result:=result+doapart;
+     result:=result+doapart(1);
    end
-   else result:=result+st[ii];
+   else if ii<=len then result:=result+st[ii];
  end;
  except
    writeln('<--fail parse xse'+st+'-->');

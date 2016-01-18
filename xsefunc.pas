@@ -2917,8 +2917,13 @@ var p_pattern,p_ext:string;
  }
 var p_url,p_base:string;
 begin
+ try
    namepars(p_url,p_base, parlist,pars);
    result:=_normalizeurl(p_url,p_base);
+
+ except
+  writeln('<li>nonorm');
+ end;
  end;
 
 

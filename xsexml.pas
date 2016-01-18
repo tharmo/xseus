@@ -961,7 +961,7 @@ begin
         if t_debug then
           writeln('<xmp>starzat:' + copy(cla, skipstart,20) + '//starzat:</xmp>', skipstart);
 
-      for curpos := skipstart to paslen do
+      for curpos:=skipstart to paslen do
       begin
         try
         if skip > 0 then
@@ -1237,7 +1237,7 @@ begin
                   attname := '';
                 end
                 else
-                if (sts[curpos] = '/') and (paslen > curpos) and (sts[curpos + 1] = '>') then
+                if (sts[curpos]='/') and (paslen>curpos) and (sts[curpos+1]='>') then
                 begin
                   inendtag := True;
                   addattr;
@@ -1255,6 +1255,8 @@ begin
                 end
                 else
                 begin
+                  if trim(term)<>'' then begin //writeln('<li>X:',term);
+                   continue;end;
                   addattr;
                   term := '';
                   attname := '';
@@ -1301,6 +1303,7 @@ begin
               if pos(sts[curpos], whitespace) > 0 then
               begin
                 //tag.attributes.add(param + '=' + _cleanattr(term));
+                IF trim(term)='' then begin continue;end;
                 addattr;//tag.setatt(attname,_cleanattr(term));
                 term := '';
                 attname := '';
@@ -1837,7 +1840,7 @@ var
 
     end;
     //curpos:=i;
-    curpos := len + 1;
+    curpos:=len + 1;
   end;
 
 
@@ -2443,6 +2446,7 @@ begin
  //if vari='' then line:=ind+'__' else
  //if atts=nil then writeln('<li>attributes not initialized');
  try
+ if (trim(vari)='') and (trim(vali)='') then exit;
  aline:=ind+vari;
  except writeln('<li>failed to add ind/line');end;
  try
@@ -2450,7 +2454,8 @@ begin
      //if trim(atts)<>'' then
      //  aline:=aline+' '+trim(atts);
    //atts:='juu="jaa"';
-   aline:=concat(aline,' '+atts);
+  // aline:=concat(aline,' '+atts);
+   aline:=concat(aline,atts);
    //aline:=aline+' juu="jaa"';
  except writeln('<li>failed to list atts');writeln(aline);aline:=ind+vari;writeln('??????????'); end;
  except writeln('<li>failed to fail to list atts'); end;
@@ -2531,7 +2536,8 @@ var
      except st:=ost;writeln('<li>failed xmlis corrupt attribute!!'+ost+'??',length(ost));end;
     end;
     try
-    atts:=concat(atts,' ',st);
+      atts:=concat(atts,' ',st);
+      //atts:=concat(atts,st);
     except writeln('<li>failed add attribute!!',st,'!!!',ost,'///');end;
     //atts:=st;
   end;
