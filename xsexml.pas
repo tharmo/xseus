@@ -4688,6 +4688,7 @@ begin
           else
           if at = 'listxmlsub()' then
           begin
+            //result:=tag.vali;
             for j := 0 to tag.subtags.Count - 1 do
               Result := Result + ttag(tag.subtags[j]).listxml('', False);
           end

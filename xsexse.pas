@@ -6728,21 +6728,28 @@ end;
 function txseus.c_dir: boolean;
 {D: xml-format dir-listtings
   -status: attribute naming could maybe be reconsidered
+   Uses Linux wildcards if not specified (* not *.*)
+
 }
 var
   sub: boolean;
   subc: ttag;
   pattern: string;
 
-  procedure __adir(var resu: ttag; dir: string; sr: tsearchrec);
+  procedure __adirfiles(totag:ttag;dir,pattern: string);
   var
     s1, s2, aps, subdir: string;
     t: tdatetime;
-    subres: ttag;
+    resu: ttag;
     i: integer;
-    subsearch: TSearchRec;
+    sr,subdirs,subsearch: TSearchRec;
+    sublist:tlist;
 
   begin
+    sublist:=tlist.create;;
+    //WRITELN('<LI>files!:'+dir+'!');//+sr.type'!');
+    if FindFirst(dir+pattern, faAnyFile,   sr) = 0 then
+    repeat
     Resu := ttag.Create;
     Resu.vari := CurBYEle.att('filetag');
     if Resu.vari = '' then
@@ -6758,64 +6765,157 @@ var
     s2 := timetostr(t);
     Resu.setatt('time', s2);
     Resu.setatt('date', s1);
-    if (Sr.Attr and fadirectory > 0) then
+    If (sr.Attr and faDirectory) = faDirectory then
+    //sublist.add(resu)
+    ELSE  totag.subtags.add(resu);
+    until (FindNext(sr) <> 0);
+    //WRITELN('<li>GOTFILES:<xmp>'+totag.xmlis+'</xmp>!!!'+dir);
+    findclose(sr);
+    {FOR I:=0 TO SUBlist.count-1 do
     begin
-      Resu.setatt('type', 'dir');
-      if (sub) then
-      begin
-        subdir := dir + sr.Name + g_ds;
-        if FindFirst(subdir + pattern, faAnyFile and faDirectory,
-          subSearch) { *Converted from FindFirst*  } = 0 then
+       resu:=sublist[i];
+       resu.vari:='dir';
+       WRITELN('<li>get:<xmp>'+resu.xmlis+'</xmp>!!!'+dir);
+       totag.subtags.add(resu);
+      //__adir(resu,dir+resu.att('name')+'/');
+    end;}
+    //WRITELN('<li>GOTALL:<xmp>'+totag.xmlis+'</xmp>!!!'+dir);
+
+
+  end;
+  procedure __subdirs(totag:ttag;dir,pattern: string);
+  var
+    s1, s2, aps, subdir: string; ssr: tsearchrec;
+    resu: ttag;
+    t: tdatetime;
+    subres: ttag;
+    i: integer;
+    dirlist:tlist;
+   // subdirs: TSearchRec;
+  begin
+    dirlist:=tlist.create;
+    WRITELN('<LI>SUBDIRS!:'+dir+'!');//+sr.type'!');
+     if FindFirst(dir+'*',   faDirectory,   ssr) = 0 then
+     repeat
+       //WRITELN('<LI>SUBDIR!:'+SR.Name+'!');//+sr.type'!');
+       //break;
+     If (ssr.Attr and faDirectory) = faDirectory then
+       if (ssr.Name <> '.') and (ssr.Name <> '..') and (ssr.Name <> '') then
+     begin
+     WRITELN('<LI>is DIR!:'+sSR.Name+'!','/in:',dir);//+sr.type'!');
+     Resu := ttag.Create;
+     Resu.vari := CurBYEle.att('dirtag');
+     if Resu.vari = '' then resu.vari:='dir';
+     s1 := ssr.Name;
+     s2 := extractfileext(s1);
+     s1 := copy(s1, 1, length(s1) - length(s2));
+     Resu.setatt('name', s1);
+     Resu.setatt('ext', s2);
+     Resu.setatt('size', IntToStr(ssr.size));
+     t := filedatetodatetime(ssr.time);
+     s1 := datetostr(t);
+     s2 := timetostr(t);
+     Resu.setatt('time', s2);
+     Resu.setatt('date', s1);
+     Resu.setatt('path', dir);
+     //writeln('<li>trydeeper:',resu.att('name'),'!from:',dir+''+ssr.name,pattern);
+     //__subdirs(resu,dir+''+ssr.name,pattern);
+    //  __adir(resu,dir,pattern);
+     dirlist.add(resu)
+     //totag.subtags.add(resu);
+     end;
+    until (FindNext(ssr) <> 0);
+     //WRITELN('<li>GOTALL:<xmp>'+totag.xmlis+'</xmp>!!!'+dir);
+     findclose(ssr);
+     __adirfiles(totag,dir+'*',pattern);
+      for i:=0 to dirlist.count-1 do
         begin
 
-          repeat
-            if (subsearch.Name <> '.') and (subsearch.Name <> '..') then
-            begin
-              __adir(subres, subdir, subsearch);
-              Resu.subtags.add(subres);
-            end;
-          until (FindNext(subSearch) <> 0);
+          subdir:=ttag(dirlist[i]).att('path')+''+ttag(dirlist[i]).att('name')+'/';
+          writeln('<li>dotrydeeper:',subdir,'!from:',dir+'!pat:',pattern);
+         __subdirs(ttag(dirlist[i]),subdir,pattern);
+         totag.subtags.add(dirlist[i]);
+
         end;
-        FindClose(subSearch);
-      end;
     end;
-    //writeln('<li>',result.xmlis+'</li>');
+ { if 1=0 THEN
+  if FindFirst(dir, faDirectory,  subdirs)  = 0 then
+  //if (Sr.Attr and fadirectory > 0) then
+  begin
+    if (1=0) and (sub) then
+    begin
+      subdir := dir + sr.Name + g_ds;
+      WRITELN('<LI>SUBDIR1:'+SR.Name+'!'+SUBDIR+'!');
+      if FindFirst(subdir, faAnyFile and faDirectory,   subSearch) = 0 then
+      begin
+        repeat
+          if (subsearch.Name <> '.') and (subsearch.Name <> '..') then
+          begin
+            WRITELN('<LI>SUBDIR2:'+SR.Name+SUBDIR);
+            __adir(subres, subdir, subsearch);
+            Resu.subtags.add(subres);
+          end;
+        until (FindNext(subSearch) <> 0);
+      end;
+      FindClose(subSearch);
+
+    end;
   end;
+  //writeln('<li>',result.xmlis+'</li>');}
+//end;
 
 var
-  SearchRec: TSearchRec;
+  subsearch,SearchRec: TSearchRec;
   restag, ares: ttag;
 
 begin
-  pattern := CurBYEle.att('pattern');
+   pattern := CurBYEle.att('pattern');
   if pattern = '' then
     pattern := '*';
   if CurBYEle.att('sub') = 'true' then
     sub := True
   else
     sub := False;
+  //__adir(curtoele,curbyele.att('dir'), pattern);
+  //if sub then
+   __subdirs(curtoele,curbyele.att('dir'),pattern);
+ end;
   //!!restag := ttag.Create;
   //!!restag.vari := CurBYEle.att('out');
   //!!if restag.vari = '' then
   //!!  restag.vari := 'dir';
   //!!resuadd(restag);
  // WRITELN('<li dir from:'+curbyele.att('dir') + pattern,'/to:',restag.vari);
-  if FindFirst(curbyele.att('dir') + pattern, faAnyFile and faDirectory,
-    SearchRec) { *Converted from FindFirst*  } = 0 then
+  //if FindFirst(curbyele.att('dir') + pattern, faAnyFile and faDirectory,  SearchRec)  = 0 then
+{    if FindFirst(curbyele.att('dir') + pattern, faAnyFile,  SearchRec)  = 0 then
     repeat
       if (searchrec.Name <> '.') and (searchrec.Name <> '..') then
       begin
         //restag.addsubtag('diri',searchrec.name);
         //writeln('<li>x',searchrec.name,'</li>');
-        __adir(ares, curbyele.att('dir'), searchrec);
-        //restag.subtags.add(ares);
+        __adir(ares, curbyele.att('dir')+'\', searchrec);
         resuadd(ares);
       end;
-    until (FindNext(SearchRec) { *Converted from FindNext*  } <> 0);
-  FindClose(SearchRec); { *Converted from FindClose*  }
+    until (FindNext(SearchRec)  <> 0);
+        //subdir := dir + sr.Name + g_ds;
+        //WRITELN('<LI>SUBDIR1:'+SR.Name+'!'+SUBDIR+'!');
+
+    //if 1=0 THEN
+      if FindFirst(curbyele.att('dir')+'/*', faDirectory,   subSearch) = 0 then
+      repeat
+        //WRITELN('<LI>SUBDIRxxx:'+Subsearch.Name+'!');
+        if (subsearch.Name <> '.') and (subsearch.Name <> '..') then
+        BEGIN
+        __SUBdirs(ares, curbyele.att('dir'), subsearch);
+        //restag.subtags.add(ares);
+        resuadd(ares);
+
+        end;
+    until (FindNext(subSearch)  <> 0);
+  FindClose(SearchRec);
 
 end;
-
+}
 
 
 function txseus.c_ftpput: boolean;

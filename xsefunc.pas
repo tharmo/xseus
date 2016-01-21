@@ -96,6 +96,9 @@ public
  function f_random:string;
  function f_max:string;
  function f_min:string;
+ function f_times:string;
+ function f_format:string;
+
 
  //floats
   function f_fplus:string;
@@ -131,7 +134,6 @@ public
  function f_weekofyear:string;
  function f_month:string;
  function f_startofweek: string;
- function f_times:string;
  function f_sqrt:string;
 
  //string
@@ -2141,6 +2143,26 @@ var adate:tdate;wday:integer;dd:string;
  begin
    namepars(p_time,p_format,parlist,pars);
    result:=FormatDateTime(p_format,strtotime(p_time));
+ end;
+ function tfunc.f_format:string;
+ const parlist:array[0..1] of string =('time','format');
+{D: formats a @time according to a format
+ ex: formattime(format='hh:nn:ss' time=?now())
+ }
+ var i,p_i:integer;
+ //ilist:array[1..100] of integer;
+ p_number,p_format:string;
+ begin
+
+   namepars(p_number,p_format,parlist,pars);
+   p_i:=strtointdef(p_number,0);
+   //writeln('<li>: format /num:',p_i+100,'/fmt:',p_format,'/');
+   //if length(parlist)<2 then p_number:='0';
+   //for i:=1 to pars.Count-1 do ilist[i-1]:=strtointdef(pars[i],0);
+   //result:=Format(p_format,[ilist]);
+   result:=Format(p_format,[p_i]);
+   // result:=Format('%.5d',[p_i]);
+   //writeln('<li>: formatted:',result);
  end;
 
 function tfunc.f_getdatetime:string;
