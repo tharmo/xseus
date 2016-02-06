@@ -199,6 +199,7 @@ public
 
  //text conversions, special chars etc
  function f_utf8toasc:string;
+ function f_ansitoutf8:string;
  function f_trim:string;
  function f_trimright:string;
  function f_trimleft:string;
@@ -930,7 +931,7 @@ begin
   x1:=pars[0];
   if pars.count>1 then x2:=pars[1] else x2:='';
   if pos(x2,x1)>0 then result:='1' else result:='0';
-  //writeln('<li>contains?:',pars[0],'??',pars[1],result,'</li>');
+  writeln('<li>contains?:',pars[0],'??',pars[1],result,'</li>');
  end;
 
  function tfunc.f_startswith: string;
@@ -1126,6 +1127,7 @@ end;
 
  function tfunc.f_fileexists:string;
  begin
+  //writeln('<li>',pars[0],'!in:',getcurrentdir);
   if fileexists(pars[0]) then result:='1' else result:='0';
  end;
 
@@ -2565,13 +2567,21 @@ astl:tstringlist;i:integer;//oldvars:string;
     astl.clear;astl.free;
    end;
 
- function tfunc.f_utf8toasc:string;
- const parlist:array[0..0] of string =('Unnamed');
+function tfunc.f_utf8toasc:string;
+const parlist:array[0..0] of string =('Unnamed');
 {D: utf to iso western euro
 }
- begin
-   result:=_utf8toasc((pars[0]))
-   end;
+begin
+  result:=_utf8toasc((pars[0]))
+  end;
+
+function tfunc.f_ansitoutf8:string;
+const parlist:array[0..0] of string =('Unnamed');
+{D: utf to iso western euro
+}
+begin
+  result:=ansitoutf8((pars[0]))
+  end;
 
 
 function tfunc.f_trim:string;
@@ -2614,6 +2624,7 @@ function tfunc.f_trim:string;
  begin
    //writeln('<xmp>enti:'+pars[0]+'</xmp>');
    result:=_clean((pars[0]));
+   //writeln('cl:<xmp>',(result),'</xmp>');
  end;
 
  function tfunc.f_noentities:string;
@@ -2683,7 +2694,7 @@ function tfunc.f_trim:string;
       end
     end
     else
-    begin ws:=false;if lineb then apu:=apu+crlf; lineb:=false; apu:=apu+apu2[i];
+    begin ws:=false;if lineb then apu:=apu+lf; lineb:=false; apu:=apu+apu2[i];
       end;
    result:=apu;
    //result:='got:'+adjustlinebreaks(apu);

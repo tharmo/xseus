@@ -90,6 +90,7 @@
       <Unit9>
         <Filename Value="xsemarkd.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="xsemarkd"/>
       </Unit9>
       <Unit10>
         <Filename Value="xsedae.pas"/>

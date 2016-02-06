@@ -17,10 +17,10 @@ function _utf8toasc(st: string): string;
 function _nocdata(st: string): string;
 
 const
-  crlf = #13#10;
+  crlf = #13#10;crr=#13;lf=#10;
 
 const
-  whitespace = #13#10 + ' ';
+  whitespace = #13#10#9 + ' ';
 
 const
   inlins = ',,span,strong,code,br,BR,img,em,b,i,a,strike,font,FONT,STRONG,CODE' +
@@ -105,13 +105,13 @@ ttag = class(TObject)
     function listst: string;
     function listraw: string;
     function listjson(inde: string): string;
-    function saveeletofile(t: string; xhead: boolean; head: string; compact: boolean): boolean;
+    function saveeletofile(t: string; xhead: boolean; head,ind: string; compact,ents: boolean): boolean;
     //procedure fromfile(fil: string; hdr: TStringList);
     //procedure fromfileind(fil: string);
     //procedure fromfiledots(fil: string);
     //procedure cgi2xml(tagi: string; sl: TStringList; clean: boolean);
     procedure listdebug;
-    function listxml(inde:string; ents: boolean): string;
+    function listxml(inde:string; ents,isroot: boolean): string;
     function ashtml: string;
     function listxmlish(inde: string; var RES: TStringList;inlinexml:boolean): boolean;
     // function listxmlish2(inde: string; var RES: tstringlist): BOOLEAN;
@@ -322,12 +322,17 @@ begin
    end;}
     //writeln('<li>atts:', attributes.text,'!</li>');
    //if _getnum(o,varix) then
+
    if pos('#',varix)=1 then
    begin
+    try
      //writeln('<li>set@',varix,':',o,'/',attributes.count);
     //valix := StringReplace(valix, '&#xA;', ^M^J, [rfreplaceall]);
-    valix := StringReplace(valix, '&#xA;', crlf, [rfreplaceall]);
+     valix := StringReplace(valix, '&#xA;', crlf, [rfreplaceall]);
      attributes[o-1]:=valix
+     except
+       writeln('<li>Failed to replace attribute:'+vari+'?'+vali+'!!!'+varix+'!!!'+valix);
+     end;
    end else
     attributes.values[varix]:=valix;
 
@@ -1972,6 +1977,8 @@ var
     if apos<1 then result:=copy(src,curpos+1,length(src)) else
     begin
     result:=copy(src,apos+3,length(src));
+    apos:=pos('''''''',result);
+    if apos>0 then result:=copy(result,1,apos-2) else
     inquotedpar := True;
 
     //writeln('<li>TVAL['+result+']'+''''''+'/from:{'+src+'}');
@@ -2475,7 +2482,7 @@ begin
  begin
    //if length(vali)+length(line)<3 then res.add(line+': '+vali) else
   try
-   if (xquoted) or (att('xse:format')='quoted') then res.add(aline + ': ''''''' + crlf +vali  + '''''''') else
+   if (xquoted) or (att('xse:format')='quoted') then res.add(aline + ': ''''''' + vali  + '''''''') else
    //if length(vali+line)<70 then  res.add(line+': '+vali)
    //else
    if inlinexml then res.add(aline+': '+vali) else
@@ -2563,7 +2570,7 @@ var
       asubi := ttag(subtags[i]);
       if inlinexml and (asubi.vari='') then //or (pos(','+uppercase(asub.vari)+',',inlineelems)>0) then
       begin
-         res[res.count-1]:=res[res.count-1]+(stringreplace(asubi.listxml(inde+'',true),crlf,' ',[rfReplaceAll]));
+         res[res.count-1]:=res[res.count-1]+(stringreplace(asubi.listxml(inde+'',true,false),crlf,' ',[rfReplaceAll]));
       end else
       asubi.listxmlish(inde + '  ', res,inlinexml);
     end;
@@ -2785,19 +2792,25 @@ begin
 
 end;
 
-function ttag.listxml(inde:string; ents: boolean): string;
+function ttag.listxml(inde:string; ents,isroot: boolean): string;
 {D: one of despare efforts to handle whitespace correctly
 }
+function etrim(v:string):string;
+begin
+    if ents then begin result:=trim(_clean(v));writeln('<li>cleaning:' +result);end else result:=trim(v);
+end;
 var
-  st, subc: string;
+  st, subc,tmpinde: string;
   i: integer;
+
 begin
   try
-  Result := '';
+  ents:=false; //?????
+  if isroot then tmpinde:='' else tmpinde:=inde;
+  //if isroot then Result := '' else result:=^J;
   if vari = 'xxxcdata' then
   begin
     st := StringReplace(vali, ']]>', ']]]]><![CDATA[>', [rfreplaceall]);
-
     Result := Result + '<![CDATA[' + st + ']]>';
     exit;
   end;
@@ -2805,10 +2818,10 @@ begin
     Result := ''
   else
   begin
-    if (inde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
+    if (tmpinde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
     Result := '<' + vari //+' inde="'+inde+'"'
     else
-    Result := crlf + inde+'<' + vari ;//inde="'+inde+'"';
+    Result := ^j + tmpinde+'<' + vari ;//inde="'+inde+'"';
     try
     //if attributes<>nil then
     for i := 0 to attributes.Count - 1 do
@@ -2830,13 +2843,13 @@ begin
     else
     if (ttag(subtags[i]).vari = '') then
      begin
-      subc := subc +(ttag(subtags[i]).vali);
+      subc := subc +etrim(ttag(subtags[i]).vali);
       //subc := subc + '!'+(ttag(subtags[i]).vali)+'/'+inttostr(i);
       //writeln('<li>',vari,'vali:'+'/'+ ttag(subtags[i]).vali+ '\');
      end
     else   //never happens:   //VALUE if (ttag(subtags[i]).vari='value') and (ttag(subtags[i]).subtags.count=0)  then
     if (ttag(subtags[i]).vari = '') and (ttag(subtags[i]).subtags.Count = 0) then
-      subc := subc + (ttag(subtags[i]).vali)
+      subc := subc + etrim((ttag(subtags[i]).vali))
     else
     try
     begin
@@ -2844,9 +2857,9 @@ begin
       //begin
       // subc := subc + (ttag(subtags[i]).listxml('', ents));
       //end else
-    if inde='' then
-    subc := subc + (ttag(subtags[i]).listxml('', ents)) else
-    subc := subc + (ttag(subtags[i]).listxml(inde+'    ', ents));
+    //if inde='' then
+    //subc := subc + (ttag(subtags[i]).listxml('', ents,false)) else
+    subc := subc + (ttag(subtags[i]).listxml('  '+tmpinde, ents,false));
 
     end;except writeln('<li>failes subbtag #'+inttostr(i));end;
   end;
@@ -2854,28 +2867,29 @@ begin
   try
   if (vari = '') then
   begin
-    if inde<>'' then
-      Result := Result + vali+subc //_normalizewhitespace(vali, False) + (subc)
-    else
-      Result := Result +vali + subc;
+    //if inde<>'' then
+      Result := Result + etrim(vali)+subc; //_normalizewhitespace(vali, False) + (subc)
+   // else
+   //   Result := Result +vali + subc;
   end
   else
-   if (subc + vali = '') and (pos(',' + vari + ',', gc_voids) > 0)  then
-   Result := Result + ' />'
+  begin
+   if (subc + trim(vali) = '') and (pos(',' + vari + ',', gc_voids) > 0)  then
+    Result := Result + '></'+vari+ '>'
    //Result := Result + crlf+'/>'
    else
    begin
-     if ents then
-     Result := Result + '>' + _clean(vali) + (subc) + '</' + vari + '>'
-    else
-      Result := Result + '>' + vali + (subc) + '</' + vari +'>';
+     if trim(subc)='' then tmpinde:='' else tmpinde:=^J+tmpinde;
+     Result := Result + '>' + etrim(vali) + (subc) +tmpinde+ '</' + vari + '>'
    end;
+  end;
   except writeln('<li>could not write tags to res');end;
   //logwrite('**!!'+result+'!!**');
   {if ents then
    Result := Result + '>' + _clean(vali) + (subc) + '</' + vari +crlf+ '>'
  else
    Result := Result + '>' + vali + (subc) + '</' + vari +crlf+ '>';}
+  // if isroot then writeln('LISTED:<xmp>',result,'</xmp>');
 end;
 
 function ttag.ashtml: string;
@@ -3079,7 +3093,7 @@ var
 begin
   stl:=tstringlist.create;
   try
-  stl.add(listxml('  ', False));
+  stl.add(listxml('  ', False,false));
   Result := stl.text;
   finally stl.free;end;
   {if self = nil then
@@ -3687,8 +3701,8 @@ begin
        //if (numcond<0) or (numcond>=maybehits.count) then
     if numcond<>-99999 then
     begin  //not pretty- the [index] -conditions handled separately. Problems with xxx[xse:$test;] -type conds
-      try
-       if numcond<0 then numcond:=maybehits.count-numcond;
+      try   //negatives do not work
+       if numcond<0 then numcond:=maybehits.count-numcond-1;
         if (numcond<0) or (numcond>maybehits.count) then
           writeln('<li>',path.con.cond,'wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'')
         else
@@ -4683,14 +4697,14 @@ begin
           else
           if at = 'listxml()' then
           begin
-            Result := tag.listxml('', False);
+            Result := tag.listxml('', False,true);
           end
           else
           if at = 'listxmlsub()' then
           begin
             //result:=tag.vali;
             for j := 0 to tag.subtags.Count - 1 do
-              Result := Result + ttag(tag.subtags[j]).listxml('', False);
+              Result := Result + ttag(tag.subtags[j]).listxml('', False,false);
           end
           else
           if at = 'listindent()' then
@@ -4757,7 +4771,7 @@ begin
           else
           if at = 'asxstring()' then
           begin
-            Result := tag.listxml('  ', True);
+            Result := tag.listxml('  ', True,true);
           end
           else
           if at = 'nocdata()' then
@@ -5011,16 +5025,16 @@ begin
   end;
 
 end;
+//    function saveeletofile(t: string; xhead: boolean; head,ind: string; compact,ents: boolean): boolean;
 
-function ttag.saveeletofile(t: string; xhead: boolean; head: string;
-  compact: boolean): boolean;
+function ttag.saveeletofile(t: string; xhead: boolean; head,ind: string;  compact,ents: boolean): boolean;
 var
   stl: TStringList;
   f: Text;
   i: integer;
-  EXT: string;
+  st,EXT: string;
 begin
-
+  //if head<>'' then head:=head+^J;
   ext := extractfileext(t);
   if (pos('xmlis', head) > 0) or (ext = '.htmi') or (ext = '.xsi') then
   begin
@@ -5029,36 +5043,41 @@ begin
   end;
   try
     try
-      stl := TStringList.Create;
-      if head <> '' then
-        stl.add(head)
-      else
-      if xhead then begin
-        stl.add('<?xml version="1.0"?>');
-        stl.add(' <!DOCTYPE '+self.vari+'>');
-      end;
-      //      writeln('<xmp>xwrote file ',t,xhead);
+      //if head <> '' then       stl.add(head)    else
+       if (head='') then if (xhead) then head:='<?xml version="1.0" encoding="UTF-8"?>';
+      // if xhead then stl.add(' <!DOCTYPE '+self.vari+'>');
       //       writeln(stl.text);
       //      writeln('</xmp>');
       if not ForceDirectories(extractfilepath(t))
       { *Converted from ForceDirectories*  } then
-        writeln('could not forcedir');
+        writeln('<li>could not forcedir');
       if compact = True then
       begin
+       stl := TStringList.Create;
+       try
+       stl.TextLineBreakStyle:=tlbsLF;
+        if head<>'' then stl.add(head);
         list('', stl);
         assignfile(f, t);
         rewrite(f);
         for i := 0 to stl.Count - 1 do
           Write(f, stl[i]);
         closefile(f);
+        finally    stl.Clear;    stl.Free;  end;
+
       end
       else
       begin
         try
-          stl.add(listxml('  ', False));
-          stl.savetofile(t);
+         st:=listxml('  ',ents,true) ;
+         //writeln('<li><small>xwrite file ',t,'</small><xmp>',xmlis,'/head:',head,'!</xmp>',compact,ents,'!</li>xml:<xmp>',st,'</xmp>');
+         //writeln('<li><small>Xxwrite file ',t,'/head:',_clean(head),'!',compact,ents,'!</small></li>');
+         if head<>'' then head:=head+^J;
+          _writefile(t,head+st);
+          //stl.add(listxml('  ', true));
+          //stl.savetofile(t);
         except
-          logwrite('Failsave:' + t);
+          writeln('<li>Failed to save:' + t);
           raise;
         end;
       end;
@@ -5066,10 +5085,8 @@ begin
     except
       Result := False;
     end;
-  finally
-
-    stl.Clear;
-    stl.Free;
+  except
+    writeln('<li>Failed to write '+t);
   end;
 end;
 

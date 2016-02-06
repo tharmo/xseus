@@ -853,15 +853,18 @@ end;
 function _filetostr(fname:string):string;
 var stf:tfilestream;sts:tstringstream;i:integer;
 begin
- try
-   stf:=tfilestream.create(fname,fmopenread);
-   //for i:=0 to sts.length do
-   SetLength(result, stf.Size);
-   stf.Read(PChar(result)^, stf.Size);
-   //result:=
-  // if pos('inon',fname)>0 then writeln('didfiletostr:!!!!!!!!!<xmp>',result,'</xmp>');
-   stf.free;
-   except writeln('<li>Failed to read file '+fname);end;
+   if fileexists(fname) then
+   begin
+     try
+     stf:=tfilestream.create(fname,fmopenread);
+      //for i:=0 to sts.length do
+     SetLength(result, stf.Size);
+     stf.Read(PChar(result)^, stf.Size);
+     //result:=
+     // if pos('inon',fname)>0 then writeln('didfiletostr:!!!!!!!!!<xmp>',result,'</xmp>');
+     stf.free;
+     except writeln('<li>Failed to read file '+fname);end;
+   end else result:='';
 end;
 
 function _quicksearch(needle,hay: string): integer;
@@ -1055,6 +1058,7 @@ begin
   writeln(s);
 end;
 
+
 procedure _save(acom,xdata:ttag;ifile:string;xml:ttag);
 var x:ttag;  fn,fnname,fnext,fnpath,apufn,head:string;bus,i:integer;p1,p2:array[0 ..1023] of char;
 ocrit,IND:boolean;
@@ -1137,9 +1141,9 @@ begin
       else
       begin
         if acom.att('xml')<>'' then
-         x.saveeletofile(fn,true,head,acom.att('compact')='true')
+         x.saveeletofile(fn,true,head,'   ',acom.att('compact')='true',acom.att('entities')='true')
          else
-        x.saveeletofile(fn,false,head,acom.att('compact')='true');
+        x.saveeletofile(fn,false,head,'   ',acom.att('compact')='true',acom.att('entities')='true');
       end;
       except writeln('<li>failedsavefile:'+fn);end;
      finally //myxs.critical:=ocrit;
@@ -1485,8 +1489,9 @@ begin
  rewrite(f);
  write(f,ts);
  closefile(f);
- except writeln('failed to write to '+fs);
+ except writeln('<li>failed to write to '+fs);
  end;
+ //writeln('<li>wrote to '+fs);
 end;
 
 

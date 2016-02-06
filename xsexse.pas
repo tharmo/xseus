@@ -840,7 +840,7 @@ begin
   try
    // if curtoele.vari='tmp_to' then   st := ttag(CurToEle.subtags[0]).listxml(False, False);
 
-    st := CurToEle.listxml('', False);
+    st := CurToEle.listxml('', False,false);
     //logwrite('testwrite:'+st+'!!!!'+curtoele.head);
     //if t_debug then
     except try writeln('fail curtoele list');//writeln('<li>failed nogotoutputst:'+curtoele.head+'!!!',x_started.count,x_stopped.count,'!!!</li>',curtoele.subtags.count);
@@ -890,7 +890,7 @@ end;  //of browseroutput
 
 function txseus.c_to: boolean;
 var
-  place, ele, outfile, rest, apus,byvali: string;
+  place, ele, outfile, rest, apus,byvali,head: string;
   tmpoldres, rootsel, resupar,gottafree,pseudoroot: ttag;
   browseroutput, wasdatatag: boolean;
   i, rootpos, resupoint: integer;
@@ -997,7 +997,7 @@ var i:integer; inf:boolean;
 }
 begin
   try
-    //writeln('<ul><li>DOTO::',curtoele=nil,curbyele.head);
+   //  writeln('<xmp>DOTO::',curbyele.head,'</xmp>');
     pseudoroot:=nil;
     wasdatatag:=false;gottafree:=nil;
      //if byvali<>'' then    begin     end;
@@ -1010,7 +1010,10 @@ begin
     if ele='' then ele := curbyele.att('element');
     outfile := CurBYEle.att('file');
     place := curbyele.att('place'); //ns+''???
-    {if ele<>'' then
+    head:=curbyele.att('header');
+
+   // if outfile<>'' then       writeln('<li>head?',curbyele.vari,'<b>',curbyele.head+'</xmp>/head:',head);
+  {
     begin
     end else}
     if (outfile <> '') or (browseroutput) then //or (place='replace') then
@@ -1177,8 +1180,9 @@ begin
       apus := _indir(outfile, x_outdir, self, True);
       begin
         try
-          if curtoele.subtags.Count > 0 then
-            if not ttag(CurToEle.subtags[0]).saveeletofile(apus, False, curbyele.att('header'), True) then
+         //writeln('<li>savefile:',apus,'/head:<xmp>!',head,'!</xmp></li>');
+         if curtoele.subtags.Count > 0 then
+            if not ttag(CurToEle.subtags[0]).saveeletofile(apus, true, head,'  ', false, curbyele.att('entities')='true') then
               writeln('failed to create file:' + apus)
         except
           writeln('faileedtowrite out:' + apus);
@@ -1272,12 +1276,12 @@ begin
         fromfile := _indir(fromfile, x_outdir, self, False);
       //writeln('<li>fromfile:',fromfile);
 
-      rawtext := _filetostr(fromfile);
       try
+        rawtext := _filetostr(fromfile);
       //logwrite('fromfile'+inttostr(length(rawtext))+rawtext);//+':'+:rawtext);
       //if pos('inon',fromfile)>0 then writeln('didfiletostr:!!!!!!!!!<xmp>',rawtext,'</xmp>');
       //writeln('<li>didreadraw'+inttostr(length(rawtext))+'<xmp>'+_clean(rawtext)+'</xmp>');
-      except writeln('<li>could not write rawtext');
+      except writeln('<li>could not read fromtext');
       end;
     end
     else //url
@@ -1295,7 +1299,7 @@ begin
         rawtext := _httpsget(fromurl, -1, CurBYEle.getattributes)
       else
         rawtext := _httpget(fromurl, -1, CurBYEle.getattributes);
-       //writeln('<li>FRMURL:',FROMURL,'! ',fromelem  ,'!</li><xmp>',rawtext,'</xmp><hr/>');
+       logwrite('FRMURL:'+FROMURL+'! '+fromelem  +'!!!'+rawtext);
     end;
     if curbyele.att('skipto') <> '' then
     begin
@@ -1307,7 +1311,8 @@ begin
     //g_debug:=true;
     //writeln('<h2>parsefromurl</h2>');
     try
-    fromtag := strtotag(rawtext, isxsi);
+     if rawtext<>'' then
+    fromtag := strtotag(rawtext, isxsi) else fromtag:=nil;
     except writeln('<li>failed to parse fromtext');    end;
     //if fromtag<>nil then writeln('<pre>'+fromtag.xmlis+'</pre>');
     //g_debug:=false;
@@ -1322,14 +1327,14 @@ begin
     //writeln('from:',fromtext,'/withrregexp:',fromregex);
     if fromregex <> '' then
     begin
-      //writeln('REGSPLIT:'+fromregex+'!'+fromtext+'</pre>');
+      //writeln('REGSPLIT:<pre>'+fromregex+'!'+fromtext+'</pre>');
       fromtag := regtoele(fromregex, fromtext);
       fromtag.vari := 'result';
-      //writeln('REGSPLIT:<pre>'+fromtag.xmlis+'</pre>');
+      //writeln('REGSPLAT:<pre>'+fromtag.xmlis+'</pre>');
     end
     else
      try
-      fromtag := tagparse(fromtext, False, True);
+      if fromtext<>'' then fromtag := tagparse(fromtext, False, True) else fromtag:=nil;
 
      except writeln('<li>failed to parse '+fromfile);
      end;
@@ -1344,8 +1349,8 @@ begin
       //writeln('<li>xsefrom:'+fromelem+'/to:'+curtoele.vari);
       fromtag := p_selroot(fromelem, SELF, curfromele, rootpos, True, gottafree);
       fromelem := copy(fromelem, rootpos, 999); //rest;
-      if fromtag = nil then
-        fromtag := curfromele;
+//      if fromtag = nil then
+//        fromtag := curfromele;  //LOOOP!!!
         //writeln('<b>FROMTAG:'+fromtag.head+'</b>!'+fromelem+' !TO:'+curtoele.vari+'</li>');
         //fromtag := state.selroot(fromelem, fromtag, rest, False);
     except
@@ -1355,7 +1360,8 @@ begin
   try
     if fromtag  = nil then
     begin
-      writeln('<!--xse:from empty element-->');exit;
+      curfromele:=nil;
+      writeln('<li>xse:from empty element');exit;
     end
     else
     if fromelem <> '' then
@@ -1368,7 +1374,7 @@ begin
       //CurFromEle := fromtag.subt('+' + trim(fromelem))
 
       CurFromEle := fromtag.subt(trim(fromelem));
-     // if curfromele<>nil then writeln('<hr>nowfrom'+curfromele.head+'//under:',curfromele.parent.head,'<hr>');
+      //if curfromele<>nil then writeln('<hr>nowfrom'+curfromele.head+'//under:',curfromele.parent.head,'<hr>');
     end
     else
       CurFromEle := fromtag;
@@ -1378,6 +1384,8 @@ begin
   end;
   //writeln('<li>FRMe:',FROMFILE,'::<b>', fromelem, '</b>//<pre>', (curbyele.xmlis), '\\</pre>', '\\<b>',fromelem,'</b></li>',curbyele.subtags.count);
   //logwrite('FRM2:'+inttostr(curbyele.subtags.count)+'::'+ CurfromEle.vari+'/FRM2');
+ // if fromtext<>'' then writeln('<li>fromreg:<pre>',curfromele.xmlis+'</pre>'+curfromele.vari);
+
   if curbyele.subtags.Count > 0 then
     dosubelements
   else
@@ -1388,8 +1396,9 @@ begin
     ctag.parent := CurToEle;
   end;
   //logwrite('FRM3:'+fromelem+ '!'+ curfromele.vari+ '/FRM3');
+  //writeln('<li>didFRoM</h2>'+curfromele.head);
   CurFromEle := oldseltag;
-  //writeln('<h2>did/FRM2</h2>'+curfromele.xmlis);
+  //writeln('<li>backtoFRoM'+curfromele.head);
   if fromfile + fromurl + fromtext <> '' then
     fromtag.killtree;
 
@@ -3487,7 +3496,7 @@ begin
       selection1 := CurFromEle;
       apptag := CurBYEle;
       fromdb:=nil;
-      //writeln('<h1>applytemplates:'+curbyele.head,'</h1>');
+      //logwrite('applytemplates:'+curbyele.head);
       //writeln('<pre>'+curbyele.xmlis+'</pre><hr/>');
       //writeln('<h3>applyfrom</h3><pre>'+ttag(curfromele).xmlis+'</pre><hr/>');
       oldtemplates := curtemplates;
@@ -3523,8 +3532,8 @@ begin
         if (CurBYEle.att('select') = '') then
         begin
           sels := TList.Create;
-          sels.Assign(CurFromEle.subtags);
-          //writeln('sewlect'+curfromele.xmlis,'/sel');
+          if curfromele<>nil then sels.Assign(CurFromEle.subtags);
+          //logwrite('sewlect'+curfromele.xmlis+'/sel');
         end
         else
         begin
@@ -3535,6 +3544,8 @@ begin
                else try begin sels:=x_relation.findrellist;end;except writeln('noselerele');end;
           end else
           sels := CurFromEle.select(CurBYEle.att('select'), True, True);
+          //for i:=0 to sels.count-1 do
+          //logwrite('selectedx:' + ttag(sels[i]).vari);
           {if pos('attributes::',CurBYEle.att('select'))>0 then
           begin
             writeln('selectedatts:' ,sels.count, '/sle:');
@@ -4514,7 +4525,8 @@ begin
         try
         progcounter := progcounter + 1;
         progt := proglist[progcounter];
-        //writeln('<li>cmd:'+progt.vari+'/tonil:',curtoele=nil,'</li>');
+         //if progt.vari=ns+'to'
+         //then writeln('<li>cmd:'+progt.vari+'/tonil:',progt.head,'</li>');
         if (curtoele = nil) then if not(progt.vari=ns+'to') then
           curtoele := ttag.Create;
           except        writeln('failed commandlist start');      end;
@@ -4829,7 +4841,7 @@ begin
     subt := apt.addsubtag('map', '');
     subt.addatt('path=' + curbyele.att('path'));
     subt.addatt('ns=' + curbyele.att('ns'));
-    xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '', False);
+    xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
   end;
 end;
 
@@ -4860,7 +4872,7 @@ begin
     writeln('<pre>' + xseuscfg.config.xmlis +
       '</pre>!!!'+g_inidir+'/xseus.xsi');
 
-     xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '', False);
+     xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
   end;
 end;
 
@@ -4884,6 +4896,8 @@ begin
     if CurBYEle = nil then
       exit;
 
+
+  //  writeln('<li>xxxCOPY:');//+curfromele.head);
     //  if CurBYEle.att('select')<>'' then
     begin
       try
@@ -4974,9 +4988,11 @@ begin
     // newtag.attributes.addstrings(CurFromEle.attributes);
 
     try
+      //logwrite('copyappl:'+curfromele.vari+' '+inttostr(curfromele.subtags.count));
       oldres := CurToEle;
       resuadd(newtag); //-
       CurToEle := newtag;    //ä
+      if curfromele.subtags.count>0 then
       Result := applyall;
     except
       writeln('faikledapplyall');
@@ -5741,6 +5757,7 @@ begin
     begin
       Result := False;
        writeln('<li>Failed to execute:!',cmd,'!');
+
       // state.did:=false;
     end
     else
@@ -6689,10 +6706,10 @@ begin
   begin
     newtag := ttag.Create;
     newtag.vari := '';
-    newtag.vali := crlf+CurBYEle.vali;
+    newtag.vali := lf+CurBYEle.vali;
     resuadd(newtag);
   end
-  else curtoele.vali:=curtoele.vali+crlf+curbyele.vali;
+  else curtoele.vali:=curtoele.vali+lf+curbyele.vali;
 end;
 
 function txseus.c_rawcopy: boolean;
@@ -6794,7 +6811,7 @@ var
    // subdirs: TSearchRec;
   begin
     dirlist:=tlist.create;
-    WRITELN('<LI>SUBDIRS!:'+dir+'!');//+sr.type'!');
+    //WRITELN('<LI>SUBDIRS!:'+dir+'!');//+sr.type'!');
      if FindFirst(dir+'*',   faDirectory,   ssr) = 0 then
      repeat
        //WRITELN('<LI>SUBDIR!:'+SR.Name+'!');//+sr.type'!');
@@ -6802,7 +6819,7 @@ var
      If (ssr.Attr and faDirectory) = faDirectory then
        if (ssr.Name <> '.') and (ssr.Name <> '..') and (ssr.Name <> '') then
      begin
-     WRITELN('<LI>is DIR!:'+sSR.Name+'!','/in:',dir);//+sr.type'!');
+     //WRITELN('<LI>is DIR!:'+sSR.Name+'!','/in:',dir);//+sr.type'!');
      Resu := ttag.Create;
      Resu.vari := CurBYEle.att('dirtag');
      if Resu.vari = '' then resu.vari:='dir';
@@ -6832,7 +6849,7 @@ var
         begin
 
           subdir:=ttag(dirlist[i]).att('path')+''+ttag(dirlist[i]).att('name')+'/';
-          writeln('<li>dotrydeeper:',subdir,'!from:',dir+'!pat:',pattern);
+          //writeln('<li>dotrydeeper:',subdir,'!from:',dir+'!pat:',pattern);
          __subdirs(ttag(dirlist[i]),subdir,pattern);
          totag.subtags.add(dirlist[i]);
 
@@ -8429,7 +8446,7 @@ begin
   CurToEle := aputag;
   dosubelements;
   ttag(aputag.subtags[0]).saveeletofile(xseuscfg.subs('users') +
-    CurBYEle.att('name') + '.usr', False, '', False);
+    CurBYEle.att('name') + '.usr', true, '','  ', False,false);
   Result := ok;
   aputag.killtree;
   curtoele := oldto;
@@ -8600,7 +8617,7 @@ end else}
         if acom.att('element') = '' then
         begin
           xform.list('', xmllist);
-          writeln('<h1>List</h1><xmp>' + xform.listxml('  ', False) + '</xmp>');
+          writeln('<h1>List</h1><xmp>' + xform.listxml('  ', False,true) + '</xmp>');
         end
         else
         begin
@@ -8611,7 +8628,7 @@ end else}
             if acom.att('format') = 'xmlis' then
               writeln('<xmp>LisTform' + xform.xmlis + '</xmp>')
             else
-              writeln('<xmp>LisTform' + xform.listxml('  ', False) + '</xmp>');
+              writeln('<xmp>LisTform' + xform.listxml('  ', False,true) + '</xmp>');
             xform.list('', xmllist);
           end;
         end;

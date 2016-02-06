@@ -102,7 +102,7 @@ begin
   i:=0;
  try
  //writeln('<h1>MDblocks:</h1><pre>'+_clean(b1.xmlis)+'</pre><hr/>');
- b2:=tagdoparse('<div>'+b1.listxml('',false)+'</div>',false,false,false,true,i);//correct
+ b2:=tagdoparse('<div>'+b1.listxml('',false,false)+'</div>',false,false,false,true,i);//correct
  //b1.saveeletofile('/home/t/xseus/apps/doc/rikki.html', False, '', True) ;
  //b2:=tagparse('<div>'+b1.listxml('',false)+'</div>',false,false);//md false
  //b2:=tagparse(b1.listxml('',false),false,false);//md false

@@ -714,18 +714,18 @@ begin
       //atag.addsubtag(
       //writeln('!SAVEINI TO:' + inif + '!read config! ' + x);
       config := tagparse(x, False, False);
-      config.saveeletofile(g_inidir + '/xseus.xsi', True, '', False);
+      config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
       config.Free;
       //writeln('!SAVEINI TO:' + inif + '!read config! ' + config.xmlis);
       createdir(g_inidir + '/www');
       x := '<helloer class="xseus:hello.xsi"><mygreeting>hello world</mygreeting></helloer>';
       config := tagparse(x, False, False);
-      config.saveeletofile(g_inidir + '/www/hello.htmi', True, '', False);
+      config.saveeletofile(g_inidir + '/www/hello.htmi', True, '','  ',false, False);
       config.Free;
       createdir(g_inidir + '/xseus');
       x := '<class name="hello"><open><h1>xse:/helloer/mygreeting</h1></open></class>';
       config := tagparse(x, False, False);
-      config.saveeletofile(g_inidir + '/xseus/hello.xsi', True, '', False);
+      config.saveeletofile(g_inidir + '/xseus/hello.xsi', True, '', '  ',False,false);
       config.Free;
     end;
     //inif:='C:\XSER\xseus.ini';  //SLASHES AND BACKSLASHES! GOTTA MAKE IT GENERAL
