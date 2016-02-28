@@ -17,7 +17,7 @@ function _utf8toasc(st: string): string;
 function _nocdata(st: string): string;
 
 const
-  crlf = #13#10;crr=#13;lf=#10;
+  crlf = #13#10;crr=#13;lf: STRING=#10;
 
 const
   whitespace = #13#10#9 + ' ';
@@ -48,7 +48,7 @@ ttag = class(TObject)
   public
   //   function hasattribute(vari: string): boolean;
     vari, vali: ansistring;
-    memregnum, indent: integer;
+    memregnum, hasindent: integer;
     subtags: TList;
     parent  //,xselected
     : ttag;
@@ -2127,9 +2127,9 @@ begin
           if copy(line,curpos,3)='###' then incommentedpar:=true;
           continue
         end;
-        if (curpos=1) and (partag<>nil) then begin thisind:=partag.indent;partag:=partag.parent; end else
+        if (curpos=1) and (partag<>nil) then begin thisind:=partag.hasindent;partag:=partag.parent; end else
         if (partag <> nil) and (partag <> roottag) then
-          while (thisind <= partag.indent) do
+          while (thisind <= partag.hasindent) do
           begin
             try
               //writeln('-',partag.vari+'/');
@@ -2148,9 +2148,9 @@ begin
         if (line[curpos]=':') or (line[curpos]='.') or ((curpos=1) and (partag<>nil)) then
         begin
           //logwrite('#'+line+inttostr(curpos)+line[curpos]);
-          startwhite:='';
+          startwhite:=' ';
           //if (line[curpos]=':') then startwhite:=crlf+crlf else
-          if (line[curpos]='.') then startwhite:=crlf;
+          if (line[curpos]='.') then startwhite:=lf;
           if curpos>1 then  curpos := curpos+1;//2;
 
           //if line[curpos]<>' ' then startwhite:=crlf else begin startwhite:=' ';curpos:=curpos+1;end;
@@ -2169,7 +2169,7 @@ begin
           else
           begin
             thistag := ttag.Create;
-            thistag.indent := thisind;
+            thistag.hasindent := thisind;
             thistag.parent := partag;
             partag.subtags.add(thistag);
             thistag.vari := '';//VALUE
@@ -2194,7 +2194,7 @@ begin
           end else
           }
           thistag := ttag.Create;
-          thistag.indent := thisind;
+          thistag.hasindent := thisind;
           if partag = nil then
           begin
             partag := thistag;
@@ -2419,7 +2419,7 @@ begin
    if (ch=^M) then
    begin
      //if result='' then
-     result:=result+crlf+indent+'  . '
+     result:=result+crlf+indent+'. '
      ;//else
      //result:=result+crlf+indent+'  ';
     //result:=result+^M^J+indent+'. ';
@@ -2428,7 +2428,7 @@ begin
    end  else
    if (linelen>width) and (ch=' ') then
    begin
-     result:=result+^M^J+indent+'  :  ';linelen:=0;
+     result:=result+^M^J+indent+':  ';linelen:=0;
    end  else result:=result+ch; //begin if result='' then result:=': '+ch else result:=result+ch;end;
    linelen:=linelen+1;
  end;
@@ -2486,7 +2486,8 @@ begin
    //if length(vali+line)<70 then  res.add(line+': '+vali)
    //else
    if inlinexml then res.add(aline+': '+vali) else
-   res.add(aline+': '+_xwrap(vali,ind,80));//+' ('+vali+')');
+   if vari<>'' then res.add(aline+': '+_xwrap(vali,ind+'  ',80)) //+' ('+vali+')');
+   else res.add(aline+': '+_xwrap(vali,ind+'',80)) //+' ('+vali+')');
 
    except writeln('<li>failed to add line:');// +line+'!'+vari+''+vali);
    end;
@@ -2756,7 +2757,7 @@ begin
       res.add(rest);
       rest := '';
       if newpre <> '' then
-        newpre := pre + '   ';
+        newpre := pre + '  ';
       for i := substart to subtags.Count - 1 do
       begin
         if subtags[i] = nil then
@@ -2797,7 +2798,7 @@ function ttag.listxml(inde:string; ents,isroot: boolean): string;
 }
 function etrim(v:string):string;
 begin
-    if ents then begin result:=trim(_clean(v));writeln('<li>cleaning:' +result);end else result:=trim(v);
+    if ents then begin result:=trim(_clean(v));writeln('<li>cleaning:' +result);end else result:=v;//trim(v);
 end;
 var
   st, subc,tmpinde: string;
@@ -2820,6 +2821,8 @@ begin
   begin
     if (tmpinde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
     Result := '<' + vari //+' inde="'+inde+'"'
+      //  <b> joo</b>  <em>joo  </em> missä välit
+      // ent' <pre>
     else
     Result := ^j + tmpinde+'<' + vari ;//inde="'+inde+'"';
     try
@@ -3073,7 +3076,7 @@ begin
       if nocr then
         list('', sl)
       else
-        list('   ', sl);
+        list('  ', sl);
     except
       writeln('Html listing failed');
       raise;
@@ -3395,7 +3398,7 @@ function _p_condition(condst:string; ele:ttag):string;
 var i,len:integer;ch:char;st1,st2,con:string;
 //function onetest:boolean;
 function onetest:boolean;
- var int1,int2:integer;compa:boolean;
+ var int1,int2:integer;compa,neg:boolean;
   begin
     st1:=parsexpart(condst,i,t_currentxseus,false,false);
     if (i>len) or (pos(condst[i],'<>=')<0) then
@@ -3485,12 +3488,12 @@ begin
          possi:=strtointdef(xsub,-99999);
          if possi<>-99999 then //pos(xsub[1], '0123456789') > 0 then
         begin
-          writeln('<li>Testing numeric cond:',xsub,':',possi,'!',posi,'/',axisz.count);
+         // writeln('<li>Testing numeric cond:',xsub,':',possi,'!',posi,'/',axisz.count);
           if possi<0 then
             possi:=axisz.count+possi+1;
-          for i:=0 to axisz.count-1 do
-             if i=possi then writeln('<li><b>pos_',i,ttag(axisz[i]).head,'</b>')
-             else writeln('<li>nopos:',i,'/',axisz.count,' ',possi,' ',ttag(axisz[i]).head);
+          //for i:=0 to axisz.count-1 do
+          //   if i=possi then writeln('<li><b>pos_',i,ttag(axisz[i]).head,'</b>')
+          //   else writeln('<li>nopos:',i,'/',axisz.count,' ',possi,' ',ttag(axisz[i]).head);
           if possi=posi then res:='1' else res:='0';  //posi+1?
         end
         else
@@ -3911,16 +3914,18 @@ begin
       apu := parent;
       if apu = nil then
       writeln('<li>Noo parent'+path.axis+' for ', vari, vali)
-      ;//else writeln('<li>gotparent'+path.axis+' for ', vari, vali);
+      ;//else
       apui := apu.subtags.indexof(self) + 1;
       if path.axis = 'self-and-followers' then
         apui := apui - 1;
+      //writeln('<li>gotparent'+path.axis+' for ', vari, vali,'/parhas:',apu.subtags.count,'/this:',apui);
 
       for i := apui to apu.subtags.Count - 1 do
       begin
         Result.add(apu.subtags[i]);
+        //writeln('--',i,':',ttag(apu.subtags[i]).xmlis());
       end;
-      //writeln('getfols:',apu.subtags.Count);
+      //writeln('getfols:',apu.subtags.Count,'//');
     except
       writeln('nogo path.followingsibling');
     end;
@@ -5325,7 +5330,7 @@ begin
       res.add(rest);
       rest := '';
       if newpre <> '' then
-        newpre := pre + '   ';
+        newpre := pre + '  ';
       for i := 0 to subtags.Count - 1 do
       begin
         if subtags[i] = nil then

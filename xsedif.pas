@@ -78,10 +78,12 @@ var st2:string;i,j:integer;
           stl.add((st2)+st[i]);
            st2:='';
        end else
-       if (st[i]=^M ) and (st[i+1]=^J) then
+        if (st[i]=^M )  then continue;
+        if (st[i]=^J) then
        begin
-         stl.add((st2)+^M^J);
-         i:=i+1;
+           //stl.add((st2)+^M^J);
+           stl.add((st2)+^J);
+           //i:=i+1;
          st2:='';
        end
        else
@@ -301,4 +303,4 @@ end;
 end.
 
 
-
+

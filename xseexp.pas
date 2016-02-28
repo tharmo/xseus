@@ -219,12 +219,12 @@ begin
   begin
     sta:=sta+1;
     //for i:=sta to
-    spec:=_uptoany(st,'(/',sta,sta,10);
+    spec:=_uptoany(st,'(/:',sta,sta,10);
    //WHY THIS: if st[sta-1]='/' then sta:=sta-1;
     //t_debug:=true;  =!from/
     //function _fetchst(findfrom,tofind:string;{var} sto:integer;sta,maxlen:integer):string;
     //if t_debug then
-    //writeln('<li>specifier:'+spec+'!/from:'+loc+'!/rest:'+copy(st,sta,100),'!</li>');
+   // writeln('<li>specifier:'+spec+'!/from:'+loc+'!/rest:'+copy(st,sta,100),'!</li>');
     Res := nil;
     gottafree := nil;
     //rest := '';
@@ -327,8 +327,9 @@ begin
      else
      if spec = 'class' then ////***handerslers
      begin
+       //writeln('<li>getclassfrom:[');//+xs.x_handlers.head,']');
           Res := xs.x_handlers;
-          //writeln('<li>ROOTELE:'+copy(res.xmlis,1,100)+'/rest:',copy(st,sta,99));
+       //   writeln('<li>ROOTELE:['+res.head+'/rest:',copy(st,sta,99),']');
      end else
     if spec = 'handler' then ////***handerslers
     begin
@@ -608,7 +609,7 @@ begin
     end;
     //if t_debug then writeln('<li>GOonfparts:','/at:',ch,sto,'/rest:',copy(st,sto,stlen),'!</li>');
     while (sto<stlen) and (pos(st[sto], whitespace)>0) do sto:=sto+1;
-    if sto>stlen then begin writeln('<li>unexpected end of params for ', fname);bREAK;end;
+    if sto>stlen then begin writeln('<li>unexpected end of params for ', fname, ' in: ',st);bREAK;end;
     ch:=st[sto];
     //if ch=',' then   sto:=sto+1  //and continue to get params
     //else

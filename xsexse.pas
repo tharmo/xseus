@@ -183,6 +183,7 @@ txseus = class(TObject)
     function c_copy: boolean;  //just short for copyelement
     function c_copyapply: boolean;
     function c_element: boolean;  //adds an element whose name can be given in attribute xse:name (so you can calculate the name) needs so rethinking....
+    function c_head: boolean;  //adds an element whose name can be given in attribute xse:name (so you can calculate the name) needs so rethinking....
 
     //program flow etc
     function c_bookmark: boolean;
@@ -828,7 +829,7 @@ end;
 
 function txseus.writeelement: boolean;
 var
-  st: string;
+  st: string;i:integer;
 begin
   try
   if curtoele = nil then
@@ -838,8 +839,10 @@ begin
   end;
   //if not httpinited then
   try
-   // if curtoele.vari='tmp_to' then   st := ttag(CurToEle.subtags[0]).listxml(False, False);
-
+    st:='';
+    if pos('temporaryto',curtoele.vari)=1 then
+     for i:=0 to curtoele.subtags.count-1 do st := st+ttag(CurToEle.subtags[i]).listxml('', False, False)
+   else
     st := CurToEle.listxml('', False,false);
     //logwrite('testwrite:'+st+'!!!!'+curtoele.head);
     //if t_debug then
@@ -853,12 +856,14 @@ begin
       begin
         //logwrite('Writeeinit');
         c_inithtml;
+        //logwrite('//Writeeinit');
         //writeln('initedit+<xmp>'+curbyele.xmlis+'</xmp>------');
         //httpinited := True;
       end else
       //logwrite('wasinited:'+curtoele.vari+'!!!'+st+'!!!');
       htmlinited := True;
       //writeln('writetxt:');
+
       if st<>'' then writeln(st);
       //logwrite('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD'+st);
     end;
@@ -869,7 +874,7 @@ begin
 try
   //logwrite('KILL:'+curtoele.xmlis);
     CurToEle.killtree;
-   // logwrite('KILLED:');
+  // logwrite('KILLED:');
    // writeln('KILLED:');
 
   except
@@ -890,12 +895,19 @@ end;  //of browseroutput
 
 function txseus.c_to: boolean;
 var
-  place, ele, outfile, rest, apus,byvali,head: string;
+  place, ele, outfile, outvar,rest, apus,byvali,head: string;
   tmpoldres, rootsel, resupar,gottafree,pseudoroot: ttag;
   browseroutput, wasdatatag: boolean;
   i, rootpos, resupoint: integer;
+{
+    /test/+  =firstchild
+    /test/++ =lastchild
+    /test    =replace
+    /test/   =at
+    /test/..
 
-  procedure getplaceinfix;
+}
+ { procedure getplaceinfix;
   begin
     place:='';
     if pos('at:', ele) = 1 then
@@ -927,16 +939,21 @@ var
       place := 'firstchild';
     end;
   end;
-
+  }
   procedure getresupoint;
   var i:integer;
   begin
+   try
    //resupoint is not anymere used outside this function. But this sets the resupar
     if (place = 'at') then
     begin
       //replace all subtags, keep old vari and atts
+      //writeln('<li>AT:'+resupar.xmlis+ele);
       resupoint := 0;
-      for i:=0 to resupar.subtags.count-1 do ttag(resupar.subtags[i]).killtree;
+      for i:=resupar.subtags.count-1 downto 0 do
+      begin
+       ttag(resupar.subtags[i]).killtree;
+      end;
       resupar.subtags.clear;
       exit;
     end;// else
@@ -981,7 +998,7 @@ var
       resupoint := resupar.subtags.Count;
       except writeln('failed pointless resupoint',resupar=nil);end;
     end;
-   //writeln('<li>gotresupoint:'+place+'!',resupar.head,'//',resupoint);
+   except writeln('<li>failedtresupoint:'+place+'!',resupar.head,'//',resupoint);end;
 
   end;
 {function agetfile(st:string):string;
@@ -995,9 +1012,11 @@ var i:integer; inf:boolean;
 
   end;
 }
+var startedbefore:integer;
 begin
   try
-   //  writeln('<xmp>DOTO::',curbyele.head,'</xmp>');
+    startedbefore:=x_started.count;
+    // writeln('DOTO::',curbyele.head);
     pseudoroot:=nil;
     wasdatatag:=false;gottafree:=nil;
      //if byvali<>'' then    begin     end;
@@ -1009,17 +1028,18 @@ begin
     ele:=trim(curbyele.vali);
     if ele='' then ele := curbyele.att('element');
     outfile := CurBYEle.att('file');
-    place := curbyele.att('place'); //ns+''???
+//    place := curbyele.att('place'); //ns+''???
     head:=curbyele.att('header');
-
+    outvar:=curbyele.att('outvar');
    // if outfile<>'' then       writeln('<li>head?',curbyele.vari,'<b>',curbyele.head+'</xmp>/head:',head);
   {
     begin
     end else}
-    if (outfile <> '') or (browseroutput) then //or (place='replace') then
+
+    if (outfile <> '') or (outvar <> '') or (browseroutput) then //or (place='replace') then
     begin
        pseudoroot := ttag.Create;
-       pseudoroot.vari:='temporaryto'+inttostr(random(100));
+       pseudoroot.vari:='temporaryto'+inttostr(random(10000));
        curtoele:=pseudoroot;
        //end;
        //if place<>'' then
@@ -1035,17 +1055,31 @@ begin
   if ele <> '' then
   begin
     try
-      if place='' then getplaceinfix;
+      //if place='test' then
+      begin //NEW SYNTAX FOR whereTO
+        //writeln('<li>try:'+':'+curbyele.head+'_');
+        if ele[1]='-' then begin place:='before'; ele:=copy(ele,2,length(ele)-1) end
+        else if ele[1]='+' then begin place:='after'; ele:=copy(ele,2,length(ele)-1) end
+        else   if ele[length(ELE)]='/' then place:='' //lastchild
+        else if ele[1]='!' then begin place:='replace'; ele:=copy(ele,2,length(ele)-1) end
+        else  if ele[length(ELE)]='+' then  begin place:='firstchild'; ele:=copy(ele,1,length(ele)-1) end
+        else place:='at';
+        ///writeln('<li>place:'+place+':'+ele,ele[1]='/',xml.head);
+        //getplaceinfix;
+      end;
+
+      //if place='' then getplaceinfix;
+
       rootpos := 1;
       rootsel := p_selroot(ele, self, tmpoldres, rootpos, True, gottafree);
       //instead of place-attribute, place may be given by prefix Needs rethinking and/or rewriting
       browseroutput := False;
       //rootsel := p_selroot(ele, self, curtoele, rootpos, True, gottafree);
-//!!      rootsel := p_selroot(ele, self, tmpoldres, rootpos, True, gottafree);
+      //rootsel := p_selroot(ele, self, tmpoldres, rootpos, True, gottafree);
       //writeln('<li>didselroot:',length(ele),'_',rootpos,rootsel.head+'/left:'+trim(copy(ele, rootpos, 9999)+']</li>'));
       if rootsel = nil then
       begin
-        writeln('<li>failed: noroot for: '+ele+'!');
+        writeln('<li>failed: noroot for: '+ele+'!',xml.head);
         rootsel:=ttag.create;//rootsel.parent=
         //rootsel := xml;
       end;
@@ -1094,7 +1128,10 @@ begin
   //***************************DIDIT*******************************************************//
 
   //if t_debug then
-  c_stopall;
+
+  while x_started.count>startedbefore do c_stop;
+
+  //  c_stopall(startedbefore);
   //writeln('<h1>didto'+ele+' </h1>/got:<xmp>'+curtoele.LISTxml('  ',FALSE),'</xmp>!!!/file:'+outfile+'/ele:',ele,'!!!',browseroutput);
   //#if t_debug then
   //writeln('<em>resuto'+resupar.head+'</em>',x_started.count,x_stopped.count);
@@ -1151,19 +1188,25 @@ begin
   else
   if browseroutput then
   begin
-       {if not httpinited then
+      if not httpinited then
       begin
         c_inithtml;
         httpinited := True;
       end;
-      }
-    //writeln('<li>didtobrowser');
+
+    //writeln('<li>did not tobrowser');
+    //writeln('<li>did not tobrowser',curfromele.xmlis());
     writeelement;
 
   end
   else  //of browseroutput
-  if outfile <> '' then
+  if outvar <> '' then
   begin
+     x_svars.values[outvar]:=curtoele.listxml('    ',false,true);
+     CurToEle.killtree;
+  end  else  //of varoutput
+  if outfile <> '' then
+    begin
     //    writeln('result_tofile:'+OUTFILE);
     try
       if (trim(curbyele.vali) <> '') and (curbyele.subtags.Count = 0) then
@@ -1209,7 +1252,7 @@ begin
     writeln('forgetemptypseudo_to');
    end else}
   CurToEle := tmpoldres;
-  //writeln('<li>TO-END',curtoele=nil,'</li></ul>');//<xmp style="color:red">', xml.xmlis, '!</xmp><hr/>');
+  //writeln('<li>TO-END',curtoele=nil,'</li>!!!!');//<xmp style="color:red">', xml.xmlis, '!</xmp><hr/>');
 end;
 
 function txseus.c_clearvars: boolean;
@@ -1244,7 +1287,7 @@ begin
     fromelem := CurBYEle.att('element');
   fromtext := CurBYEle.att('text');
   oldseltag := CurFromEle;
-
+ TRY
   //fromstring:=CurBYEle.att('string');
   //fromsreg:=CurBYEle.att('regexp');
   //writeln('<li>c_from_'+fromurl+'<hr/>'+curbyele.xmlis+'</li>');
@@ -1346,7 +1389,7 @@ begin
   begin
     try
       rootpos := 1;
-      //writeln('<li>xsefrom:'+fromelem+'/to:'+curtoele.vari);
+      //writeln('<li>xsefrom:'+fromelem);
       fromtag := p_selroot(fromelem, SELF, curfromele, rootpos, True, gottafree);
       fromelem := copy(fromelem, rootpos, 999); //rest;
 //      if fromtag = nil then
@@ -1361,7 +1404,7 @@ begin
     if fromtag  = nil then
     begin
       curfromele:=nil;
-      writeln('<li>xse:from empty element');exit;
+      writeln('<!--xse:from empty element-->');exit;
     end
     else
     if fromelem <> '' then
@@ -1397,10 +1440,12 @@ begin
   end;
   //logwrite('FRM3:'+fromelem+ '!'+ curfromele.vari+ '/FRM3');
   //writeln('<li>didFRoM</h2>'+curfromele.head);
+  finALLY
   CurFromEle := oldseltag;
   //writeln('<li>backtoFRoM'+curfromele.head);
   if fromfile + fromurl + fromtext <> '' then
     fromtag.killtree;
+  END;
 
 end;
 
@@ -1465,10 +1510,12 @@ begin
       //bytag := selroot(byelem, curbyele, rest, True, gottafree);
       //byelem := rest;
       rootpos:=1;
+      //writeln('<li>BYELEM:' + byelem,'</li>');
       bytag := p_selroot(byelem, SELF, curfromele, rootpos, True, gottafree);
+      //writeln('<li>BYROOT:' + bytag.head,'</li>');
       byelem := copy(byelem, rootpos, 999); //rest;
 
-      //writeln('<li>BY:' + bytag.vari + '!',byelem,'!</li>');
+      //writeln('<li>BY:' + byelem + '!',bytag.head,'/from:','!</li>');
       //fromtag := state.selroot(fromelem, fromtag, rest, False);
       // writeln('<li>FRM111:', fromelem, '//', copy(fromtag.xmlis,1,100), '\\', CurBYEle.xmlis, '\\<b>',rest,'</b></li>');
     except
@@ -4215,6 +4262,10 @@ var
 
 begin
   try
+  // if old=nil then writeln('<li>nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnä');
+   //try
+   //  writeln('<li>prepare'+curbyele.head+':'+old.vari);
+   //except writeln('<li>nothing to prepare');raise;end;
     Result := nil;
     orignew := nil;
     newtag := ttag.Create;
@@ -4225,18 +4276,27 @@ begin
     except
       writeln('<li>failed substitute vali' + old.vali, '!');
     end;
+    try
     for i := old.subtags.Count - 1 downto 0 do
     begin
       if t_debug then  writeln('<li><small>TONEW' + ttag(old.subtags[i]).vari + '!</small>');
       newtag.subtags.insert(0, old.subtags[i]);  //note, insert links, not copy elems
     end;
+  except
+    writeln('<li>failed copy subtags' + old.vari, '!');
+  end;
 
+  try
     if old.att(ns + 'to') <> '' then
     begin
       dotofrom(ns + 'to', old.att(ns + 'to'));
 
       exit;
     end;
+  except
+    writeln('<li>failed to prepare XSE:TO',old.vari);
+    //newtag.killtree;
+  end;
     if old.att(ns + 'from') <> '' then
     begin
       vali:=parsexse( old.att(ns + 'from'), self);
@@ -4255,7 +4315,7 @@ begin
       rootpos := 1;
       sres := p_selroot(vali, SELF, curbyele, rootpos, True, gottafree);
       rest := copy(vali, rootpos, 9999); //rest;
-      //if pos('bookmark',vali)>1 then writeln('<li>gotbm:',sres.xmlis,'!!!',rest,'!');
+      //if pos('class',vali)>1 then writeln('<li>gotbm:',sres.xmlis,'!!!',rest,'!');
       // writeln('<li>goby:',sres.head,'!!!(',rest,')!!!');
       if sres = nil then
         sres := curbyele;
@@ -4308,7 +4368,7 @@ begin
     Result := newtag;
     //if old.att(ns+'by')<>'' then writeln('<li>'+vali+'BYATT:<xmp>'+result.xmlis+crlf+'!!!</xmp>');
   except
-    writeln('<li>failed to prepare cmd');
+    writeln('<li>failed to prepare cmd',old.vari);
     newtag.killtree;
   end;
 end;
@@ -4576,6 +4636,7 @@ begin
         //if mydebug then
         //writeln('<li>cmd:'+progt.vari+'/tonil:',curtoele=nil,'/oldtonil:<b>',oldto=nil,'</b></li>');
         //except writeln('<li>cmdnolist:',progt.head,curtoele=nil,'</li>');end;
+        // writeln('<li>preparing'+progt.xmlis+':');
         newtag := preparebytag(progt, orignew);// orignew will point to new even if it changed by to/by;
         if newtag = nil then
         begin
@@ -4660,7 +4721,7 @@ begin
             begin
               try
                 if x_started.count>0 then
-                 c_stopall;
+                 c_stopall;  //maybe not all? 0 means all
                 //writeln('<li>BROWSER/STARTED (should not happen)', x_started.getele.head,'/ @',curtoele.head);
                 writeelement;
                 //if mydebug then
@@ -5043,6 +5104,38 @@ begin
     CurToEle := newtag;
   if curbyele.subtags.Count > 0 then
     dosubelements;
+    CurToEle := oldto;
+  end;
+
+function txseus.c_head: boolean;
+{D:
+ -usage: quite common
+}
+var
+  newtag, oldto: ttag;//, acom, seltag: ttag;
+
+  i: integer;
+  ast: string;
+begin
+  //writeln('<li>DOHEAD: '+curbyele.xmlis);
+  newtag := ttag.Create;
+  //if curbyele.att(ns + 'name') = '' then
+    if curbyele.att('name') = '' then
+    newtag.vari := CurFromEle.vari
+  else
+    newtag.vari := curbyele.att('name');
+    //newtag.vari := curbyele.att(ns + 'name');
+    newtag.vali := curfromele.vali;
+  ;
+  //if curbyele.att(ns + 'attributes') = 'copy' then
+    //if acom.att(ns+'attributes')<>'nocopy' then
+    newtag.attributescopyfrom(CurFromEle);
+    curtoele.subtagsadd(newtag);
+    oldto := curtoele;
+    CurToEle := newtag;
+  if curbyele.subtags.Count > 0 then
+    dosubelements;
+   //writeln('<li>DIDHEAD: '+curtoele.xmlis);
     CurToEle := oldto;
   end;
 
@@ -8271,11 +8364,11 @@ function txseus.c_elementname: boolean;
 {D: adds an attribute to current result element
 }    var ele:ttag;
 begin
-  if curbyele.att('element')<>'' then
+  {if curbyele.att('element')<>'' then
   begin
      ele:=staselect(curbyele.att('element'),curfromele);
-  end  else ele:=curfromele;
-  Ele.vari:= CurBYEle.att('new');
+  end  else ele:=curfromele;}
+  curfromEle.vari:= trim(CurBYEle.vali); //att('new');
   //wrITELN('<LI>SETelename:',ele.vari,'<pre>'+ELE.XMLIS+'<hr>!'+curbyele.xmlis+'</pre><li>');
 end;
 function txseus.c_changetext: boolean;
@@ -8992,17 +9085,22 @@ var
 begin
   if x_STARTED.pars.Count > 0 then
     CurToEle := x_startED.PARS[0];
-  //writeln('<li>stopall:',x_started.pars.count,curtoele.xmlis+'<hr/>');
+ // if (upto>0) and  (x_started.elems.count>0) then
+ //  writeln('<li>stoppall:',x_started.elems.count,'!!!',ttag(x_started.elems[0]).xmlis+'???');
+ // writeln('<li>stopall:',x_started.pars.count,curtoele=nil,'<hr/>',upto,'/',x_started.elems.count);
+
   while x_started.ELEMS.Count > 0 do
   begin
     //starttag := ttag(started[started.Count - 1]);
     //CurToEle := starttag.parent;
     //state.starts := state.starts - 1;
     //started.Delete(started.Count - 1);
+   // writeln('<li>deleting started');
     x_started.Delete;
     x_started.laststart:=false;
   end;
-  //writeln('<li>stoppedall:',x_started.count,curtoele.head+'!!!');
+  //if (upto>0) and (x_started.elems.count>0) then
+  //writeln('<li>stoppedall:',x_started.elems.count,'!!!',ttag(x_started.elems[0]).xmlis+'???');
 end;
 
 function txseus.c_start: boolean;

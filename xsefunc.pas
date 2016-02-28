@@ -484,7 +484,7 @@ end;
  //atstr:=ats;
  //pars:=tstringlist.create;
  end;
- function tfunc.f_item: string;  //with trailing separator (ie. item 0 is ignored)
+ function tfunc.f_item: string;  //gets umbered item .. with trailing separator (ie. item 0 is ignored)
   var items,no:integer; st,sep:string;
    stl:tstringlist;
   begin
@@ -508,7 +508,7 @@ begin
   //result:=md2xml(pars[0]);
  end;
 
- function tfunc.f_itemval: string;  //with trailing separator (ie. item 0 is ignored)
+ function tfunc.f_itemval: string;  //gets named item in list (var=val,var2=vl2..) with trailing separator (ie. item 0 is ignored)
   var items:integer; st,sep,vari:string;
    stl:tstringlist;
   begin
@@ -527,7 +527,7 @@ begin
 
   end;
 
- function tfunc.f_setitem: string;  //
+ function tfunc.f_setitem: string;  //add item to list (string with separators) at specified point. Separator as third par, or taken from the end of the list)
  var I,items,no:integer; st,sep:string;
   stl:tstringlist;
  begin
@@ -554,7 +554,7 @@ begin
      stl.free;
    end;
  end;
- function tfunc.f_itemadd: string;  //
+ function tfunc.f_itemadd: string;  //add to item named
  var I,items,no,toadd:integer; st,sep:string;
   stl:tstringlist;
  begin
@@ -583,7 +583,7 @@ begin
    end;
  end;
 
- function tfunc.f_incitem: string;  //
+ function tfunc.f_incitem: string;  // (liststring_of_separated_numbers, item_no to increment_by_one) .. special purpose vector stuff
  var I,items,no:integer; st,sep:string;
   stl:tstringlist;
  begin
@@ -931,7 +931,7 @@ begin
   x1:=pars[0];
   if pars.count>1 then x2:=pars[1] else x2:='';
   if pos(x2,x1)>0 then result:='1' else result:='0';
-  writeln('<li>contains?:',pars[0],'??',pars[1],result,'</li>');
+  //writeln('<li>contains?:',pars[0],'??',pars[1],result,'</li>');
  end;
 
  function tfunc.f_startswith: string;
@@ -1196,7 +1196,7 @@ end;
      x1:=pars[0];
      x2:=pars[1];
      if x1=x2 then result:='0' else result:='1';
-     //writeln('x1:',x1, 'x2:',x2, 'res:',result,'<pre>',pars.text,'</pre>');
+     //writeln('<li>NE: x1:',x1, 'x2:',x2, 'res:',result,'<pre>',pars.text,'</pre>');
    end;
   end;
 
@@ -2673,30 +2673,34 @@ function tfunc.f_trim:string;
    result:=StringReplace(result,^M,' ',[rfreplaceall]);
    result:=StringReplace(result,^J,' ',[rfreplaceall]);
    result:=trim((result));
-   //writeln('<!--oneline:'+result+'-->');
+   //writeln('<!--oneline:'+result+lf+'-->');
   end;
 
  function tfunc.f_trimwhitespace:string;
  const parlist:array[0..0] of string =('');
- {D: converts all adjacent whitespaces to single space
+ {D: converts all adjacent whitespaces to single space or linefeed
  }
- var ws,lineb:boolean;apu,apu2:string; i:integer;
+ var ws,lineb:boolean;res,apu2:string; i:integer;
  begin
-  apu:='';
+  res:='';
    ws:=true;
    apu2:=pars.strings[0];
    for i:=1 to length(apu2) do
     if pos(apu2[i],whitespace)>0 then
     begin
       if pos(apu2[i],crlf)>0 then lineb:=true;
+      //if pos(apu2[i],lf)>0 then lineb:=true;
       if ws or (i=length(apu2)) then continue else
-      begin  ws:=true;apu:=apu+' ';
+      begin  ws:=true;//res:=res+' ';
       end
     end
     else
-    begin ws:=false;if lineb then apu:=apu+lf; lineb:=false; apu:=apu+apu2[i];
+    begin
+      if ws then begin if lineb then res:=res+lf else res:=res+' ';end;
+      lineb:=false; res:=res+apu2[i];
+      ws:=false;
       end;
-   result:=apu;
+   result:=res;
    //result:='got:'+adjustlinebreaks(apu);
  end;
 function tfunc.f_whitespacespace:string;

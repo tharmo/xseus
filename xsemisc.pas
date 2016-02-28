@@ -1141,9 +1141,9 @@ begin
       else
       begin
         if acom.att('xml')<>'' then
-         x.saveeletofile(fn,true,head,'   ',acom.att('compact')='true',acom.att('entities')='true')
+         x.saveeletofile(fn,true,head,'  ',acom.att('compact')='true',acom.att('entities')='true')
          else
-        x.saveeletofile(fn,false,head,'   ',acom.att('compact')='true',acom.att('entities')='true');
+        x.saveeletofile(fn,false,head,'  ',acom.att('compact')='true',acom.att('entities')='true');
       end;
       except writeln('<li>failedsavefile:'+fn);end;
      finally //myxs.critical:=ocrit;
@@ -1168,7 +1168,7 @@ begin
   sl:=tstringlist.create;
   if nocr then t.list('',sl)
   else
-   t.list('   ',sl);
+   t.list('  ',sl);
   except writeln('Failed to list html');raise;end;
  for i:=0 to sl.count-1 do
   write(sl[i]+cr);
