@@ -195,6 +195,7 @@ function tagfromfileind(fil: string): ttag;
 function tagfromfiledots(fil: string): ttag;
 procedure registertagowner(xse: TObject; e,r: TList);
 function createtag(par: ttag; vars: string):ttag;
+function createpersistenttag:ttag;
 function _p_condition(condst:string; ele:ttag):string;
 
 implementation
@@ -1460,8 +1461,16 @@ begin
   //if txseus(currentxseus).xstarted then
   //  xrefcount := 1;  //for debugging new mem management
 end;}
-function createtag(par: ttag; vars: string):ttag;
+function createpersistenttag:ttag;
+var elemlist:tlist;
 begin
+ elemlist:=t_elemlist;
+ result:=ttag.create;
+ t_elemlist:=elemlist;
+end;
+
+function createtag(par: ttag; vars: string):ttag;
+  begin
   result:=ttag.create;
   //subtags := TList.Create;
   //attributes := TStringList.Create;
@@ -1494,7 +1503,7 @@ begin
     try
       sl.loadfromfile(fil);
     except
-      writeln('<!--failed to find file:' ,fil,'!!!!'+ sl.Text+'!-->');
+      writeln('<--failed to find object file:' ,fil,'-->');
      // result:=ttag.create;  //do we want this?
       exit;
     end;
@@ -1537,6 +1546,7 @@ begin
         end;
         //parse(sl.text,false,true);
       end;
+      //writeln('got file:'+sl.text+'**********'+result.xmlis+'***');
     except
       writeln('failed to parsefromfile', fil);
     end;

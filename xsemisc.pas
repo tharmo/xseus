@@ -44,14 +44,21 @@ function _listjson(ftag:ttag):ttag;
 function _json(src:string):ttag;
 function _ical(src:string):ttag;
 function _getnum(var n:integer;st:string):boolean;
+function _fileup(diri,fil:string):string;
+{function _getauthtag(sestag,authtag:ttag;diri,fil:string):ttag;
 function _testrights(session:ttag;dir,role,by:string):boolean;
+function _authorizebyentryword(outdiri:string;acom: ttag):string;
+function _authorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
+function _authenticate(sestag,authtag:ttag;diri,fil:string):ttag;
+}
 //function indyget(gurl:string):string;
 //function indypost(server,fil,form,headers:string):string;
 procedure _h1(st:string);
 //function _wrap(str,width,indent:string):string;
 function _wrap(str,indent:string;width:integer):string;
-function _haveright(todir,fromdir,rig:string;xs:tobject):boolean;
-function _ataghaveright(rigtag:ttag;fromdir,todir,rig:string):boolean;
+
+//function _haveright(todir,fromdir,rig:string;xs:tobject):boolean;
+//function _ataghaveright(rigtag:ttag;fromdir,todir,rig:string):boolean;
 procedure _cleancdata(acom,xform:ttag);
 //ocedure _text2html(var res:tstringlist;txt:tstringlist;acom,xform:ttag);
 
@@ -2384,12 +2391,17 @@ begin
    begin
       for i:=0 to mappings.subtags.count-1 do
       begin
+         try
          amap:=mappings.subtags[i];
+         //Dwriteln('<li>trymap:'+fil+'/from:'+amap.xmlis);
          if pos(amap.att('path'),fil)=1 then
          begin
            result:=amap.att('url')+copy(fil,length(amap.att('path'))+1,length(fil));
            _gsub('\','/',result);
            break;
+         end;
+
+         except  writeln('failmap');
          end;
       end;
    end;
@@ -3109,6 +3121,8 @@ begin
      end;
 
      //writeln('<li>allow |'+targdir+'|'+targfile,'| for:',srcnorm);
+
+     // THIS WILL BE MOVED TO XSEAUTH AND CALLED SEPARATELY
      if write then
      permfile:=_findfileupstream(targdir,'.xseuswrite',0) else
      permfile:=_findfileupstream(targdir,'.xseusread',0);
@@ -3125,135 +3139,6 @@ begin
 
 end;
 
-function _oldindir(target,srcdir:string;testallow:boolean;xs:tobject):string;
-//NEEDS RETHINKING AND REWRITING
-var targdir,tfile,trest,srest:string;haveright:boolean;//adir:tdirectoryinfo;
-     begin
-  try
-      if pos('http://',target)=1 then
-      begin
-        result:=target;exit;
-      end;
-     result:='INVALIDFILENAME?\'+target;
-     if AnsiContainsText(target,'>') then exit;
-     if AnsiContainsText(target,'|') then exit;
-     if AnsiContainsText(target,'<') then exit;
-     testallow:=false;
-     target:=ansilowercase(target);
-     targdir:=extractfiledir(target);//+g_ds;
-     //if (targdir='\') or
-     if (targdir='\\') then targdir:=g_ds;
-     tfile:=extractfilename(target);
-     //     writeln('indir ?: '+target+'/srcdir:'+srcdir+'/targdir:'+targdir+'/filename:'+tfile);
-     {       writeln('commonpath ?: <li>'+target,
-            '<li> from '+srcdir+'<li> common:'
-        ,_matchhead(target,srcdir,trest,srest),
-        '<li> tailtarg:',trest,
-        ' <li>srest:',srest);
-       writeln('<li> tailtarg:',trest,' <li>srest:',srest);
-     }
-     if targdir='' then
-      targdir:=srcdir else
-     targdir:=_relpath(targdir,srcdir)+g_ds;
-      //    writeln('reldir ?: '+targdir);
-   //  targdir:=StringReplace(targdir,'|','',[rfreplaceall]);
-   //  targdir:=StringReplace(targdir,'>','',[rfreplaceall]);
-
-      srcdir:=ansilowercase(srcdir);
-      if testallow or (pos(srcdir,targdir)=1) then
-      begin
-       result:=targdir+''+tfile;
-       //writeln('indir ok: '+targdir+' from '+srcdir+'='+result);
-       exit;
-      end;
-      //getdirectoryparent(targdir);
-
-      if testallow=testallow then
-        begin
-          haveright:=_haveright(targdir,srcdir,'r',txseus(xs));
-          if haveright then
-          begin
-            result:=targdir+''+tfile;exit;
-          end;
-          if (fileupexists(targdir,'.xseusallow')) then
-          begin
-            result:=targdir+''+tfile;
-            exit;
-          end
-           else
-          begin
-            writeln('Forbidden: no permission for: '+targdir+'.xseusallow in '+srcdir);
-            exit;
-          end;
-        end;
-      finally
-         //   writeln('indir: '+targdir+' from '+srcdir+'='+result);
-      end
-end;
-
-{
-//function _text2html(txt:tstringlist;acom,xform:ttag):tstringlist;
-procedure _text2html(var res:tstringlist;txt:tstringlist;acom,xform:ttag);
-var cv:tconverter;opts:ttag;
-begin
-  cv:=tconverter.create;
-  cv.inst:=txt;
-
-    cv._debug:=false;if acom.att('doh')<>'' then cv.op.doh:=true;
-  if acom.att('dop')<>'' then cv.op.dop:=true;
-  if acom.att('dou')<>'' then cv.op.dourls:=true;
-  if acom.att('dot')<>'' then cv.op.dotabs:=true;
-  if acom.att('doexl')<>'' then cv.op.doexl:=true;
-  if acom.att('dom')<>'' then cv.op.domail:=true;
-  if acom.att('dol')<>'' then cv.op.dolist:=true;
-  if acom.att('h1')<>'' then cv.op.h1:=acom.att('h1');
-  if acom.att('h2')<>'' then cv.op.h2:=acom.att('h2');
-  if acom.att('h3')<>'' then cv.op.h3:=acom.att('h3');
-  if acom.att('empties')<>'' then cv.op.empties:=true;
-  if acom.att('dots')<>'' then
-  begin
-   _h1('dots');
-   cv.op.dots:=true;
-  end;
-  cv.op.hlev:=strtointdef(acom.att('hlev'),0);
-opts:=acom.subt('formoptions');
- if opts<>nil then
-begin
- if opts.att('doh')<>'' then cv.op.doh:=true;
- if opts.att('dop')<>'' then cv.op.dop:=true;
- if opts.att('dol')<>'' then cv.op.dolist:=true;
- if opts.att('dot')<>'' then cv.op.dotabs:=true;
- if opts.att('dots')<>'' then cv.op.dots:=true;
- if opts.att('doexl')<>'' then cv.op.doexl:=true;
- if opts.att('empties')<>'' then cv.op.empties:=true;
- if opts.att('dou')<>'' then cv.op.dourls:=true;
- if opts.att('dom')<>'' then cv.op.domail:=true;
-  if opts.att('h1')<>'' then cv.op.h1:=opts.att('h1');
-  if opts.att('h2')<>'' then cv.op.h2:=opts.att('h2');
-  if opts.att('h3')<>'' then cv.op.h3:=opts.att('h3');
-  cv.op.hlev:=strtointdef(opts.att('hlev'),0);
-
-end;
-
-
-
-cv.op.heads:=false;
-cv.op.accepthtml:=true;
-
-cv.makehtml;
-
-//result:=tstringlist.create;
-//result.addstrings(cv.outst);
-res.addstrings(cv.outst);
-
-cv.op.free;
-
-cv.outst.free;
-//cv.inst.free;
-//exit;
- cv.free;
-end;
-}
 procedure _cleancdata(acom,xform:ttag);
 var st:string;
 ot,nt:ttag;
@@ -3279,47 +3164,28 @@ begin
  xform.subtagsadd(nt);
 end;
 
-
-function _ataghaveright(rigtag:ttag;fromdir,todir,rig:string):boolean;
-var j:integer;aput2:ttag;
+function _fileup(diri,fil:string):string;
+var done:boolean;   tries:integer;
 begin
-    result:=false;
-    for j:=0 to rigtag.subtags.count-1 do
+  result:='';
+  done:=false;tries:=0;
+  while not done do
+  begin
+    tries:=tries+1;
+    IF TRIES>20 THEN BREAK;
+    //writeln('<li>tryfile:'+diri+fil);
+    if fileexists(diri+fil) then
     begin
-      aput2:=rigtag.subtags[j];
-      if aput2.vari='file' then
-      if _matches(aput2.att('from'),fromdir) then
-      if  todir=aput2.att('to') then
-      begin
-        result:=true;
-        exit;
-      end;
-    end;
+         done:=true;
+         result:=diri;
+         exit;
+         //writeln('<li>gotfile:'+diri+fil,'!',fileexists(diri+fil));
+    end else
+    diri:=TRIMFileName(diri +PATHDELIM+'..');
+
+  end;
 end;
 
-function _haveright(todir,fromdir,rig:string;xs:tobject):boolean;
-var  aput,aput2:ttag;i:integer;
-begin
- result:=false;
-  result:=_ataghaveright(txseus(xs).x_rights,fromdir,todir,rig);
-  if result then exit;
-
-    if (FileExists((todir)+g_ds+'rights.htme')) then
-          begin
-           aput:=tagfromfile((todir)+g_ds+'rights.htme',nil);
-           //aput:=ttag.create;
-           //aput.fromfile((todir)+g_ds+'rights.htme',nil);
-           //aput:=aput.subtags[0];
-
-           for i:=0 to aput.subtags.count-1 do
-           begin
-            aput2:=ttag(aput.subtags[i]).copytag;
-            txseus(xs).x_rights.subtags.add(aput2);
-            aput2.setatt('to',todir);
-           end;
-           result:=_ataghaveright(aput,fromdir,todir,rig);
-           aput.killtree;aput2.clearmee;
-    end;end;
 procedure _h1(st:string);
 begin
  writeln('<h1>'+st+'</h1>');
@@ -3380,38 +3246,7 @@ begin
   end;
 end;
 }
-function _testrights(session:ttag;dir,role,by:string):boolean;
-var i:integer;aputag:ttag;
-begin
-  try
-       result:=false;
-       for i:=0 to session.subtags.count-1 do
-       begin
-         aputag:=session.subtags[i];
-         //listwrite(aputag);
-         if aputag.vari='aukt' then
-         begin
-           //x1:=_ubstitute(acom.att('dir'),selst,state,xs);
-           //x2:=_ubstitute(acom.att('role'),selst,state,xs);
-           //x3:=_ubstitute(acom.att('by'),selst,state,xs);
-           //writeln('<li>authdir: '+x1 +'todir: '+aputag.att('dir'));
-           if (pos((aputag.att('dir')),(dir))=1)
-           then
-           begin
-            //if aputag<>nil then  writeln('<li>ok to ' +aputag.att('dir'),result,'</li>');
-            result:=true;
-           end;
 
-         end;
-       end;
- except
-   _h1('eikäy rights');listwrite(session);
-     writeln('<li>dir:',dir,'</li>');
-
- end;
- // writeln('<li>ok to ' +dir,result,'</li>');
- // listwrite(session);
- end;
 
 { function _isnumlist(cs:string;var levs,llen:integer):boolean;
 var i:integer;innum:boolean;

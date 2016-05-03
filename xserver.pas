@@ -44,7 +44,8 @@ interface
     function RecvString(Timeout: Integer): AnsiString; virtual;
 }
 type tsession=class(tobject)
-   id:string;sestag:ttag;
+   id,ip:string;port:integer;sestag:ttag;
+
    lasttime,starttime:tdatetime;
     //constructor create(ti:tdatetime);
     destructor free;
@@ -60,7 +61,7 @@ type tsessions=class(tobject)
 
    SesSIONS:tLIST;
    sestimeout:integer;
-   function createsession(sessid:string):tsession;
+   function createsession(sessid:string;servi:pointer):tsession;
    function getsession(sessid:string):tsession;
    procedure clearsession(sess:tsession);
    //procedure delsession(idi:string);
@@ -99,6 +100,8 @@ type
     session:tsession;
     myxseus:pointer;//txseus;
     cookie:string;
+    clientip:string;
+    clientport:integer;
     sock: TTCPBlockSocket;
     HeaderHasBeenWritten: boolean;
     chunked:boolean;
@@ -113,6 +116,7 @@ type
     procedure setheader(vari,vali:string);
     //procedure getquery(query:string);
     function servefile(mime, url:string):string;
+    function redirect(mime, url:string):string;
     procedure getparams(postdata:string);
     procedure getmultiparams(len:integer;soc:TTCPBlockSocket;str:string);
     procedure getrest(len:integer;soc:TTCPBlockSocket;str:string);
@@ -158,7 +162,7 @@ type txseusserver = class(TObject)
 
 
 
-var   xseuscfg: txseusconfig;
+var   //xseuscfg: txseusconfig;
   xseusserver: TxseusServer;
  // g_writehandler:ttextrec;
  // g_keepbuffer:boolean;
@@ -171,6 +175,7 @@ procedure bitofrest;
 
 
 implementation
+uses xseauth;
 {  $R *.lfm}
 function tsessions.gettime(ind:integer):tdatetime;
 begin
@@ -219,23 +224,29 @@ logwrite('listener destroy');
  inherited destroy;
 end;
 
-function tsessions.createsession(sessid:string):tsession;
+function tsessions.createsession(sessid:string;servi:pointer):tsession;
 var sest:ttag;ases:tsession;
 begin
  //logwrite('newsess for:'+sessid);
  sest:=ttag.create;
+ sest.vari:='session';
  sest.addsubtag('started',timetostr(now));
+ sest.addsubtag('ip',tserving(servi).clientip);
+ sest.addsubtag('port',inttostr(tserving(servi).clientport));
  sest.vari:='session';
  system.enterCriticalSection(g_sesscriti);
  try
   ases:=tsession.create;
   sessions.add(ases);
   ases.id:=sessid;
+  ases.ip:=tserving(servi).clientip;
+  ases.port:=tserving(servi).clientport;
   ases.starttime:=now;
   ases.lasttime:=now;
   ases.sestag:=sest;
  //sescookies.add(sessid);
   ases.sestag:=sest;
+  logwrite('created session:'+inttostr(sessions.count)+ases.sestag.xmlis);
  {$ifndef windows} // .. its actually 32/64 quetion, not win/linux
  // starttimes.add(pointer(now));
  // lasttimes.add(pointer(now));
@@ -261,11 +272,12 @@ begin
   begin
       ases:=sessions[i];
       ases.lasttime:=now;
+      logwrite('gotsession:'+inttostr(i)+ases.sestag.xmlis);
       break;
   end;
-  if ases=nil then exit;
+  if ases=nil then begin
+  logwrite('nosession');exit;end;
  //ioc:=sescookies.indexof(sessid);
- //logwrite('getses3');
  //if ioc<0 then exit;//begin logwrite('nosession:'+inttostr(ioc)+sessid);exit;end;
  //sestag:=ttag(sestags[ioc]);
  sestag:=ases.sestag;
@@ -516,7 +528,7 @@ end;
 var hdr:string;
 begin
   try
-    filen := _getpath(_mapurltofile(url, xseuscfg.subt('urlpaths')),'\');
+    filen := _getpath(_mapurltofile(url, g_xseuscfg.subt('urlpaths')),'\');
     if not fileexists(filen) then
     fail else
     begin
@@ -542,6 +554,19 @@ begin
   except fail;end;
 end;
 //destructor
+
+function tserving.redirect(mime, url:string):string;
+//if pos('login', uri)<1 then
+ begin //redirect
+
+   sock.SendString('HTTP/1.1 301 Moved Permanently' + CRLF);
+  Sock.SendString('Location: '+url + CRLF);
+
+
+ //statusline:='HTTP/1.1 301 Moved Permanently';
+//setheader('location','http://www.google.com');//url+formst);
+end;
+
 procedure tserving.doFree;
 begin
   LOGwrite('stop thread '+inttostr(id));
@@ -589,7 +614,7 @@ begin
   while (not Terminated) and (1 = 1) do
   begin
     try
-    logwrite('Open connection '+inttostr(sock.getremotesinport));
+    logwrite('Open connection '+'/'+sock.getremotesinip+':'+inttostr(sock.getremotesinport));
     HeaderHasBeenWritten := False;
     attendconnection(sock);
     logwrite('Close socket'+inttostr(sock.getremotesinport));
@@ -722,7 +747,7 @@ begin
 statusline:='HTTP/1.1 200';
 requestheaders:=tstringlist.create;
 responseheaders:=tstringlist.create;
-responseheaders.AddStrings(xseuscfg.defheaders);
+responseheaders.AddStrings(g_xseuscfg.defheaders);
 //logwrite('defhead:'+responseheaders.text);
 end;
 
@@ -1001,10 +1026,11 @@ begin cookie:=_randomstring;
 end else  session:=xseusserver.sessions.getsession(cookie);
 if session=nil then
 begin
- session:=xseusserver.sessions.createsession(cookie);
+ session:=xseusserver.sessions.createsession(cookie,self);
 end;
 setheader('Set-Cookie','xseus_session='+cookie+'; path=/');
-
+ session.ip:=clientip;
+ session.port:=clientport;
 //logwrite('thissession:'+session.xmlis);
 except logwrite('Problems with cookies and session(cookie:'+cookie+')');end;
 //logwrite(timetostr(now)+' connection gotses for '+cookie+'/'+inttostr(id)+':'+session.xmlis);
@@ -1050,6 +1076,8 @@ begin
   method := fetch(s, ' ');
   uri := fetch(s, ' ');
   protocol := fetch(s, ' ');
+  clientip:=sock.getremotesinip;
+  clientport:=sock.getremotesinport;
   setheader('Server','Xseus / Synapse');
   repeat
     s := (ASocket.RecvString(Timeout));
@@ -1071,7 +1099,7 @@ begin
 
   except logwrite('failed to read headers'); raise; end;
   // headers read
-  //logwrite('read headers:'+requestheaders.Text);
+   logwrite('read headers:'+requestheaders.Text);
    try //read params
     postdata:='';
     if pos('application/octet-stream',CONTENTTYPE)>0 then
@@ -1112,13 +1140,14 @@ begin
      getparams(s);
     end;
    except logwrite('failed to read params');raise;   end;
+
    //params read
   i:=pos('?',uri);
   if i>1 then ext:=copy(uri,1,i-1) else ext:=uri;
   ext:=extractfileext(ext);
   ext:=lowercase(copy(ext,2,length(ext)-1));
   //ext :=extractdelimited(1,ext,['?','&']);
-  mime:=xseuscfg.getmime(ext);
+  mime:=g_xseuscfg.getmime(ext);
   //xseusserver.sessions.purgeoldsessions;
   //cookie:=_getcookie(requestheaders);
   //if pos('.htmi', uri)>0 then
@@ -1170,27 +1199,39 @@ begin
         logwrite('inited xseus'+timetostr(now)+' ('+inttostr(id)+') for:'+uri);
         //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         try
-         //WRITELN('HELÖLO');
+        //txseus(myxseus).c_inithtml;
+        //txseus(myxseus).
+        if not auth_checkauth(myxseus) then
+        begin //redirect
+          //statusline:='HTTP/1.1 302 FOUND';
+          //sethe§ader('location','http://localhost:8001/notes/notes.htmi/login.htmi');//url+formst);
+          redirect('','?login');
+        end else
         txseus(myxseus).dosubelements;
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
         except  logwrite('fail:'+s);writecustomheaders('HTTP/1.1 200','text/html',-1); writeln('failed xseus.run');  end;
-      end else writeln('<li>Failed xseus init');
+      end else
+      begin
+        writeln('<li>uri'+uri+' /file:');
+        writeln('<li>failed xseus init:');
+
+      end;
       end;
       try   //clear xseus
       if keepxseusalive then
       begin
       g_livesession:=self;
-      g_livesession:=nil; //to make sure not used yet
+      //g_livesession:=nil; //to make sure not used yet
 
       end else
       begin
-      logwrite('clear');
+      //logwrite('clear');
       txseus(myxseus).Clear;
-      logwrite('cleared');
+      //logwrite('cleared');
       logwrite('freed:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
       txseus(myxseus).free;
-      logwrite('freedxseus:');
+      //logwrite('freedxseus:');
       end;
      except   writeln('failed xseus.clear'); raise; end;
              //xseus cleared
@@ -1219,7 +1260,8 @@ begin
     if ext='get' then uri:=copy(uri,1,length(uri)-4);
     // allow to get .htmi/xsi -files instead of running them
     myxseus:=nil;
-    servefile(mime,uri);
+    redirect('','notes.htmi');
+    //servefile(mime,uri);
     logwrite('served file:'+uri+mime);
   end;
     //servefile;
@@ -1274,15 +1316,15 @@ begin
   sessions:=tsessions.create;
   defaultheaders:=tstringlist.create;
   inif := extractfiledir(ParamStr(0)) + g_ds + 'xseus.xsi';
-  xseuscfg := txseusconfig.Create;
+  g_xseuscfg := txseusconfig.Create;
    //logwrite('INIF:'+inif);//+xseuscfg.config.xmlis);
-  xseuscfg.get(INIF);
-  sessions.sestimeout:=strtointdef(xseuscfg.sessiontimeout,15);
+  g_xseuscfg.get(INIF);
+  sessions.sestimeout:=strtointdef(g_xseuscfg.sessiontimeout,15);
   //xseusformi.memolog('At');
-  if xseuscfg.config.subs('chunked')='false' then serverchunked:=false else serverchunked:=true;
+  if g_xseuscfg.config.subs('chunked')='false' then serverchunked:=false else serverchunked:=true;
   //chunked:=false;
   servs := tthreadpool.Create;
-  servs.threadcount:=strtointdef(xseuscfg.config.subs('threadcount'),6);//sorry not elegant to do it here
+  servs.threadcount:=strtointdef(g_xseuscfg.config.subs('threadcount'),6);//sorry not elegant to do it here
   servs.init;
   if serverchunked then
  logwrite('did create a xseusserver with inifile:'+inif+' running '+inttostr(servs.threadcount)+' threads, chunked')
@@ -1305,7 +1347,7 @@ var
 begin
  try
  stimes:=0;
- port:=xseuscfg.config.subs('port');
+ port:=g_xseuscfg.config.subs('port');
  if port='' then port:='8001';
  ListenerSocket := TTCPBlockSocket.Create;
  //listenersocket.SO_REUSEADDR:=true;

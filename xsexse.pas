@@ -90,6 +90,7 @@ txseus = class(TObject)
     //x_config:xseuscfg: txseusconfig;
     x_started,x_stopped: tstarted;
     x_session: ttag;
+    x_classname:string;
     x_cmdline: boolean;
     x_rematch: boolean;  //for case-statement. Apply?
     x_hmackey, x_newcookie, x_objectfile, x_outdir, ses_file,
@@ -154,8 +155,9 @@ txseus = class(TObject)
     function setbookmark(vari: string; tagi: ttag): boolean;
 
   public
+    //function checkauth:boolean;
     procedure readhtme;
-    function readxsi(cname: string):boolean;
+    function readxsi(cname,handler: string):boolean;
     procedure writelog(msg: string; form: boolean);
 
   published
@@ -311,7 +313,9 @@ txseus = class(TObject)
     function c_debugtext: boolean;
 
     //sessions etc  (havent used the for a while so not sure if these work. I think they do, but what they do is forgotten at the moment)
-    function c_checkrights: boolean;
+    function c_getauthorization: boolean;
+    function c_readauthorization: boolean;
+    function c_authorize: boolean;
     function c_login: boolean;
     function c_logout: boolean;
     function c_savesession: boolean;
@@ -369,14 +373,15 @@ txseus = class(TObject)
 procedure registerxseus(xse: TObject; s, e: TList);
 //procedure clearelems(elems: TList);
 //procedure clearstates(states: TList);
+function readparamstoform(params: TStringList): ttag;
 
 
 
 implementation
 
-uses  xsemisc, xsefunc, synacode,
+uses  xsemisc, xsefunc, synacode, xseauth,
   xseexp,  //xseftp,
-  xseoid,//xsetrie,//xsmarkd,
+  //xseoid,//xsetrie,//xsmarkd,
   xsemarkd,       sqldb,
   xserver, xsereg;
 {tolist,fromlist:tlist;
@@ -385,7 +390,6 @@ toselector, torootsel,fromselector: string;
 toselected,fromselected:pointer;
 toselecti:integer;
 next:trelation;}
-
 
 function txseus.c_js:boolean;
 var jssource,js:tstringlist;
@@ -819,6 +823,7 @@ procedure txseus.resuadd(t: ttag);
 begin
   try
     curtoele.subtags.add(t);
+    t.parent:=curtoele;
   except
     writeln('failed to add to result', curtoele.subtags = nil, t = nil);
     writeln('failed to add to result', curtoele.xmlis, '!');
@@ -1211,6 +1216,7 @@ begin
     try
       if (trim(curbyele.vali) <> '') and (curbyele.subtags.Count = 0) then
       begin
+        //INDIR_AUTH
         apus := _indir(outfile, x_outdir, self, True);
         _writefile(apus, curbyele.vali);
         writeln('<li>writing raw text value - did you mean this?');
@@ -1220,6 +1226,7 @@ begin
         writeln('nilresult_tofile');
         exit;
       end;
+      //INDIR_AUTH
       apus := _indir(outfile, x_outdir, self, True);
       begin
         try
@@ -2666,16 +2673,16 @@ begin
     ers := 0;    //c:=0;
     x_svars.Free;
     // x_ids.list;
-    logwrite('<li>vars');
+    //logwrite('<li>vars');
     try
       X_HANDLERS.KILLTREE;
-      logwrite('<li>hans');
+      //logwrite('<li>hans');
     except
       writeln('nokillhands');
     end;
     try
       X_RIGHTS.KILLTREE;
-      logwrite('<li>rigs');
+      //logwrite('<li>rigs');
     except
       writeln('nokillrights');
     end;
@@ -2684,7 +2691,7 @@ begin
         elements_CREATED, ' Killed:', elements_FREED);
     try
       X_BOOKMARKS.KILLTREE;
-      logwrite('<li>bms');
+      //logwrite('<li>bms');
     except
       writeln('nokillbook');
     end;
@@ -2696,10 +2703,10 @@ begin
       writeln('nokillfun');
     end;
     try
-      logwrite('<li>goxml');
+      //logwrite('<li>goxml');
       XML.KILLTREE;
       //XML.freemEE;
-      logwrite('<li>didgoxml');
+      //logwrite('<li>didgoxml');
     except
       writeln('nokillXML');
     end;
@@ -2918,7 +2925,7 @@ begin
   inibodyst := '<body>';
   inibodyend := crlf+'</body></html>';
   //LOGWRITE('XXX6');
-  xseuscfg.logf := nil;
+  g_xseuscfg.logf := nil;
   //LOGWRITE('XXX7');
 
 end;
@@ -4871,15 +4878,15 @@ var
   ot: txseus;
 begin
   writeln('OLDINI<pre> ');
-  writeln(xseuscfg.config.xmlis);
+  writeln(g_xseuscfg.config.xmlis);
   //xseuscfg.free;
   //ot := thrxs;
   //thrxs := nil;
   //xseuscfg:=txseuscfg.create;
-  xseuscfg.config.Free;
-  xseuscfg.get(g_inidir + 'xseus.xsi');
+  g_xseuscfg.config.Free;
+  g_xseuscfg.get(g_inidir + 'xseus.xsi');
   //thrxs := ot;
-  writeln(xseuscfg.config.xmlis);
+  writeln(g_xseuscfg.config.xmlis);
   writeln('NEWINI</pre> ');
 
   //_h1('halting');
@@ -4894,7 +4901,7 @@ var
   apt, subt: ttag;
   ind: string;
 begin
-  apt := xseuscfg.config.subt('apppaths');
+  apt := g_xseuscfg.config.subt('apppaths');
   if apt.subt('map[@ns=''' + curbyele.att('ns') + ''']') <> nil then
     writeln('<h2>Not allowed to override old app-paths' + curbyele.att('ns'), '</h2>')
   else
@@ -4902,7 +4909,7 @@ begin
     subt := apt.addsubtag('map', '');
     subt.addatt('path=' + curbyele.att('path'));
     subt.addatt('ns=' + curbyele.att('ns'));
-    xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
+    g_xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
   end;
 end;
 
@@ -4915,7 +4922,7 @@ var
   apt, subt: ttag;
   ind: string;
 begin
-  apt := xseuscfg.config.subt('urlpaths');
+  apt := g_xseuscfg.config.subt('urlpaths');
   if apt.subt('map[@url=''' + curbyele.att('url') + ''']') <> nil then
     writeln('<h2>Not allowed to override old url-mappings' +
       curbyele.att('url'), '</h2>')
@@ -4930,10 +4937,10 @@ begin
     writeln('<pre>' + apt.xmlis +
       '</pre>!!!'+g_inidir+'/xseus.xsi');
    // apt.subtags.move(apt.subtags.Count - 1, 0);
-    writeln('<pre>' + xseuscfg.config.xmlis +
+    writeln('<pre>' + g_xseuscfg.config.xmlis +
       '</pre>!!!'+g_inidir+'/xseus.xsi');
 
-     xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
+     g_xseuscfg.config.saveeletofile(g_inidir + '/xseus.xsi', True, '','  ', False,false);
   end;
 end;
 
@@ -5165,7 +5172,7 @@ begin
   if Result <> nil then
     if Result.att('file') <> '' then  //data pointer to external helper-file
     begin
-      incfile := _indirs(Result.att('file'), xseuscfg.apppaths);
+      incfile := _indirs(Result.att('file'), g_xseuscfg.apppaths);
       inctag := tagfromfile(incfile, nil);
       Result := inctag.SUBt('handler[@name eq ''' + msg + ''']').copytag;
     end;
@@ -5225,11 +5232,11 @@ begin
       newcom := ttag.Create;
       //writeln('<li>Try command:<pre>' + acom.xmlis + '</pre>_' +
       //  xseuscfg.xcommands.xmlis + '###' + IntToStr(xseuscfg.xcommands.subtags.Count));
-      for j := 0 to xseuscfg.xcommands.subtags.Count - 1 do
+      for j := 0 to g_xseuscfg.xcommands.subtags.Count - 1 do
       begin
-        if ttag(xseuscfg.xcommands.subtags[j]).att('name') = acom.vari then
+        if ttag(g_xseuscfg.xcommands.subtags[j]).att('name') = acom.vari then
         begin
-          thecom := xseuscfg.xcommands.subtags[j];
+          thecom := g_xseuscfg.xcommands.subtags[j];
           writeln('found cmd: <pre>' + thecom.xmlis + '</pre>');
           if thecom = nil then
             if debug then
@@ -5285,7 +5292,7 @@ begin
             newvali := aput.att('sep') + q + _cleandir(
               aput.att('indir'), aput.att('nodir'), aput.att('indirs'),
               aput.att('addtoval'), acom.att(apust), x_outdir,
-              xseuscfg.subt('apppaths'), False, self) + q;
+              g_xseuscfg.subt('apppaths'), False, self) + q;
             if aput.att('redir') = 'true' then
               newvali := ' > ' + newvali;
             newcom.setatt(newvari, newvali);
@@ -5451,27 +5458,28 @@ begin
 
 end;
 
-{
-procedure _cookieauth(var ase:ttag;var sesdir,sesurl:string;xseus:txseus;cookies:tstringlist;var sesfile:string);
+
+{procedure _cookieauth(var sestag:ttag;var sesdir,sesurl:string;xseus:txseus;cookies:tstringlist;var sesfile:string);
 var
 sess:string;ocrit:boolean;
 begin
-  if ase=nil then exit;
+  if sestag=nil then exit;
    sess:=cookies.values['xseus_session'];
    if xseus.x_newcookie<>'' then
      sess:=xseus.x_newcookie;
    if sess='' then sess:=_randomstring;
       sesfile:=sesdir+g_ds+sess+'.htme';
 
-   sesurl:=copy(sesfile,
-     length(xseus.x_cgi.subs('document_root'))+1,
-     length(sesfile));
-      StringReplace(sesurl,'\','/',[rfreplaceall]);
+   //sesurl:=copy(sesfile,
+   //  length(xseus.x_cgi.subs('document_root'))+1,
+   //  length(sesfile));
+   //   StringReplace(sesurl,'\','/',[rfreplaceall]);
 
-    if fileexists(sesfile) then
+   if fileexists(sesfile) then
    begin
    try
-     ase.fromfile(sesfile,nil);
+     //tagfromfile(
+     ase:=sestag.fromfile(sesfile,nil);
      if (ase<>nil) and (ase.subtags.count>0) then
      begin
        ase:=ase.subtags[0];
@@ -5504,7 +5512,8 @@ begin
   _com('session:'+sesfile);
    exit;
  end;
-}
+ }
+
 function txseus.substitutex(st: string): string;
 begin
   Result := parsexse(st, self);
@@ -5581,7 +5590,7 @@ begin
   xtmp.setatt('urlpath', extractfilepath(iurl));
   xtmp.setatt('host', host);
   xtmp.setatt('handler', handler);
-  i := length(iurl);
+ // i := length(iurl);
   //while (i > 1) and (iurl[i] <> '/') do
   //  i := i - 1;
   //xtmp.setatt('urldir', copy(iurl, 1, i));
@@ -5629,15 +5638,15 @@ begin
       else
       begin
         //objn := _getpath(_mapurltofile(url, xseuscfg.subt('urlpaths')), '\');
-        objn := _mapurltofile(url, xseuscfg.subt('urlpaths'));
+        objn := _mapurltofile(url, g_xseuscfg.subt('urlpaths'));
         //writeln(objn,':=_getpath(',_mapurltofile(url,x_commands.subt('mappings')),url,'<hr/>');
       end;
       try
         if url = '' then
-          url := _mapfiletourl(objn, xseuscfg.subt('mappings'));
+          url := _mapfiletourl(objn, g_xseuscfg.subt('mappings'));
       except
         writeln('<li>mapfile error url:' + url + ' file: ' + objn);
-        listwrite(xseuscfg.subt('urlpaths'));
+        listwrite(g_xseuscfg.subt('urlpaths'));
       end;
     except
       writeln('<!--could not sel vals for callobject:' + objn + '-->');
@@ -5724,9 +5733,9 @@ begin
     end;
     try
       if acom.att('class') <> '' then
-        handlersn := _indirs(acom.att('class'), xseuscfg.apppaths)
+        handlersn := _indirs(acom.att('class'), g_xseuscfg.apppaths)
       else
-        handlersn := _indirs(x_data.att('class'), xseuscfg.apppaths);
+        handlersn := _indirs(x_data.att('class'), g_xseuscfg.apppaths);
       x_commandfile := handlersn;
       x_handlers := getxse(handlersn, x_elemlist);
       //writeln('aaaaaaaaxxxxxxx' + handlersn + '!');
@@ -5812,6 +5821,7 @@ begin
     else
       x_object := (ol.xml.subt('object'));
     xml.subtagsadd(x_object);
+
     if newob then
     begin
       x_form.setatt('create', objn);
@@ -5961,7 +5971,7 @@ begin
   end;
 end;
 
-function txseus.readxsi(cname: string):boolean;
+function txseus.readxsi(cname,handler: string):boolean;
 var   //handlersn: string;
   i: integer;
 
@@ -6004,6 +6014,7 @@ begin
       listwrite(x_handlers);
     end;
     //logwrite('hands:'+x_form.xmlis);
+    if handler<>'' then x_handlername:=handler else
     x_handlername := x_form.subs('handler');
     //logwrite('hands:'+x_handlername+'!'+x_form.xmlis);
     if x_handlername = '' then
@@ -6187,8 +6198,8 @@ function txseus.init(url, host, protocol: string; session: ttag; ser: pointer): 
   //form,uploads:tstringlist);
 var
   serv: tserving;
-  posi: integer;
-
+  posi,i: integer;
+  apust:string;
 begin
   try
     //logwrite('initing:'+url+'!'+host);
@@ -6213,19 +6224,21 @@ begin
     //posi:=pos('?',url);
     //if posi<1 then x_url:=url else x_url:=copy(url,1,posi-1);
     x_url := extractdelimited(1, url, ['?', '&']);
+    //logwrite('URL:'+x_url+'!!!'+xseuscfg.config.subt('urlpaths').xmlis);
+    logwrite('URL:'+x_url+'!!!'+_mapfiletourl(url,g_xseuscfg.config.subt('urlpaths')));
     x_host := host;
     x_protocol := protocol;
 
-    x_objectfile := _mapurltofile(x_url, xseuscfg.subt('urlpaths'));
-    x_hmackey := xseuscfg.subs('hmackey');
+    x_objectfile := _mapurltofile(x_url, g_xseuscfg.subt('urlpaths'));
+    x_hmackey := g_xseuscfg.subs('hmackey');
     {$ifdef windows}
     x_url:=_gsub('/',g_pathseparator,x_url);
     x_objectfile:=_gsub('/',g_pathseparator,x_objectfile);
     {$endif}
-     if not fileexists(x_objectfile) then
+    if not fileexists(x_objectfile) then
     begin
       writeln('<li>Fail: file', x_objectfile,' not found for url',x_url);
-      writeln('<pre>', xseuscfg.subt('urlpaths').xmlis,'</pre>');
+      writeln('<pre>', g_xseuscfg.subt('urlpaths').xmlis,'</pre>');
 
        exit;
     end;
@@ -6249,11 +6262,11 @@ begin
       except
         logwrite('failed read/parse data:' + x_objectfile +'!!!');
       end;
-      x_commandfile := _indirs(x_data.att('class'), xseuscfg.apppaths);
+      x_commandfile := _indirs(x_data.att('class'), g_xseuscfg.apppaths);
       //logwrite('calling class:'+x_commandfile);
       try
        //logwrite('read:'+x_data.att('class')+'ZZ'+X_DATA.XMLIS+'/X_DATA');
-        if not(readxsi(x_commandfile)) then result:=false else result:=true;
+        if not(readxsi(x_commandfile,'')) then result:=false else result:=true;
         //logwrite('faireadxsi:'+x_myhandler.xmlis);
       except
         logwrite('no handlers in:' + x_objectfile + ' not found in ' +
@@ -6267,7 +6280,7 @@ begin
       (pos('.xse', x_objectfile) > 0) then
     begin
       x_commandfile:=x_objectfile;
-      if not readxsi(x_objectfile) then result:=false else result:=true;
+      if not readxsi(x_objectfile,'') then result:=false else result:=true;
       //x_commands:=x_data;
       x_data := x_handlers.subt('data');
       x_handlers:=x_data.copytag;
@@ -6294,15 +6307,23 @@ begin
         exit;
       end;
     end;
+    //apust:=x_data.att('class');
+    //for i:=1 to length(apust) do if apust[i]=':' then break else x_classname:=x_classname+apust[i];
+    //WRITELN('<h1>class: '+classname+'</h1>');
     xml.vari := 'xseus';
     xml.subtagsadd(x_data);
     xml.subtagsadd(x_form);
+    //xml.subtagsadd(session);
     //xml.subtagsadd(x_cgi);
-    logwrite('xmlhan');
+    //logwrite('xmlhan');
     //xml.subtags.add(x_myhandler);
     //logwrite('getob');
     x_object := _getobjectdata(x_objectfile, x_url, x_host, x_handlername, nil, nil);
     xml.subtagsadd(x_object);
+    apust:=x_data.att('class');
+    for i:=1 to length(apust) do if apust[i]=':' then break else x_classname:=x_classname+apust[i];
+    x_object.setatt('app', x_classname);
+
     //logwrite('gotob'+x_object.xmlis);
     //!!!????    CurBYEle := x_myhandler.copytag;
         CurBYEle := x_myhandler;
@@ -6313,8 +6334,9 @@ begin
     curtemplates := nil;//curbyele;
     curtoele := nil;
     curfromele := xml;
-    //Result := True;
+    Result := True;
     //writeln('iniiniitED');
+    //result:=auth_checkauth(self);
 
   except
     logwrite('failed to init xseus');
@@ -6413,6 +6435,10 @@ begin
   Assign(output, 'nul');
 end;
 
+function txseus.c_login: boolean;
+begin
+  auth_login;
+end;
 
 function txseus.c_logout: boolean;
 {D: not functional at the moment
@@ -6427,267 +6453,22 @@ begin
 end;
 
 
-function txseus.c_login: boolean;
-{D: writes authorization data to session-tag (persistent data for a user-session over separate
-  xseus-tasks. Can only be used if "userdomains" are defined in xseus-ini.
-}
-var
-  apust: string;
-  j: integer;
-  aputag, acom, dom: ttag;
+
+function txseus.c_authorize: boolean;
 begin
-  dom := nil;
-  acom := CurBYEle;
-  apust := x_object.att('dir');
-  writeln('dir:' + apust);
-  //aputag := x_commands . subt ('userdomains/dir[@dir=' + apust + ']' ) ;
-  aputag := xseuscfg.subt('userdomains');
-  //if
-  //aputag = nil
-  //then
-  writeln('UD:<pre>', APUTAG.xmlis, '</pre>');
-  for  j := 0 to aputag.subtags.Count - 1 do
-    if ttag(aputag.subtags[j]).att('path') = apust then
-    begin
-      dom := aputag.subtags[j];
-      writeln('INI:<pre>', dom.xmlis, '</pre>');
-      break;
-    end;
-  if dom = nil then
-  begin
-    _h1('Unauthorized domain for login:' + x_object.att('dir') + ':');
-
-  end
-  else
-  begin
-    if x_session = nil then
-    begin
-      writeln('NO SESSION:');//<pre>',xx_session.xmlis,'</pre>');
-      exit;
-    end;
-    try
-      aputag := ttag.Create;
-      aputag.vari := 'login';
-      aputag.parent := x_session;
-      x_session.subtags.add(aputag);
-      aputag.setatt('name', acom.att('name'));
-      //x_session . attributes . values ['domain' ] := acom . att ('domain' ) ;
-      //writeln('NAMEsofarä');
-
-      aputag.setatt('domain', dom.att('name'));
-      //writeln('domainsofarä');
-      aputag.setatt('idi', acom.att('idi'));
-      //x_session . attributes . values ['saveas' ] := ses_dir + '\' + acom . att ('saveas' ) ;
-      aputag.setatt('ip', acom.att('ip'));
-    except
-
-      writeln('Failed to set session attributes' + x_session.xmlis);
-    end;
-    //x_session . attributes . values ['dir' ] := aputag . att ('dir' ) ;
-    //x_session . attributes . values ['domain' ] := aputag . att ('name' ) ;
-    //x_session . attributes . values ['type' ] := acom . att ('domain' ) ;
-        {if
-        acom . att ('element' ) <> ''
-        then
-        if
-        xml . subt ( acom . att ('element' ) ) <> nil
-        then
-        x_session . subtags := xml . subt ( acom . att ('element' ) ). subtags
-        ;}
-    //listwrite(x_session);
-       { if
-        acom . att ('saveas' ) <> ''
-        then
-        x_session . savetofile ( ses_dir + '\' + acom . att ('saveas' ) + '.htme' , true ,'' ,false )
-        ;
-       }
-  end;
+  result:=auth_authorize;
+  //writeln('xxxxxxxxxxxxxxxxxxxxxx');
 end;
 
-function _checkrights(outdiri, role, password, user: string; acom: ttag;
-  xml: ttag; xs: txseus): boolean;
-var
-  i, j: integer;
-  aputagi, oses: ttag;
-  pwok, onjo: boolean;
-  fn: string;
-
-  st, stold: string;
-  xpass, thepass, sestag: ttag;
-  oelems: TList;
-begin
-  try
-    try
-      oelems := xs.x_elemlist;
-      //              xs.elems:=nil;
-
-      //result:=true;
-      //listwrite(xs.x_session);
-      //exit;
-      Result := False;
-      //xpass := ttag.Create;
-      st := outdiri;
-      stold := '';
-      pwok := False;
-      fn := acom.att('file');
-      if fn = '' then
-        fn := 'luvat.htme';
-      while not pwok do
-      begin
-        try
-          stold := st;
-          st := extractfiledir(st);
-          if stold = st then
-            break;
-          //--if FileExistsUTF8(st+g_ds+fn) { *Converted from FileExists*  } then
-          if FileExists(st + g_ds + fn) { *Converted from FileExists*  } then
-          begin
-            _com('found ' + st);
-            //xpass.fromfile(st + g_ds + 'luvat.htme', nil);
-            xpass := tagfromfile(st + g_ds + 'luvat.htme', nil);
-          end
-          else
-            continue;
-          if (xpass = nil) or (xpass.subtags.Count = 0) then
-            continue;
-        except
-          writeln('<li>Problems with ' + st);
-          raise;
-        end;
-        thepass := xpass.subtags[0];
-        for i := 0 to thepass.subtags.Count - 1 do
-        begin
-          try
-            aputagi := ttag(thepass.subtags[i]);
-            //writeln('pass:'+password);
-            //listwrite(aputagi);
-            //if aputagi<>nil then
-            begin
-              if ((password = aputagi.att('pass')) and (password <> '')) or
-                ((user = aputagi.att('user')) and (user <> '')) then
-              begin
-                pwok := True;
-                sestag := ttag.Create;
-                sestag.vari := 'aukt';
-                sestag.setatt('dir', st + '');
-                //user:=aputagi.att('user');
-                sestag.setatt('user', user + '');
-                role := aputagi.att('role');
-                sestag.setatt('role', role);
-             {if ((password=aputagi.att('pass')) and (password<>'')) then
-             begin
-              writeln('HITpass:'+password);
-              sestag.attributes.add('P_'+password +'_=_'+aputagi.att('pass')+'_');
-               sestag.addsubtag('allow','' );
-               sestag.attributes.add( 'role='+aputagi.att('role'));
-               sestag.attributes.add( 'user='+aputagi.att('name'));
-               sestag.attributes.add( 'hui=hai');
-               //ttag(thepass.subtags[thepass.subtags.count-1]).attributes.text:=
-               //  'role='+role+crlf+'user='+user+'';
-               listwrite(sestag);
-              writeln('//HITpass:'+password);
-             end;}
-                onjo := False;
-                if xs.x_session = nil then
-                  exit;
-                if xs.x_session.subtags = nil then
-                  exit;
-                for j := 0 to xs.x_session.subtags.Count - 1 do
-                  if (ttag(xs.x_session.subtags[j]).att('dir') = st) and
-                    (ttag(xs.x_session.subtags[j]).att('role') = role) and
-                    (ttag(xs.x_session.subtags[j]).att('name') = user) then
-                    onjo := True;
-                if not onjo then
-                begin
-                  xs.x_elemlist := nil;
-                  if sestag <> nil then
-                    xs.x_session.subtags.add(sestag.copytag);
-                end;
-                if sestag <> nil then
-                  if xs.x_session.att('name') = '' then
-                    xs.x_session.setatt('name', sestag.att('user'));
-                // _h1('Passw ok for '+st+password+'='+aputagi.att('pass'));
-
-              end;
-            end;
-          except
-            writeln('<li>could not authenticate ' + st);
-            listwrite(xs.x_session);
-          end;
-        end;
-      end;
-      //               writeln('<li>pw:');
-      //     listwrite(xs.x_session);
-      Result := pwok;
-      //writeln('pwokpwpwpwpwp',result);
-      exit;
-
-   {
-   if pwok then
-     if xs.x_session.att('name')<>'' then
-      begin
-        try
-        oses:=ttag.create;
-        if fileexists(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr') then
-        oses.fromfile(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr',nil);
-     except writeln('<li>Could not read rights '+xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr');
-       end;
-        if oses.subtags.count>0 then oses:=oses.subtags[0];
-        if xs.x_session<>nil then if xs.x_session.subtags.count>0 then oses.subtagscopy(xs.x_session.subtags);
-        oses.att('ip']:=xs.x_session.att('ip');
-        oses.att('time']:=xs.x_session.att('date')+' '+xs.x_session.att('time');
-        oses.att('id']:=xs.x_session.att('id');
-        oses.savetofile(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr',false,'',false);
-         end;
-         }
-    except
-      writeln('<li>could not checkrights ' + st);
-    end;
-
-  finally
-    xs.x_elemlist := oelems;
-  end;
-
+function txseus.c_getauthorization: boolean;
+begin   //check if authorized
+  result:=auth_getauthorization;
 end;
 
-
-function txseus.c_checkrights: boolean;
-{D:    part of a set of tools for authentication (see: if test="rights", c_login, c_logout, etc.
-  -doc: later
-  -plan: rewrite if impossible to document
-}
-var
-  apust: string;
-  k: integer;
-  acom: ttag;
-
-begin
-  acom := CurBYEle;
-  apust := '';
-  if acom.att('forcepass') <> '' then
-    apust := acom.att('forcepass')
-  else
-    apust := X_FORM.subs('.//entryword');
-  //for k := x_form.subtags.Count - 1
-  //downto
-  //0 do
-  //if cut_ls([k]) = 'entryword' then
-  //  apust := cut_rs(ccall.fields[k]);
-  try
-
-    _checkrights(x_outdir, acom.att('role'), apust,
-      x_session.att('name'), acom, xml, self);
-
-    ;
-  except
-
-    _h1('nocheckr');
-
-  end;
+function txseus.c_readauthorization: boolean;
+begin  //check files for authorization
+  result:=auth_readauthorization;
 end;
-
-
-
 
 function txseus.c_function: boolean;
 {D: adds used-defined functions at run-time
@@ -7311,6 +7092,7 @@ function txseus.c_set: boolean;
           if acom.att('var') <> '' then
           begin
             vars.values[acom.att('var')]:=acom.vali;
+            //writeln('<li>setvar:', acom.att('var'),acom.vali);
           end
           else
           if acom.att('func') <> '' then
@@ -8538,19 +8320,22 @@ begin
   oldto := curtoele;
   CurToEle := aputag;
   dosubelements;
-  ttag(aputag.subtags[0]).saveeletofile(xseuscfg.subs('users') +
+  ttag(aputag.subtags[0]).saveeletofile(g_xseuscfg.subs('users') +
     CurBYEle.att('name') + '.usr', true, '','  ', False,false);
   Result := ok;
   aputag.killtree;
   curtoele := oldto;
 end;
 
+
 function txseus.c_listsession: boolean;
-{D: Adds an element to session tag, marking which htme-file is responsible the addition
+{D: lists the session tag,
     -usage: debugging.
+    - security: should apps be able to list what others have added to the session? (it's for the same user. shoulnot be problem)
 }
 begin
-  writeln('<pre>', x_session.xmlis, '</pre>');
+  //writeln('<pre>', x_session.xmlis, '</pre>');
+  curtoele.subtags.add(x_session.copytag);
 end;
 
 function txseus.c_session: boolean;
@@ -8558,44 +8343,9 @@ function txseus.c_session: boolean;
     -usage: could be very usefull, but currently probably not fuctioning properly
 }
 
-var
-  aputag, aputag2: ttag;
-  k: integer;
-  apui: integer;
-  apust: string;
-  ok: boolean;
-  acom: ttag;
-  oldto: Ttag;
-  at: ttag;
 begin
-  acom := CurBYEle;
-  if x_session <> nil then
-  begin
-    aputag := ttag.Create;
-    oldto := curtoele;
-    CurToEle := aputag;
-    dosubelements;
-    try
-      if aputag.subtags.Count = 0 then
-        listwrite(x_session)
-      else
-        for k := 0 to aputag.subtags.Count - 1 do
-        begin
-          at := ttag(aputag.subtags[k]).copytag;
-          x_session.subtags.add(at);
-          at.parent := x_session;
-          at.setatt('by', x_objectfile);
-          //ttag(aputag.subtags[k]).att('by']:=x_object.att('url');
-        end;
-      //writeln('Cookies;<xmp>', tserving(x_serving).cookies.Text, '<xmp>');
-      aputag.killtree;
-      curtoele := oldto;
-      writeln('<!--SESSION:'+x_session.xmlis+'-->');
-    finally //writeln('ENDOFSESSTAG');
-    end;
-  end;
+   result:=auth_session;
 end;
-
 
 function txseus.c_list: boolean;
 var xlist:tstringlist;apustag : ttag;

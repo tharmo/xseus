@@ -52,7 +52,7 @@ public
  function f_not: string;
  function f_and: string;
  function f_or: string;
-  function f_eq: string;
+ function f_eq: string;
   function f_ne: string;
   function f_gt: string;
   function f_lt: string;
@@ -62,6 +62,7 @@ public
   function f_isinline: string;
   function f_isblock: string;
   function f_isnamechar: string; //just tm debuggin
+  function f_value: string; //auts. eval? + concat?...
 
   //characters etc constants
     function f_amp: string;
@@ -255,7 +256,7 @@ type
     p1,p2,p3,p4:string;
   end;
  implementation
- uses xsemisc,xseexp,xsedif,lazutf8;
+ uses xsemisc,xseexp,xsedif,xseauth,lazutf8;
 
 function getdatetime(p_date:string):tdatetime;
  var formset:tformatsettings;adat:tdatetime;ast:string;
@@ -503,6 +504,25 @@ end;
     end;
 
   end;
+ function tfunc.f_value: string;  //gets umbered item .. with trailing separator (ie. item 0 is ignored)
+  var items,no:integer; st,sep:string;
+   stl:tstringlist;
+  begin
+    st:=pars[0];
+    no:=strtointdef(pars[1],1);
+     if pars.count>2 then sep:=pars[2] else if st<>'' then sep:=st[length(st)] else sep:=',';
+    try
+    stl:=tstringlist.create;
+    items:=_split(st,sep,stl);
+    if items<no then result:=''
+     else result:=stl[no-1];
+    //for i:=i to length(st) do
+    finally
+      //writeln('<li>sep:'+sep+'_'+ stl.count);
+      stl.free;
+    end;
+
+  end;
 function tfunc.f_parsemdinlines:string;
 begin
   //result:=md2xml(pars[0]);
@@ -554,7 +574,7 @@ begin
      stl.free;
    end;
  end;
- function tfunc.f_itemadd: string;  //add to item named
+ function tfunc.f_itemadd: string;  //add to item number <par2>
  var I,items,no,toadd:integer; st,sep:string;
   stl:tstringlist;
  begin
@@ -1187,6 +1207,27 @@ end;
      //writeln('<li>EQ?<code>/x1:',x1, '/x2:',x2, '/res:',result+'</code></li>');
    end;
   end;
+ {function tfunc.f_eqtest:string;   old debug code
+  var x1,x2,test:string;  i:integer;
+   begin
+  // writeln('<li>EQUALS: ','!',pars.text,'/',pars.count,'</li>');
+   if pars.count<2 then result:='=' else
+   begin
+     x1:=pars[0];
+     x2:=pars[1];
+     if x1=x2 then result:='1' else result:='0';
+     if(pos('En kaipaa',x1)>0) and (pos('En kaipaa',x2)>0) then
+     if result='0' then
+     begin
+       writeln('<li><code>/x1:',x1, '/x2:',x2, '/res:',result,'</code>');
+      for i:=0 to length(x1) do
+        if i>length(x2) then write('!nox2',ord(x1[i])) else
+        if x1[i]<>x2[i] then
+        writeln('[',x1[i],ord(x1[i]),'-',x2[i],ord(x2[2]),']');
+      writeln('</li>');
+     end;
+   end;
+  end;}
  function tfunc.f_ne:string;
   var x1,x2,test:string;
    begin

@@ -177,6 +177,7 @@ var
   g_threadpoolcriti,g_sesscriti,g_logscriti:trtlcriticalsection;
  // g_objectcache: TStringList;
   g_locks:tlocs;
+  //xseuscfg: txseusconfig;
   g_xseuscfg:txseusconfig;
   {$IFNDEF LAZARUS}//logstream: tfilestream;
     {$ENDIF}
@@ -792,6 +793,7 @@ begin
   xpermissions := config.subt('permission');
   //logwrite('iniii;' + config.xmlis);
   apppaths := config.subt('apppaths');
+  //urlpaths := config.subt('urlpaths');
   //logwrite('application paths INDIR:' + apppaths.xmlis);
   //logwrite('page paths:'+xseuscfg.subt('urlpaths').xmlis);
   smtpindir := config.subs('//smtp/@indir');

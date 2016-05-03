@@ -8,6 +8,135 @@ uses
   Classes, SysUtils;
 
 implementation
+function _oldindir(target,srcdir:string;testallow:boolean;xs:tobject):string;
+//NEEDS RETHINKING AND REWRITING
+var targdir,tfile,trest,srest:string;haveright:boolean;//adir:tdirectoryinfo;
+     begin
+  try
+      if pos('http://',target)=1 then
+      begin
+        result:=target;exit;
+      end;
+     result:='INVALIDFILENAME?\'+target;
+     if AnsiContainsText(target,'>') then exit;
+     if AnsiContainsText(target,'|') then exit;
+     if AnsiContainsText(target,'<') then exit;
+     testallow:=false;
+     target:=ansilowercase(target);
+     targdir:=extractfiledir(target);//+g_ds;
+     //if (targdir='\') or
+     if (targdir='\\') then targdir:=g_ds;
+     tfile:=extractfilename(target);
+     //     writeln('indir ?: '+target+'/srcdir:'+srcdir+'/targdir:'+targdir+'/filename:'+tfile);
+     {       writeln('commonpath ?: <li>'+target,
+            '<li> from '+srcdir+'<li> common:'
+        ,_matchhead(target,srcdir,trest,srest),
+        '<li> tailtarg:',trest,
+        ' <li>srest:',srest);
+       writeln('<li> tailtarg:',trest,' <li>srest:',srest);
+     }
+     if targdir='' then
+      targdir:=srcdir else
+     targdir:=_relpath(targdir,srcdir)+g_ds;
+      //    writeln('reldir ?: '+targdir);
+   //  targdir:=StringReplace(targdir,'|','',[rfreplaceall]);
+   //  targdir:=StringReplace(targdir,'>','',[rfreplaceall]);
+
+      srcdir:=ansilowercase(srcdir);
+      if testallow or (pos(srcdir,targdir)=1) then
+      begin
+       result:=targdir+''+tfile;
+       //writeln('indir ok: '+targdir+' from '+srcdir+'='+result);
+       exit;
+      end;
+      //getdirectoryparent(targdir);
+
+      if testallow=testallow then
+        begin
+          haveright:=_haveright(targdir,srcdir,'r',txseus(xs));
+          if haveright then
+          begin
+            result:=targdir+''+tfile;exit;
+          end;
+          if (fileupexists(targdir,'.xseusallow')) then
+          begin
+            result:=targdir+''+tfile;
+            exit;
+          end
+           else
+          begin
+            writeln('Forbidden: no permission for: '+targdir+'.xseusallow in '+srcdir);
+            exit;
+          end;
+        end;
+      finally
+         //   writeln('indir: '+targdir+' from '+srcdir+'='+result);
+      end
+end;
+
+{
+//function _text2html(txt:tstringlist;acom,xform:ttag):tstringlist;
+procedure _text2html(var res:tstringlist;txt:tstringlist;acom,xform:ttag);
+var cv:tconverter;opts:ttag;
+begin
+  cv:=tconverter.create;
+  cv.inst:=txt;
+
+    cv._debug:=false;if acom.att('doh')<>'' then cv.op.doh:=true;
+  if acom.att('dop')<>'' then cv.op.dop:=true;
+  if acom.att('dou')<>'' then cv.op.dourls:=true;
+  if acom.att('dot')<>'' then cv.op.dotabs:=true;
+  if acom.att('doexl')<>'' then cv.op.doexl:=true;
+  if acom.att('dom')<>'' then cv.op.domail:=true;
+  if acom.att('dol')<>'' then cv.op.dolist:=true;
+  if acom.att('h1')<>'' then cv.op.h1:=acom.att('h1');
+  if acom.att('h2')<>'' then cv.op.h2:=acom.att('h2');
+  if acom.att('h3')<>'' then cv.op.h3:=acom.att('h3');
+  if acom.att('empties')<>'' then cv.op.empties:=true;
+  if acom.att('dots')<>'' then
+  begin
+   _h1('dots');
+   cv.op.dots:=true;
+  end;
+  cv.op.hlev:=strtointdef(acom.att('hlev'),0);
+opts:=acom.subt('formoptions');
+ if opts<>nil then
+begin
+ if opts.att('doh')<>'' then cv.op.doh:=true;
+ if opts.att('dop')<>'' then cv.op.dop:=true;
+ if opts.att('dol')<>'' then cv.op.dolist:=true;
+ if opts.att('dot')<>'' then cv.op.dotabs:=true;
+ if opts.att('dots')<>'' then cv.op.dots:=true;
+ if opts.att('doexl')<>'' then cv.op.doexl:=true;
+ if opts.att('empties')<>'' then cv.op.empties:=true;
+ if opts.att('dou')<>'' then cv.op.dourls:=true;
+ if opts.att('dom')<>'' then cv.op.domail:=true;
+  if opts.att('h1')<>'' then cv.op.h1:=opts.att('h1');
+  if opts.att('h2')<>'' then cv.op.h2:=opts.att('h2');
+  if opts.att('h3')<>'' then cv.op.h3:=opts.att('h3');
+  cv.op.hlev:=strtointdef(opts.att('hlev'),0);
+
+end;
+
+
+
+cv.op.heads:=false;
+cv.op.accepthtml:=true;
+
+cv.makehtml;
+
+//result:=tstringlist.create;
+//result.addstrings(cv.outst);
+res.addstrings(cv.outst);
+
+cv.op.free;
+
+cv.outst.free;
+//cv.inst.free;
+//exit;
+ cv.free;
+end;
+}
 
    function txseus.c_todb:boolean;
 var qq:tsqlquery;//vals:array [1..3] of const;
