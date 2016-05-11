@@ -6,21 +6,29 @@ interface
 
 uses
   Classes, SysUtils,xsemisc,xsexml,xseglob;
+function auth_report:boolean;
+//debugging, see what we have
+
 function auth_login: boolean;
-function _getauthtag(sestag,authtag:ttag;diri,fil:string):ttag;
-function _testrights(session:ttag;dir,role,by:string):boolean;
-function _authorizebyentryword(outdiri:string;acom: ttag):string;
-function _authorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
-function _authenticate(sestag,authtag:ttag;diri,fil:string):ttag;
-function _haveright(todir,fromdir,rig:string;xs:tobject):boolean;
-function _ataghaveright(rigtag:ttag;fromdir,todir,rig:string):boolean;
+// writes a default format line to session-element (tat is preserved - saved in global server space - between http-calls
+
 function auth_checkauth(xsp:pointer):boolean;
 function auth_getauthorization:boolean;
 function auth_readauthorization:boolean;
 function auth_authorize:boolean;
 function auth_session:boolean;
+function _ataghaveright(rigtag:ttag;fromdir,todir,rig:string):boolean;
+function _testrights(session:ttag;dir,role,by:string):boolean;
+// checks if current session has authorization _role_ in _dir_ .. old, not tested, perhaps unnecessary
+
+{function _haveright(todir,fromdir,rig:string;xs:tobject):boolean;
+function _authorizebyentryword(outdiri:string;acom: ttag):string;
+//old, not tested, perhaps not needed - easy to write in xseus-script
+function _authorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
+ }
 
 
+// OPENID Client  .. not tested recently
 type toid = class(tobject)
 assoc_handle,claimed_id,identity,mode,ns, oauth,realm,return_to,trust_root,signed,nonce:string;
 procedure populate;
@@ -33,6 +41,47 @@ function check_auth(url:string;params:ttag):ttag;
 end;
 implementation
 uses xsexse,xserver;
+
+function auth_report:boolean;
+ var xs:txseus;acom,aputag,at,oldto,ses,log,alog:ttag;i,slaspos:integer;done:boolean;
+   fname,fromfile:string;
+ begin
+  xs:= txseus(t_currentxseus);
+  ses:=xs.x_session;
+  acom:=xs.CurBYEle;
+  if ses=nil then
+  begin writeln('<li>NO SESSION, NO RIGHTS TO ANYTHING. Try reloading</li>');exit
+  end;
+  log:=ses.subt('login');
+  if log=nil then
+  begin writeln('<li>NO Login, NO RIGHTS TO ANYTHING. </li>');
+    //find all login.htmi's upstream
+    fname:=acom.att('file');
+    if fname='' then fname:='login.htmi';
+
+    //fromdir:=copy(xs.x_url,1,slaspos);
+    fromfile:=_mapurltofile(xs.x_url,g_xseuscfg.subt('urlpaths'));
+    slaspos:=_poslast(g_ds,fromfile)-1;
+    while slaspos>0 do
+    begin
+      fromfile:=copy(fromfile,1,slaspos);
+      writeln('<li>fromdir:'+fromfile,slaspos);
+      if fileexists(fromfile+g_ds+fname) then
+      begin
+       alog:=tagfromfile(fromfile+g_ds+fname,nil);
+        writeln('from:<xmp>'+alog.xmlis+'</xmp>'+fromfile);
+
+
+      end;
+      slaspos:=_poslast(g_ds,fromfile)-1;
+
+    end;
+  end;
+
+
+
+end;
+
 function auth_session:boolean;
 var xs:txseus;acom,aputag,at,oldto:ttag;i:integer;
 begin
@@ -65,18 +114,28 @@ begin
   end;
 end;
 function auth_readauthorization:boolean;
-var fromdir,fromfile:string;xs:txseus;acom:ttag;
+var fromdir,fname,fromfile:string;xs:txseus;acom,alog:ttag;
 begin
  xs:= txseus(t_currentxseus);
  acom := xs.CurBYEle;
- fromfile:=acom.att('file');
- if fromfile='' then fromfile:='login.htmi';
+ fname:=acom.att('file');
+ if fname='' then fname:='login.htmi';
  fromdir:=copy(xs.x_url,1,_poslast(g_ds,xs.x_url)-1);
- writeln('<li>from:'+_mapurltofile(fromdir+g_ds+fromfile,g_xseuscfg.subt('urlpaths')));
+
+ fromfile:=_mapurltofile(fromdir+g_ds+fname,g_xseuscfg.subt('urlpaths'));
+ writeln('<li>from:'+fromfile);
  while pos(g_ds,fromdir)>0 do
  begin
    fromdir:=copy(fromdir,1,_poslast(g_ds,fromdir)-1);
-   writeln('<li>from:'+_mapurltofile(fromdir+g_ds+fromfile,g_xseuscfg.subt('urlpaths')));
+   fromfile:=_mapurltofile(fromdir+g_ds+fname,g_xseuscfg.subt('urlpaths'));
+   writeln('<li>from:'+fromdir+'                    <li>file:'+fromfile);
+   if fileexists(fromfile) then
+   begin
+    alog:=tagfromfile(fromfile,nil);
+     writeln('from:<xmp>'+alog.xmlis+'</xmp>'+fromfile);
+
+
+   end;
 
  end;
 end;
@@ -201,7 +260,7 @@ var
   xs:txseus;
 begin
  xs:= txseus(t_currentxseus);
-  res:=_authenticate(xs.x_session,xs.curbyele,xs.x_outdir,'xseus.htmi');
+  //res:=_authenticate(xs.x_session,xs.curbyele,xs.x_outdir,'xseus.htmi');
   //writeln('<hr/><xmp>'+res.xmlis+'<xmp>');
   if res<>nil then xs.curtoele.subtags.add(res);
   //if res<>nil then curtoele.subtags.add(res.copytag);
@@ -220,8 +279,8 @@ begin
   //  apust := cut_rs(ccall.fields[k]);
   try
 
-    _authorizebyuser(xs.x_outdir, acom.att('role'), apust,
-      xs.x_session.att('name'), acom, xs.xml, xs.x_session);
+    //_authorizebyuser(xs.x_outdir, acom.att('role'), apust,
+    //  xs.x_session.att('name'), acom, xs.xml, xs.x_session);
 
     ;
   except
@@ -232,171 +291,7 @@ begin
 end;
 
 
-function _getauthtag(sestag,authtag:ttag;diri,fil:string):ttag;
-var done:boolean;   tries:integer;authf:string;
-begin
-  result:=nil;
-  authf:=_fileup(diri,fil);
-  //writeln('<li>afile:'+authf);
-  if  authf='' then exit;
-  result:=tagfromfile(authf+fil,nil);
-end;
-function _authenticate(sestag,authtag:ttag;diri,fil:string):ttag;
-var done:boolean;   tries:integer;authf:string;
-begin
-  result:=nil;
-  authf:=_fileup(diri,fil);
-  //writeln('<li>afile:'+authf);
-  if  authf='' then exit;
-  result:=tagfromfile(authf+fil,nil);
-end;
 
-function _authorizebyentryword(outdiri:string;acom: ttag):string;
-begin
-end;
-
-function _authorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
-begin
-
-end;
-
-function _oldauthorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
-var
-  i, j: integer;
-  aputagi, oses: ttag;
-  pwok, onjo: boolean;
-  fn: string;
-
-  st, stold: string;
-  authtag,xpass, thepass:ttag;
-  oelems: TList;
-begin
-  try
-    try
-      Result := False;
-      //xpass := ttag.Create;
-      st := outdiri;
-      stold := '';
-      pwok := False;
-      fn := acom.att('file');
-      if fn = '' then
-        fn := 'xseus.htmi';
-      while not pwok do
-      begin
-        try
-          stold := st;
-          st := extractfiledir(st);
-          if stold = st then
-            break;
-          //--if FileExistsUTF8(st+g_ds+fn) { *Converted from FileExists*  } then
-          if FileExists(st + g_ds + fn) { *Converted from FileExists*  } then
-          begin
-            //_com('found ' + st);
-            //xpass.fromfile(st + g_ds + 'luvat.htme', nil);
-            xpass := tagfromfile(st + g_ds + 'xseus.htmi', nil);
-          end
-          else
-            continue;
-          if (xpass = nil) or (xpass.subtags.Count = 0) then
-            continue;
-        except
-          writeln('<li>Problems with ' + st);
-          raise;
-        end;
-        thepass := xpass.subtags[0];
-        for i := 0 to thepass.subtags.Count - 1 do
-        begin
-          try
-            aputagi := ttag(thepass.subtags[i]);
-            //writeln('pass:'+password);
-            //listwrite(aputagi);
-            //if aputagi<>nil then
-            begin
-              if ((password = aputagi.att('pass')) and (password <> '')) or
-                ((user = aputagi.att('user')) and (user <> '')) then
-              begin
-                pwok := True;
-                authtag := ttag.Create;
-                authtag.vari := 'aukt';
-                authtag.setatt('dir', st + '');
-                //user:=aputagi.att('user');
-                authtag.setatt('user', user + '');
-                role := aputagi.att('role');
-                authtag.setatt('role', role);
-                         {if ((password=aputagi.att('pass')) and (password<>'')) then
-                         begin
-                          writeln('HITpass:'+password);
-                          sestag.attributes.add('P_'+password +'_=_'+aputagi.att('pass')+'_');
-                           sestag.addsubtag('allow','' );
-                           sestag.attributes.add( 'role='+aputagi.att('role'));
-                           sestag.attributes.add( 'user='+aputagi.att('name'));
-                           sestag.attributes.add( 'hui=hai');
-                           //ttag(thepass.subtags[thepass.subtags.count-1]).attributes.text:=
-                           //  'role='+role+crlf+'user='+user+'';
-                           listwrite(sestag);
-                          writeln('//HITpass:'+password);
-                         end;}
-                onjo := False;
-                if authtag = nil then
-                  exit;
-                //for j := 0 to xs.x_session.subtags.Count - 1 do
-                for j := 0 to sestag.subtags.Count - 1 do
-                  if (ttag(sestag.subtags[j]).att('dir') = st) and
-                    (ttag(sestag.subtags[j]).att('role') = role) and
-                    (ttag(sestag.subtags[j]).att('name') = user) then
-                    onjo := True;
-                if not onjo then
-                begin
-                  if authtag <> nil then
-                  sestag.subtags.add(authtag);
-                  //sestag.subtags.add(authtag.copytag);
-                end;
-                if sestag <> nil then
-                  if sestag.att('name') = '' then
-                    sestag.setatt('name', sestag.att('user'));
-                // _h1('Passw ok for '+st+password+'='+aputagi.att('pass'));
-
-              end;
-            end;
-          except
-            writeln('<li>could not authenticate ' + st);
-            //listwrite(xs.x_session);
-          end;
-        end;
-      end;
-      //               writeln('<li>pw:');
-      //     listwrite(xs.x_session);
-      Result := pwok;
-      //writeln('pwokpwpwpwpwp',result);
-      exit;
-
-   {
-   if pwok then
-     if xs.x_session.att('name')<>'' then
-      begin
-        try
-        oses:=ttag.create;
-        if fileexists(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr') then
-        oses.fromfile(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr',nil);
-     except writeln('<li>Could not read rights '+xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr');
-       end;
-        if oses.subtags.count>0 then oses:=oses.subtags[0];
-        if xs.x_session<>nil then if xs.x_session.subtags.count>0 then oses.subtagscopy(xs.x_session.subtags);
-        oses.att('ip']:=xs.x_session.att('ip');
-        oses.att('time']:=xs.x_session.att('date')+' '+xs.x_session.att('time');
-        oses.att('id']:=xs.x_session.att('id');
-        oses.savetofile(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr',false,'',false);
-         end;
-         }
-    except
-      writeln('<li>could not checkrights ' + st);
-    end;
-
-  finally
-    //xs.x_elemlist := oelems;
-  end;
-
-end;
 
 function _testrights(session:ttag;dir,role,by:string):boolean;
 var i:integer;aputag:ttag;
@@ -769,5 +664,151 @@ begin
       aputag.setatt('ip', ses.subs('ip'));
     except    writeln('Failed to set session attributes' + xs.x_session.xmlis);   end;
   end;
+end;
+function _authorizebyentryword(outdiri:string;acom: ttag):string;
+begin
+end;
+
+function _authorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
+begin
+
+end;
+
+function _oldauthorizebyuser(outdiri, role, password, user: string; acom: ttag;  xml: ttag; sestag:ttag): boolean;
+var
+  i, j: integer;
+  aputagi, oses: ttag;
+  pwok, onjo: boolean;
+  fn: string;
+
+  st, stold: string;
+  authtag,xpass, thepass:ttag;
+  oelems: TList;
+begin
+  try
+    try
+      Result := False;
+      //xpass := ttag.Create;
+      st := outdiri;
+      stold := '';
+      pwok := False;
+      fn := acom.att('file');
+      if fn = '' then
+        fn := 'xseus.htmi';
+      while not pwok do
+      begin
+        try
+          stold := st;
+          st := extractfiledir(st);
+          if stold = st then
+            break;
+          //--if FileExistsUTF8(st+g_ds+fn) { *Converted from FileExists*  } then
+          if FileExists(st + g_ds + fn) { *Converted from FileExists*  } then
+          begin
+            //_com('found ' + st);
+            //xpass.fromfile(st + g_ds + 'luvat.htme', nil);
+            xpass := tagfromfile(st + g_ds + 'xseus.htmi', nil);
+          end
+          else
+            continue;
+          if (xpass = nil) or (xpass.subtags.Count = 0) then
+            continue;
+        except
+          writeln('<li>Problems with ' + st);
+          raise;
+        end;
+        thepass := xpass.subtags[0];
+        for i := 0 to thepass.subtags.Count - 1 do
+        begin
+          try
+            aputagi := ttag(thepass.subtags[i]);
+            //writeln('pass:'+password);
+            //listwrite(aputagi);
+            //if aputagi<>nil then
+            begin
+              if ((password = aputagi.att('pass')) and (password <> '')) or
+                ((user = aputagi.att('user')) and (user <> '')) then
+              begin
+                pwok := True;
+                authtag := ttag.Create;
+                authtag.vari := 'aukt';
+                authtag.setatt('dir', st + '');
+                //user:=aputagi.att('user');
+                authtag.setatt('user', user + '');
+                role := aputagi.att('role');
+                authtag.setatt('role', role);
+                         {if ((password=aputagi.att('pass')) and (password<>'')) then
+                         begin
+                          writeln('HITpass:'+password);
+                          sestag.attributes.add('P_'+password +'_=_'+aputagi.att('pass')+'_');
+                           sestag.addsubtag('allow','' );
+                           sestag.attributes.add( 'role='+aputagi.att('role'));
+                           sestag.attributes.add( 'user='+aputagi.att('name'));
+                           sestag.attributes.add( 'hui=hai');
+                           //ttag(thepass.subtags[thepass.subtags.count-1]).attributes.text:=
+                           //  'role='+role+crlf+'user='+user+'';
+                           listwrite(sestag);
+                          writeln('//HITpass:'+password);
+                         end;}
+                onjo := False;
+                if authtag = nil then
+                  exit;
+                //for j := 0 to xs.x_session.subtags.Count - 1 do
+                for j := 0 to sestag.subtags.Count - 1 do
+                  if (ttag(sestag.subtags[j]).att('dir') = st) and
+                    (ttag(sestag.subtags[j]).att('role') = role) and
+                    (ttag(sestag.subtags[j]).att('name') = user) then
+                    onjo := True;
+                if not onjo then
+                begin
+                  if authtag <> nil then
+                  sestag.subtags.add(authtag);
+                  //sestag.subtags.add(authtag.copytag);
+                end;
+                if sestag <> nil then
+                  if sestag.att('name') = '' then
+                    sestag.setatt('name', sestag.att('user'));
+                // _h1('Passw ok for '+st+password+'='+aputagi.att('pass'));
+
+              end;
+            end;
+          except
+            writeln('<li>could not authenticate ' + st);
+            //listwrite(xs.x_session);
+          end;
+        end;
+      end;
+      //               writeln('<li>pw:');
+      //     listwrite(xs.x_session);
+      Result := pwok;
+      //writeln('pwokpwpwpwpwp',result);
+      exit;
+
+   {
+   if pwok then
+     if xs.x_session.att('name')<>'' then
+      begin
+        try
+        oses:=ttag.create;
+        if fileexists(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr') then
+        oses.fromfile(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr',nil);
+     except writeln('<li>Could not read rights '+xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr');
+       end;
+        if oses.subtags.count>0 then oses:=oses.subtags[0];
+        if xs.x_session<>nil then if xs.x_session.subtags.count>0 then oses.subtagscopy(xs.x_session.subtags);
+        oses.att('ip']:=xs.x_session.att('ip');
+        oses.att('time']:=xs.x_session.att('date')+' '+xs.x_session.att('time');
+        oses.att('id']:=xs.x_session.att('id');
+        oses.savetofile(xs.x_session.att('dir')+g_ds+xs.x_session.att('name')+'.usr',false,'',false);
+         end;
+         }
+    except
+      writeln('<li>could not checkrights ' + st);
+    end;
+
+  finally
+    //xs.x_elemlist := oelems;
+  end;
+
 end;
 

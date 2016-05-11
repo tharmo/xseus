@@ -31,7 +31,8 @@ uses
   //xsesta,
   xseglob,
   //xsecgi,
-  xsemuu,
+  //xsemuu,
+  xseconv,
   xsexml, Math,
   variants,
   xsedif, xsedb;
@@ -6467,7 +6468,8 @@ end;
 
 function txseus.c_readauthorization: boolean;
 begin  //check files for authorization
-  result:=auth_readauthorization;
+  result:=auth_report;//readauthorization;
+  //result:=auth_readauthorization;
 end;
 
 function txseus.c_function: boolean;
@@ -7691,7 +7693,8 @@ var
   src: string;
 begin
   src := CurBYEle.att('src');
-  resuadd(_json(src));
+  //resuadd(_json(src));
+  _json(src,curtoele);
 
 end;
 

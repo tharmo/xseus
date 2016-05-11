@@ -40,9 +40,6 @@ procedure _testmem(tname:string);
 function _gsub(what,towhat:string;var inwhat:string):string;
 procedure _sub(what,towhat:string;var inwhat:string);
 function StreamToString(aStream: TStream;sta,siz:integer): string;
-function _listjson(ftag:ttag):ttag;
-function _json(src:string):ttag;
-function _ical(src:string):ttag;
 function _getnum(var n:integer;st:string):boolean;
 function _fileup(diri,fil:string):string;
 {function _getauthtag(sestag,authtag:ttag;diri,fil:string):ttag;
@@ -402,14 +399,16 @@ function _httpsget(urli:string;wait:integer;acomatts:tstringlist):string;
   HTTP := THTTPSend.Create;
   //http.Sock.SSL.OnVerifyCert:=mytestmethod; this did not get called
   HTTP.Protocol:='1.1' ;
+  HTTP.KeepAlive:=True;
   //Http.Sock.CreateWithSSL(TSSLOpenSSL);
   Http.Sock.SSL.CertificateFile:='/home/t/xseus/cert.pem';
   Http.Sock.SSL.PrivatekeyFile:='/home/t/xseus/key.pem';
-  HTTP.Sock.SSL.VerifyCert:=true;
+  HTTP.Sock.SSL.VerifyCert:=false;
   HTTP.Sock.SSL.CertCAFile:='/home/t/xseus/cacert.pem';
+  HTTP.Sock.SSL.SSLType:=LT_all;
   //HTTP.Sock.SSL.OnVerifyCert:=VerifyCert;
   //HTTP.Sock.SSL.CertCAFile:='/home/t/xseus/cert.pem';
-  Http.Sock.SSLDoConnect;
+ //!! Http.Sock.SSLDoConnect;
          //https://developer.mozilla.org/en-US/docs/Web/HTML/Block-level_elements         //if http.sock.lasterror=SSL_ERROR_ZERO_RETURN then
 
   //urli:=  'https://www.openssl.org/';
@@ -1562,7 +1561,7 @@ var i,len,alen:integer;
 begin
     len:=length(whole);
     alen:=length(part);
-    result:=-99;
+    result:=0;
     for i:=len downto 1 do
     if (whole[i]=part[1])
       and (copy(whole,i, alen)=part)
@@ -3283,308 +3282,7 @@ end;
 
 
 
-type tjson=class(tobject)
-   //-- added public
-public
 
- src:string;resu:string;
-  curpos,stpos,epos,len:integer;
- function getstring:string;
- function getlist(vari:string):ttag;
- function getobjects(basetag:ttag;liststring:string):boolean;
- constructor create(sr:string);
-end;
-
-function tjson.getobjects(basetag:ttag;liststring:string):boolean;
-var ch:char;start,hasvali,hasvari,inlist:boolean;restag:ttag;ast,listvari:string;
-begin
-try
- restag:=ttag.create;
- basetag.subtags.Add(restag);
-   restag.parent:=basetag;
- restag.vari:=liststring;
- inlist:=false;
-  if liststring<>''  then
-   inlist:=true;
- hasvari:=inlist;
- while  (curpos<len) do
- begin
-   curpos:=curpos+1;
-   ch:=(src[curpos]);
-   try
-   if ch='"' then
-   begin
-     ast:=getstring;
-     if hasvari then
-     begin
-       restag.vali:=ast;
-     end
-     else
-     begin
-         restag.vari:=ast;
-         hasvari:=true;
-     end;
-   end
-   else
-   if ch='}' then exit else
-   if ch='{' then
-   begin
-    getobjects(restag,'')
-   end else
-   if ch=',' then
-   begin
-     restag:=ttag.create;
-     basetag.subtags.add(restag);
-     restag.parent:=basetag;
-     if hasvari then restag.vari:=liststring;
-     if not inlist then hasvari:=false;
-   end else
-   if ch='[' then
-   begin
-     basetag.subtags.delete(basetag.subtags.Count-1);
-     getobjects(basetag,restag.vari);
-   end else
-   if ch=']' then
-   begin
-       exit
-   end;// else igmored chars, whitespace etc
-   except writeln('faileddojsonele'+ch);
-
-   end;
- end;
-finally
-end;
-end;
-
-
-function tjson.getstring:string;
-var ch,nch:char;
-begin
- result:='';
- curpos:=curpos+1;
- repeat
-       ch:=src[curpos];
-       if ch='"' then exit;
-       if ch='\' then
-       begin
-          nch:=src[curpos+1];
-          curpos:=curpos+2;
-          case nch of
-           '"':result:='"';
-           '\':result:=result+'\';
-           '/':result:=result+'/';
-           'f':result:=^J;
-           'n':result:=result+crlf;
-           'r':result:=^M;
-           't':result:=^I;
-           'b':result:=^H;
-           else curpos:=curpos-1;
-          end;
-       end
-       else
-       begin
-          result:=result+src[curpos];
-          curpos:=curpos+1;
-       end;
-   until curpos>len;
-
-end;
-function tjson.getlist(vari:string):ttag;
-begin
-end;
-
-constructor tjson.create(sr:string);
-begin
- src:=sr;
- curpos:=1;
- len:=length(src);
-end;
-
-function _json(src:string):ttag;
-var js:tjson;i,j:integer;basetag:ttag;
-begin
-  js:=tjson.create(src);
-  //writeln('jiisoni:<xmp>'+src+'</xmp>');
-  while (js.src[js.curpos]<>'{') and (js.curpos<js.len) do
-   js.curpos:=js.curpos+1;
-   result:=ttag.create;
-   js.getobjects(result,'');
-   result:=result.subtags[0];
-end;
-
-function _listjson(ftag:ttag):ttag;
-var js:tjson;i,j:integer;basetag:ttag;
-begin
-
-end;
-
-type tical=class(tobject)
- //-- added public
-public
- //src:string;resu:string;
- icsrc:tstringlist;
- basetag:ttag;curline:integer;
- function getstring:string;
- function getlist(vari:string):ttag;
-function getline(var curst:integer;par:ttag;ast:string):ttag;
- constructor create(sr:string);
-  private
-    function getlines(par:ttag): ttag;
-end;
-
-function tical.getline(var curst:integer;par:ttag;ast:string):ttag;
-var ch:char;start,hasvali,hasvari,inlist:boolean;restag:ttag;aaast,listvari:string;
-  len,curpos,stpos,epos:integer;
-  function getvar:string;
-  begin
-    result:='';
-     while  (curpos<len) do
-     begin  //getvar
-       ch:=ast[curpos];
-       if pos(ch,';: ')>0 then break;
-       result:=result+ch;
-       curpos:=curpos+1;
-     end;
-  end;
-  function getpar:string;
-  var inquote:boolean;
-  begin
-    inquote:=false;
-    result:='';
-    curpos:=curpos+1;
-     while  (curpos<len) do
-     begin  //getvar
-       ch:=ast[curpos];
-       if ch='"' then inquote:=not inquote else
-       if not inquote then
-        if pos(ch,';:')>0 then break;
-       result:=result+ch;
-       curpos:=curpos+1;
-     end;
-  end;
-begin
-try
- //ast:=icsrc[curst];
- restag:=ttag.create;
- result:=restag;
- len:=length(ast);
- curpos:=1;
- restag.vari:=getvar;
- while (curpos<len) and (ch=';') do
- begin
-  restag.setatt(cut_ls(getpar),cut_rs(getpar));
- end;
- restag.vali:=copy(ast,curpos+1,99999);
-   except
-    writeln('failedical:'+ast,curpos);
-   end;
-
-   end;
-
-function tical.getlines(par:ttag):ttag;
-var gottag,prevtag:ttag;
-begin
-  while curline< icsrc.Count  do
-  begin
-   //writeln('<li>',curline,icsrc.strings[curline]+'/X</li>');
-   gottag:=getline(curline,par,icsrc[curline]);
-   curline:=curline+1;
-   if curline>1000 then break;
-
-   if gottag.vari='BEGIN' then
-   begin
-     gottag.vari:=gottag.vali;
-     gottag.vali:='';
-     getlines(gottag);
-
-   end else
-   if gottag.vari='END' then
-   begin
-     exit;
-   end;
-   if gottag.vari='' then
-   begin
-     //gottag.parent:=prevtag;
-     //prevtag.subtags.add(gottag);
-     prevtag.vali:=prevtag.vali+gottag.vali;
-
-   end
-   else
-   begin
-     gottag.parent:=par;
-     par.subtags.add(gottag);
-     prevtag:=gottag;
-   end;
-end;
- result:=par;
- end;
-
-
-function tical.getstring:string;
-var ch,nch:char;curpos:integer;
-begin
-{ result:='';
- curpos:=1;//curpos+1;
- repeat
-       ch:=src[curpos];
-       if ch='"' then exit;
-       if ch='\' then
-       begin
-          nch:=src[curpos+1];
-          curpos:=curpos+2;
-          case nch of
-           '"':result:='"';
-           '\':result:=result+'\';
-           '/':result:=result+'/';
-           'f':result:=^J;
-           'n':result:=result+crlf;
-           'r':result:=^M;
-           't':result:=^I;
-           'b':result:=^H;
-           else curpos:=curpos-1;
-          end;
-       end
-       else
-       begin
-          result:=result+src[curpos];
-          curpos:=curpos+1;
-       end;
-   until curpos>len;
- }
-end;
-function tical.getlist(vari:string):ttag;
-begin
-end;
-
-constructor tical.create(sr:string);
-var i:integer;
-begin
- //src:=sr;
- icsrc:=tstringlist.create;
- icsrc.text:=sr;
- basetag:=ttag.create;
- basetag.vari:='icalendar';
- curline:=0;
- //len:=icsrc.count;
-
-end;
-
-function _ical(src:string):ttag;
-var ic:tical;i,j:integer;
-begin
-  ic:=tical.create(src);
-  result:=ic.getlines(ic.basetag);
-
-  //writeln('iicali:<xmp>'+ic.basetag.xmlis+'</xmp>');
-  //result:=ic.basetag;//result.subtags[0];
-  //writeln('didiical:');
-end;
-
-function _listical(ftag:ttag):ttag;
-var ic:tical;i,j:integer;basetag:ttag;
-begin
-
-end;
 
 function parseone(s:string;sta:integer;res:ttag):integer;
 var i:integer;nres:ttag;
