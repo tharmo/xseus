@@ -1687,25 +1687,64 @@ end;
 
 procedure ttag.killtree;
 var
+  i,curi: integer;done:boolean;curt,nextt:ttag;todos:tlist;    tmp,turha:string;//mydebug:boolean;
+begin
+  todos:=tlist.create;
+
+  if self=nil then exit;
+  todos.add(self);
+  curt:=self;
+  //writeln('<h4>kill:'+vari+'</h4><ul>');
+  try
+  i:=0;
+  while todos.count>0 do
+  begin
+   //WRITELN('<LI>try with',curt.head,todos.count);
+   //i:=i+1;
+   //if i>1000000 then break;
+  try
+    IF curt.XREFCOUNT>1 THEN  begin
+        curt.xrefcount:=xrefcount-1;
+      continue;
+    end;
+    if curt.subtags.count<1 then
+     begin
+      //writeln('<li>kill:'+curt.vari+'</li></ul></li>');
+      todos.Delete(todos.count-1);
+      nextt:=todos[todos.count-1];
+      //writeln('<li>nextup:'+nextt.vari+'</li>');
+      curt.clearmee;
+      if todos.count=0 then BEGIN WRITELN('<LI>NOTHINTODO</UL>');exit;END;
+     end else
+     begin
+       nextt:=curt.subtags[0];
+       curt.subtags.delete(0);
+       //writeln('<li>dfrom:'+curt.vari+'<ul>');
+       //writeln('<li>ndown:'+nextt.vari,'#',TODOS.COUNT,'</li>');
+       todos.add(nextt);
+     end;
+     curt:=nextt;
+  except
+    logwrite('FAILEDKILLELEMENTTREE');
+    //WRITELN('EMENT:'+turha);
+    //raise;
+  end;
+  end;
+
+  finally
+     todos.free;
+   // writeln('</ul><h4>killed</h4>');
+  end;
+end;
+{procedure ttag.killtree;
+var
   i: integer;    tmp,turha:string;//mydebug:boolean;
 begin
- // mydebug:=true;
-{  try
-   turha:=vari+'!'+vali+'!'+attributeslist;
-  if mydebug then
-  begin
-    //logwrite('<li>Killing:'+vari);
-     writeln(turha+'<ul>');
-  //listdebug;
-  end;
-}  try
-  //logwrite('*');
+  try
   if self=nil then exit;
   tmp:=vari;
-  //logwrite(vari+'-'+inttostr(subtags.count));
     IF XREFCOUNT>1 THEN
     begin
-     // logwrite('<li>dontkilltree:'+vari+'/'+inttostr(subtags.count)+'</li> ');
       xrefcount:=xrefcount-1;
       exit;
     end;
@@ -1713,11 +1752,7 @@ begin
     //logwrite('KIDSOF:'+vari);
     for i := subtags.Count - 1 downto 0 do
     begin
-     //if ttag(subtags[i]).parent=self then
-      //if subtags[i]<>nil then
-      //  if subtags[i]<>self then              s
          ttag(subtags[i]).killtree
-    ;//else    writeln('<li>noukill'+vari+':'+ttag(subtags[i]).vari+'</li>');
     end;
     except
       logwrite(inttostr(subtags.Count)+'-killtree nogo'+inttostr(i));
@@ -1733,17 +1768,8 @@ begin
     //WRITELN('EMENT:'+turha);
     //raise;
   end;
-  //logwrite('didkill'+tmp);
-{  finally
-    if mydebug then
-  begin
-     writeln('<li>killed:'+turha,'</li></ul></li>');
-  //listdebug;
-  end;
-end;  }
-
 end;
-
+ }
 procedure ttag.clearmeE;
 var
   i,orefcount: integer;
@@ -2263,78 +2289,247 @@ begin
   end;
 end;
 
-{
-function ttag.listiTREE:string;
-var res:tstringlist;
-function _indline(st,ind:string):string;
-begin
- result:=''+stringreplace(trim(adjustlinebreaks(st)),crlf,crlf+ind+'+',[rfreplaceall]);
-end;
 
+function _xwrap(str,indent:string;width:integer):string;
+var i,linelen:integer;ch:char;
 begin
-res:=tstringlist.create;
-listyaml('  ',res);
-result:=res.Text;
-res.free;
-end;
-
-function ttag.listYAML(inde:string;VAR RES:tstringlist):BOOLEAN;
-function _indline(st,ind:string):string;
-begin
- result:=''+stringreplace(trim(adjustlinebreaks(st)),crlf,crlf+ind+'+',[rfreplaceall]);
-end;
-var i:integer;sl:tstringlist;line,st:string;isnew:boolean;
-begin
-  if self=nil then exit;
-   isnew:=false;
-  if res=nil then
-  begin
-   isnew:=true;
-   res:=tstringlist.create;
-  end;
-  //note - memory leak
-  if vari='value' then
-  begin
-    //line:='';
-    if trim(vali)<>'' then
-    res.add(inde+'+'+_indline(vali,inde));
-  end
-  else
-    if attributes.count>0 then
-    begin
-      for i:=0 to attributes.count-1 do
-      BEGIN
-        st:=attributes.strings[i];
-        if pos(' ',st)>0 then
-         line:=line+' @'+cut_ls(st)+'="'+cut_rs(st)+'"'
-        else line:=line+' @'+st
-      end;
-      if trim(vali)<>'' then
-      res.add(inde+vari+': '+line+crlf+inde+'+ '+_indline(vali,'  '+inde))
-      else
-      res.add(inde+vari+': '+line);
-   end
-   else //no attributes
+ //if pos('taaseka',str)>0 then writeln('xwrap:<pre>!-'+str+'-!</pre>');
+ //wid:=strtointdef(width,60);
+ //ind:=copy('                                         ',1,strtointdef(indent,0));
+ result:='';//indent+': ';  //or ''?
+ linelen:=0;
+ for I := 1 to length(str) do
+ begin
+  ch:=str[i];
+ // if pos('taaseka',str)>0 then writeln('-'+ch+'-');
+   if (ch=^J) then CONTINUE;// else;//ch:=' ';
+   if (ch=^M) then
    begin
-     res.add(inde+vari+': '+_indline(vali,'  '+inde));
-   end;
-   if subtags<>nil then for i:=0 to subtags.count-1 do
-     ttag(subtags[i]).listyaml(inde+'  ',res);
+     //if result='' then
+     result:=result+crlf+indent+'. '
+     ;//else
+     //result:=result+crlf+indent+'  ';
+    //result:=result+^M^J+indent+'. ';
+     // result:=
+      linelen:=0;
+   end  else
+   if (linelen>width) and (ch=' ') then
+   begin
+     result:=result+^M^J+indent+':  ';linelen:=0;
+   end  else result:=result+ch; //begin if result='' then result:=': '+ch else result:=result+ch;end;
+   linelen:=linelen+1;
+ end;
+ //if pos('taaseka',str)>0 then writeln('<li>taas:',length(indent),'<xmp>!!!!!!!!!!!!!!'+result+'!!!!!!!!!!!!</xmp>');
 end;
-}
+
+function _onelinexml(tagi:ttag;inde:string):string;
+  function etrim(v:string):string;
+    begin
+      result:=v;
+        //if ents then begin result:=trim(_clean(v));writeln('<li>cleaning:' +result);end else result:=v;//trim(v);
+    end;
+var i:integer;st:string;
+
+begin
+    if tagi.vari = 'cdata' then
+    begin
+      result:= '<![CDATA[' + StringReplace(tagi.vali,  ']]>', ']]]]><![CDATA[>', [rfreplaceall]) + ']]>';
+      exit;
+    end;
+    if (tagi.vari = '') then
+     begin
+      result := etrim(tagi.vali);
+      exit;
+      //subc := subc + '!'+(ttag(subtags[i]).vali)+'/'+inttostr(i);
+      //writeln('<li>',vari,'vali:'+'/'+ ttag(subtags[i]).vali+ '\');
+     end;
+    try
+     result:=tagi.vari;
+    if tagi.attributes<>nil then
+    for i := 0 to tagi.attributes.Count - 1 do
+    begin
+      st := tagi.attributes.strings[i];
+      //ost:=st;
+      if length(st)>0 then
+      begin
+      st := StringReplace(st, '"', '&quot;', [rfreplaceall]);
+      st := StringReplace(st, crlf, '&#xA;', [rfreplaceall]);
+      st := StringReplace(st, ^M, '&#xA;', [rfreplaceall]);
+      st := StringReplace(st, ^J, '&#xA;', [rfreplaceall]);
+      //ost:=st;
+       result := result+' '+cut_ls(st) + '="' + cut_rs(st) + '"';
+      end;
+    end;
+   except writeln('<li>failed xmlis corrupt attribute!!'+st+'??',length(st));end;
+   if (tagi.subtags.count=0)
+     and (tagi.vali='') then
+       result:=inde+'<'+result+'/>' else
+  result:=inde+'<'+result+'>'+tagi.vali;
+
+end;
+function _listxml(ele:ttag):string;
+var i,j,curlev:integer;atag:ttag;alev,levs:tlist;
+begin
+  result:='';
+  levs:=tlist.create;
+  alev:=tlist.create;
+  try
+  alev.Add(ele);
+  levs.add(alev);
+ curlev:=0;
+ i:=0;
+ atag:=ele;
+ while curlev>=0 do
+ begin
+   //writeln('<li>sofar<xmp>:'+result,'</xmp><hr/>');
+   //WRITELN('<LI>doing:',ATAG.VARI,ATAG.SUBTAGS.COUNT,'@',curlev,' with ',alev.count,' levs [',levs.count,']');//+atag.vari); for i:=0 to levs.count-1 do writeln('<li>',tlist(levs[i]).count,'</li>');
+     if alev.count<1 then
+    ///// NOTHING MORE ON THIS LEVEL: end the tag (unless "<simple/>") and backtrack one level
+    begin
+       //WRITELN('<LI>backing:',curlev,' with ',alev.count,' levs [',levs.count,']');//+atag.vari); for i:=0 to levs.count-1 do writeln('<li>',tlist(levs[i]).count,'</li>');
+       if (atag.subtags.count>0) or (atag.vali<>'') then
+       result:=result+'</'+atag.vari+'>';// else result:=result+'//'+atag.head;
+       if curlev=0 then if alev.count=0 then exit;
+       alev.Free;
+       levs.delete(levs.Count-1);
+       curlev:=curlev-1;
+       alev:=levs[curlev];
+       try  ///this tag removed from parent as this has been handled
+       atag:=alev[0];
+       alev.delete(0);
+       except  WRITELN('<LI>troubleat:',curlev,' with ',alev.count,', levs [',levs.count,']');   end;
+       continue;
+    end;
+    atag:=ttag(alev[0]);
+    //WRITELN('<LI>doing:',curlev,' with ',alev.count,' to go [',atag.head+']');
+    result:=result+lf+_onelinexml(atag,copy('                                                    ',1,curlev));
+    // writeln('<li>got:<xmp>'+_onelinexml(atag,copy('                                                    ',1,curlev))+'</xmp>');
+    if atag.subtags.count>0 then
+    //////////HAS SUBTAGS - add them and continue
+    begin
+      alev:=tlist.create;
+      alev.AddList(atag.subtags);
+      levs.add(alev);
+      curlev:=curlev+1;
+      //WRITELN('<LI>adding:',curlev,' with ',alev.count,' unhandled [',atag.head+']');
+      continue;
+    end else
+    ///////// NO SUBTAGS: continue with next tag
+    begin
+      if atag.vali<>'' then result:=result+'</'+atag.vari+'>';
+      alev.Delete(0);
+
+    end;
+
+ end;
+ finally  //these have been freed already?
+  //for curlev:=levs.count-1 downto 0 do tlist(levs[curlev]).free;
+  levs.free;
+  //writeln('<li>finished<xmp>:'+result,'</xmp>');
+
+ end;
+end;
+
+function __oneline(tagi:ttag;inde: string): string;
+var
+  i, vals: integer;
+  aline,atts, st, values, tvali,ost: string;
+ begin
+ st:='';
+ atts:='';
+ aline:='';
+ // if (trim(vari)='') and (trim(vali)='') then exit;
+  aline:=inde+tagi.vari;
+  try
+  if tagi.attributes<>nil then
+  for i := 0 to tagi.attributes.Count - 1 do
+  begin
+    st := tagi.attributes.strings[i];
+    ost:=st;
+    if length(st)>0 then
+    begin
+    st := StringReplace(st, '"', '&quot;', [rfreplaceall]);
+    st := StringReplace(st, crlf, '&#xA;', [rfreplaceall]);
+    st := StringReplace(st, ^M, '&#xA;', [rfreplaceall]);
+    st := StringReplace(st, ^J, '&#xA;', [rfreplaceall]);
+    //ost:=st;
+    try
+    st := cut_ls(st) + '="' + cut_rs(st) + '"';
+     except st:=ost;writeln('<li>failed xmlis corrupt attribute!!'+ost+'??',length(ost));end;
+    end;
+    try
+      aline:=aline+' '+st;
+    except writeln('<li>failed add attribute!!',st,'!!!',ost,'///');end;
+  end;
+  except writeln('failed xmlis corrupt attributes');  end;
+  if tagi.vali<>'' then //else
+  begin
+    //if (xquoted) or (att('xse:format')='quoted') then res.add(aline + ': ''''''' + vali  + '''''''') else
+    //if inlinexml then res.add(aline+': '+vali) else
+    //if vari<>'' then
+    aline:=(aline+': '+_xwrap(tagi.vali,inde+'  ',80)) //+' ('+vali+')');
+    ;//else res.add(aline+': '+_xwrap(vali,ind+'',80)) //+' ('+vali+')');
+  end;
+  result:=aline;
+
+ end;
+
+function _listxmlis(ele:ttag):string;
+var i,curlev:integer;atag:ttag;alev,levs:tlist;
+begin
+  //writeln('<h1>xmlis</h1>');
+
+  result:='';
+  levs:=tlist.create;
+  alev:=tlist.create;
+  try
+  alev.Add(ele);
+  levs.add(alev);
+ curlev:=0;
+ while curlev>=0 do
+ begin
+    if alev.count<1 then break;
+    atag:=ttag(alev[0]);
+    //WRITELN('<LI>doing:',curlev,' with ',alev.count,' unhandled [',atag.head+']');
+    alev.delete(0);
+    result:=result+lf+__oneline(atag,copy('                                                    ',1,curlev));
+    if atag.subtags.count>0 then
+    begin
+      alev:=tlist.create;
+      alev.AddList(atag.subtags);
+      levs.add(alev);
+      curlev:=curlev+1;
+      //WRITELN('<LI>adding:',curlev,' with ',alev.count,' unhandled [',atag.head+']');
+      continue;
+    end;
+    //writeln('<li>more? at:',curlev,' with ',alev.count);
+    while (curlev>0) and (alev.count=0) do  //skip all levels that have no more branches to travel
+    begin
+     alev.Free;
+     levs.delete(levs.Count-1);
+     curlev:=curlev-1;
+     alev:=levs[curlev];
+    end;
+ end;
+ finally
+  for curlev:=levs.count-1 downto 0 do tlist(levs[curlev]).free;
+  levs.free;
+ end;
+end;
+
+
 function ttag.xmlis: string;
 var
   sl: TStringList;
 begin
 
-  sl := TStringList.Create;
+  //sl := TStringList.Create;
   try
   try
-    listxmlish('', SL,false);
-
-    //result:=stringreplace(sl.text,'#','\#',[rfreplaceall]);
-    Result := sl.Text;
-    //logwrite('XMLIS:'+result+'/XMLIS:'+vari);
+    logwrite('xmlxmlmxlmxlmxlmlxm');
+    result:=_listxmlis(self);
+   // listxmlish('', SL,false);
+   // Result := sl.Text;
 
   except
 
@@ -2342,8 +2537,15 @@ begin
   writeln('<li>FAILED ttag.XMLIS',vari,'</li>');
   end;
   finally
-    sl.Free;
+    //sl.Free;
   end;
+end;
+function ttag.listxml(inde:string; ents,isroot: boolean): string;
+{D: one of despare efforts to handle whitespace correctly
+}
+begin
+
+ result:=_listxml(self);
 end;
 
 {
@@ -2413,37 +2615,7 @@ begin
     end;
 end;
 }
-function _xwrap(str,indent:string;width:integer):string;
-var i,linelen:integer;ch:char;
-begin
- //if pos('taaseka',str)>0 then writeln('xwrap:<pre>!-'+str+'-!</pre>');
- //wid:=strtointdef(width,60);
- //ind:=copy('                                         ',1,strtointdef(indent,0));
- result:='';//indent+': ';  //or ''?
- linelen:=0;
- for I := 1 to length(str) do
- begin
-  ch:=str[i];
- // if pos('taaseka',str)>0 then writeln('-'+ch+'-');
-   if (ch=^J) then CONTINUE;// else;//ch:=' ';
-   if (ch=^M) then
-   begin
-     //if result='' then
-     result:=result+crlf+indent+'. '
-     ;//else
-     //result:=result+crlf+indent+'  ';
-    //result:=result+^M^J+indent+'. ';
-     // result:=
-      linelen:=0;
-   end  else
-   if (linelen>width) and (ch=' ') then
-   begin
-     result:=result+^M^J+indent+':  ';linelen:=0;
-   end  else result:=result+ch; //begin if result='' then result:=': '+ch else result:=result+ch;end;
-   linelen:=linelen+1;
- end;
- //if pos('taaseka',str)>0 then writeln('<li>taas:',length(indent),'<xmp>!!!!!!!!!!!!!!'+result+'!!!!!!!!!!!!</xmp>');
-end;
+
 
 function ttag.listxmlish(inde: string; var RES: TStringList;inlinexml:boolean): boolean;
 
@@ -2803,107 +2975,6 @@ begin
 
 end;
 
-function ttag.listxml(inde:string; ents,isroot: boolean): string;
-{D: one of despare efforts to handle whitespace correctly
-}
-function etrim(v:string):string;
-begin
-    if ents then begin result:=trim(_clean(v));writeln('<li>cleaning:' +result);end else result:=v;//trim(v);
-end;
-var
-  st, subc,tmpinde: string;
-  i: integer;
-
-begin
-  try
-  ents:=false; //?????
-  if isroot then tmpinde:='' else tmpinde:=inde;
-  //if isroot then Result := '' else result:=^J;
-  if vari = 'xxxcdata' then
-  begin
-    st := StringReplace(vali, ']]>', ']]]]><![CDATA[>', [rfreplaceall]);
-    Result := Result + '<![CDATA[' + st + ']]>';
-    exit;
-  end;
-  if (vari = 'nonono_value') or (vari = '') then
-    Result := ''
-  else
-  begin
-    if (tmpinde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
-    Result := '<' + vari //+' inde="'+inde+'"'
-      //  <b> joo</b>  <em>joo  </em> missä välit
-      // ent' <pre>
-    else
-    Result := ^j + tmpinde+'<' + vari ;//inde="'+inde+'"';
-    try
-    //if attributes<>nil then
-    for i := 0 to attributes.Count - 1 do
-      Result := Result + ' ' + cut_ls(attributes[i]) + '="' +
-        cut_rs(attributes[i]) + '"';
-    except writeln('<li>failes list atts #'+'!'+vari);end;
-  end;
-  subc := '';
-  except writeln('<li>failes tag #'+'!');raise;end;
-  try
-  if subtags<>nil then
-  if subtags.count>0 then
-  for i := 0 to subtags.Count - 1 do
-  begin
-   //try    if ttag(subtags[i]).vari<>'' then writeln('');  except writeln('failing subtag');raise;end;
-    if ttag(subtags[i]).vari = 'cdata' then
-      subc := subc + '<![CDATA[' + StringReplace(ttag(subtags[i]).vali,
-        ']]>', ']]]]><![CDATA[>', [rfreplaceall]) + ']]>'
-    else
-    if (ttag(subtags[i]).vari = '') then
-     begin
-      subc := subc +etrim(ttag(subtags[i]).vali);
-      //subc := subc + '!'+(ttag(subtags[i]).vali)+'/'+inttostr(i);
-      //writeln('<li>',vari,'vali:'+'/'+ ttag(subtags[i]).vali+ '\');
-     end
-    else   //never happens:   //VALUE if (ttag(subtags[i]).vari='value') and (ttag(subtags[i]).subtags.count=0)  then
-    if (ttag(subtags[i]).vari = '') and (ttag(subtags[i]).subtags.Count = 0) then
-      subc := subc + etrim((ttag(subtags[i]).vali))
-    else
-    try
-    begin
-      //if (inde<>'')  then
-      //begin
-      // subc := subc + (ttag(subtags[i]).listxml('', ents));
-      //end else
-    //if inde='' then
-    //subc := subc + (ttag(subtags[i]).listxml('', ents,false)) else
-    subc := subc + (ttag(subtags[i]).listxml('  '+tmpinde, ents,false));
-
-    end;except writeln('<li>failes subbtag #'+inttostr(i));end;
-  end;
-  except writeln('<li>could not write subbtags to res:');writeln(ttag(subtags[i]).vari+inttostr(subtags.count)+'!'+inde+'!'+booltostr(ents));end;
-  try
-  if (vari = '') then
-  begin
-    //if inde<>'' then
-      Result := Result + etrim(vali)+subc; //_normalizewhitespace(vali, False) + (subc)
-   // else
-   //   Result := Result +vali + subc;
-  end
-  else
-  begin
-   if (subc + trim(vali) = '') and (pos(',' + vari + ',', gc_voids) > 0)  then
-    Result := Result + '></'+vari+ '>'
-   //Result := Result + crlf+'/>'
-   else
-   begin
-     if trim(subc)='' then tmpinde:='' else tmpinde:=^J+tmpinde;
-     Result := Result + '>' + etrim(vali) + (subc) +tmpinde+ '</' + vari + '>'
-   end;
-  end;
-  except writeln('<li>could not write tags to res');end;
-  //logwrite('**!!'+result+'!!**');
-  {if ents then
-   Result := Result + '>' + _clean(vali) + (subc) + '</' + vari +crlf+ '>'
- else
-   Result := Result + '>' + vali + (subc) + '</' + vari +crlf+ '>';}
-  // if isroot then writeln('LISTED:<xmp>',result,'</xmp>');
-end;
 
 function ttag.ashtml: string;
 var
@@ -5680,5 +5751,108 @@ end;
 
 
 
+end;
+
+
+function ttag.listxml(inde:string; ents,isroot: boolean): string;
+{D: one of despare efforts to handle whitespace correctly
+}
+function etrim(v:string):string;
+begin
+    if ents then begin result:=trim(_clean(v));writeln('<li>cleaning:' +result);end else result:=v;//trim(v);
+end;
+var
+  st, subc,tmpinde: string;
+  i: integer;
+
+begin
+  try
+  ents:=false; //?????
+  if isroot then tmpinde:='' else tmpinde:=inde;
+  //if isroot then Result := '' else result:=^J;
+  if vari = 'xxxcdata' then
+  begin
+    st := StringReplace(vali, ']]>', ']]]]><![CDATA[>', [rfreplaceall]);
+    Result := Result + '<![CDATA[' + st + ']]>';
+    exit;
+  end;
+  if (vari = 'nonono_value') or (vari = '') then
+    Result := ''
+  else
+  begin
+    if (tmpinde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
+    Result := '<' + vari //+' inde="'+inde+'"'
+      //  <b> joo</b>  <em>joo  </em> missä välit
+      // ent' <pre>
+    else
+    Result := ^j + tmpinde+'<' + vari ;//inde="'+inde+'"';
+    try
+    //if attributes<>nil then
+    for i := 0 to attributes.Count - 1 do
+      Result := Result + ' ' + cut_ls(attributes[i]) + '="' +
+        cut_rs(attributes[i]) + '"';
+    except writeln('<li>failes list atts #'+'!'+vari);end;
+  end;
+  subc := '';
+  except writeln('<li>failes tag #'+'!');raise;end;
+  try
+  if subtags<>nil then
+  if subtags.count>0 then
+  for i := 0 to subtags.Count - 1 do
+  begin
+   //try    if ttag(subtags[i]).vari<>'' then writeln('');  except writeln('failing subtag');raise;end;
+    if ttag(subtags[i]).vari = 'cdata' then
+      subc := subc + '<![CDATA[' + StringReplace(ttag(subtags[i]).vali,
+        ']]>', ']]]]><![CDATA[>', [rfreplaceall]) + ']]>'
+    else
+    if (ttag(subtags[i]).vari = '') then
+     begin
+      subc := subc +etrim(ttag(subtags[i]).vali);
+      //subc := subc + '!'+(ttag(subtags[i]).vali)+'/'+inttostr(i);
+      //writeln('<li>',vari,'vali:'+'/'+ ttag(subtags[i]).vali+ '\');
+     end
+    else   //never happens:   //VALUE if (ttag(subtags[i]).vari='value') and (ttag(subtags[i]).subtags.count=0)  then
+    if (ttag(subtags[i]).vari = '') and (ttag(subtags[i]).subtags.Count = 0) then
+      subc := subc + etrim((ttag(subtags[i]).vali))
+    else
+    try
+    begin
+      //if (inde<>'')  then
+      //begin
+      // subc := subc + (ttag(subtags[i]).listxml('', ents));
+      //end else
+    //if inde='' then
+    //subc := subc + (ttag(subtags[i]).listxml('', ents,false)) else
+    subc := subc + (ttag(subtags[i]).listxml('  '+tmpinde, ents,false));
+
+    end;except writeln('<li>failes subbtag #'+inttostr(i));end;
+  end;
+  except writeln('<li>could not write subbtags to res:');writeln(ttag(subtags[i]).vari+inttostr(subtags.count)+'!'+inde+'!'+booltostr(ents));end;
+  try
+  if (vari = '') then
+  begin
+    //if inde<>'' then
+      Result := Result + etrim(vali)+subc; //_normalizewhitespace(vali, False) + (subc)
+   // else
+   //   Result := Result +vali + subc;
+  end
+  else
+  begin
+   if (subc + trim(vali) = '') and (pos(',' + vari + ',', gc_voids) > 0)  then
+    Result := Result + '></'+vari+ '>'
+   //Result := Result + crlf+'/>'
+   else
+   begin
+     if trim(subc)='' then tmpinde:='' else tmpinde:=^J+tmpinde;
+     Result := Result + '>' + etrim(vali) + (subc) +tmpinde+ '</' + vari + '>'
+   end;
+  end;
+  except writeln('<li>could not write tags to res');end;
+  //logwrite('**!!'+result+'!!**');
+  {if ents then
+   Result := Result + '>' + _clean(vali) + (subc) + '</' + vari +crlf+ '>'
+ else
+   Result := Result + '>' + vali + (subc) + '</' + vari +crlf+ '>';}
+  // if isroot then writeln('LISTED:<xmp>',result,'</xmp>');
 end;
 

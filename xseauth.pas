@@ -662,7 +662,7 @@ begin
       //writeln('sofar2'+aputag.xmlis);
       //x_session . attributes . values ['saveas' ] := ses_dir + '\' + acom . att ('saveas' ) ;
       aputag.setatt('ip', ses.subs('ip'));
-    except    writeln('Failed to set session attributes' + xs.x_session.xmlis);   end;
+    except    writeln('Failed to set session attributes');END;// + xs.x_session.xmlis);   end;
   end;
 end;
 function _authorizebyentryword(outdiri:string;acom: ttag):string;

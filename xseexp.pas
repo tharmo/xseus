@@ -224,7 +224,7 @@ begin
     //t_debug:=true;  =!from/
     //function _fetchst(findfrom,tofind:string;{var} sto:integer;sta,maxlen:integer):string;
     //if t_debug then
-   // writeln('<li>specifier:'+spec+'!/from:'+loc+'!/rest:'+copy(st,sta,100),'!</li>');
+    //writeln('<li>specifier:'+spec+'!/from:'+loc+'!/rest:'+copy(st,sta,100),'!</li>');
     Res := nil;
     gottafree := nil;
     //rest := '';
@@ -819,6 +819,9 @@ begin
     //writeln(':',ii,'-',ch);
     if ch='{' then
     begin
+        if t_debug then
+        logwrite('try:'+copy(st,1,ii)+'!!!'+copy(st,ii,9999)+'#'+inttostr(ii));
+
       //if DEP>0 then begin logwrite('<li>STILLDEEPER:'+st+'!'+inttostr(ii));end;;// else
       if (ii<len) AND (pos(st[ii+1],whitespace)>0) then
       begin
@@ -873,6 +876,7 @@ begin
      end;
      ii:=ii+1;
      result:=result+doapart(1);
+
    end
    else if ii<=len then result:=result+st[ii];
  end;

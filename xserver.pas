@@ -246,7 +246,7 @@ begin
   ases.sestag:=sest;
  //sescookies.add(sessid);
   ases.sestag:=sest;
-  logwrite('created session:'+inttostr(sessions.count)+ases.sestag.xmlis);
+  //logwrite('created session:'+inttostr(sessions.count)+ases.sestag.xmlis);
  {$ifndef windows} // .. its actually 32/64 quetion, not win/linux
  // starttimes.add(pointer(now));
  // lasttimes.add(pointer(now));
@@ -272,7 +272,7 @@ begin
   begin
       ases:=sessions[i];
       ases.lasttime:=now;
-      logwrite('gotsession:'+inttostr(i)+ases.sestag.xmlis);
+      //logwrite('gotsession:'+inttostr(i)+ases.sestag.xmlis);
       break;
   end;
   if ases=nil then begin
@@ -680,7 +680,7 @@ var
   i: integer;
   serving: tserving;
 begin
-  threadCount:=6;  //this was xommented out for some reason..???
+  threadCount:=2;  //this was xommented out for some reason..???
   freeths := TList.Create;
   all := TList.Create;
   inuseths := TList.Create;
@@ -1062,6 +1062,7 @@ begin
      //params:=tstringlist.create;
 
      t_thisprocess := self;
+     t_debug:=false;
      timeout := 120000;
     //read request line
    except writeln('<li>serving failed to init'); raise;end;
@@ -1160,7 +1161,6 @@ begin
   if _isxseus(ext)  then
   begin
   keepxseusalive:=false;
-   //logwrite('XSUES:'+ext+'!'+s+'+/thread:'+inttostr(id)+'/mem:'+floattostr(getheapstatus.totalallocated));
    //logwrite('(cookie:'+cookie+')');
     try
     try //doxeus
@@ -1208,8 +1208,9 @@ begin
           redirect('','?login');
         end else
         txseus(myxseus).dosubelements;
+        writeln(GetFPCHeapStatus.MaxHeapUsed);
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
-        logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
+        logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed)+'//'+inttostr(Int64(getheapstatus.totalallocated)));
         except  logwrite('fail:'+s);writecustomheaders('HTTP/1.1 200','text/html',-1); writeln('failed xseus.run');  end;
       end else
       begin
@@ -1227,6 +1228,7 @@ begin
       end else
       begin
       //logwrite('clear');
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEMPORARiLY comm out:
       txseus(myxseus).Clear;
       //logwrite('cleared');
       logwrite('freed:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));

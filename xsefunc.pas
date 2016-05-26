@@ -675,7 +675,7 @@ begin
  var I,items:integer;
   stl:tstringlist;stag:ttag;
  begin
-   if sep='' then sep:=st[length(st)] else sep:=',';
+   if sep='' then sep:=st[length(st)];//se sep:=',';
    stl:=tstringlist.create;
    result:=ttag.create;
    try
@@ -1109,7 +1109,7 @@ end;
 
  function tfunc.f_slice:string;
  const parlist:array[0..2] of string =('string','start','len');
- {D:simple normal substring
+ {D: substring with start and end instead of start and len
  }
  var p_string,p_sta,p_end:string; //+no others
   en,sta:integer;
@@ -1374,8 +1374,8 @@ end;
  var i:integer;sts:tstarted;
  begin
    sts:=txseus(xs).x_started;
-   result:=inttostr(sts.count)+':';
-   for i:=0 to sts.count-1 do
+   result:=inttostr(sts.elems.count)+':';
+   for i:=0 to sts.elems.count-1 do
     result:=result+'['+ttag(sts.elems[i]).vari+'/'+ttag(sts.pars[i]).vari+']';
  end;
 
@@ -2906,7 +2906,7 @@ var p_pattern,p_ext:string;
    //logwrite('reading');
    //apu:= pars.values['file'];
    //if apu='' then apu:=cut_rs(pars.strings[0]);
-   //writeln('<li>read: file='+p_file+' pars='+pars.text+g_ds+'\\');
+   //>writeln('<li>read: file='+p_file+' pars='+pars.text+g_ds+'\\',pos('https:',p_file));
     if (pos('http:',p_file)=1) or (pos('https:',p_file)=1) then
     begin
       apu2:='-1';

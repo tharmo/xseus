@@ -125,7 +125,7 @@ type
     elems, pars: TList;laststart:boolean;
     constructor Create;
     destructor Free;
-    function Count: integer;
+    function xCount: integer;
     procedure setpar(newp:ttag);
 
     procedure add(ele, par: pointer);
@@ -864,6 +864,7 @@ end;
 
 procedure tstarted.add(ele, par: pointer);
 begin
+ //writeln('<li><b>STARTED::::',count, '/',(elems.capacity), '/',(pars.capacity),'</li></ul>');
   elems.add(ele);
   pars.add(par);
 end;
@@ -892,12 +893,12 @@ begin
   Result := elems[elems.Count - 1];
 end;
 
-function tstarted.Count: integer;
+function tstarted.xCount: integer;
 begin
   if pars.Count = elems.Count then
     Result := elems.Count
    else
-    Result := -999;
+    Result := -999999;
 end;
 
 function tstarted.getpar: ttag;

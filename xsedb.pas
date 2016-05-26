@@ -32,6 +32,7 @@ procedure sql_doprepared(ats:pointer);
 end;
 procedure closeall_sql(dblist:tstringlist);
 function getdb_sql(dbn:string;dblist:tstringlist):tdb;
+function _createtempdb(db:tdb;dlist:tstringlist;sels,table:string):tdb;
 
 implementation
 uses xsexml;
@@ -44,6 +45,16 @@ uses xsexml;
   next
 
 }
+function _createtempdb(db:tdb;dlist:tstringlist;sels,table:string):tdb;
+var newdb:tdb;
+begin
+  //result:=getdb_sql(':memory',dlist);
+  result:=tdb.create(':memory:');
+  //result:=tdb(db.sql_gettable(selst));
+  dlist.addobject('temp_table',result);
+  tdb(result.sql_copytable(db,sels,table));
+
+end;
 
 constructor tdb.create(dbname:string);
 begin

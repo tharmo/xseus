@@ -11,7 +11,7 @@ function _json(src:string;res:ttag):boolean;
 function _json2(src:string):ttag;
 function _ical(src:string):ttag;
 implementation
-uses xsemisc;
+uses xsemisc,lazutf8;
 type tjson=class(tobject)
    //-- added public
 public
@@ -155,6 +155,7 @@ function tjson.getarray(basetag:ttag;defname:string):ttag;
     begin
      skippaa;
      ntag:=basetag.addsubtag(defname,'');
+     DEFNAME:='item';
      //writeln('<li>ARRAY:',curpos,'/',len,'!'+copy(src,curpos,20)+'!<ul>');
       while  (curpos<len-1) do
       begin
@@ -190,7 +191,7 @@ function tjson.getarray(basetag:ttag;defname:string):ttag;
 
 
 function tjson.getstring:string;
-var ch,nch:char;
+var ch,nch:char;u:cardinal;
 begin
  result:='';
  skippaa;
@@ -211,6 +212,12 @@ begin
            'r':result:=^M;
            't':result:=^I;
            'b':result:=^H;
+           'u': begin
+                try
+                result:=result+UnicodeToUTF8(strtoint('x'+copy(src,curpos,4)));
+                except result:='zz';end;
+                curpos:=curpos+4;
+           end
            else curpos:=curpos-1;
           end;
        end
