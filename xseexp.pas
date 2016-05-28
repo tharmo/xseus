@@ -859,6 +859,7 @@ end;
 //parses a string that can contain several {}-macros
 begin
  try
+ result:='';
  ii:=0;
  len:=length(st);
  while ii<len do

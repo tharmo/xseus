@@ -94,7 +94,8 @@ ttag = class(TObject)
     procedure clearmeE;
     procedure killtree;
     function copytag: ttag;  //TAG
-    function clonetag(ats:boolean): ttag;//TAG
+    function copytagnew: ttag;  //TAG
+    function clonetag(par:ttag;subs:boolean): ttag;//TAG
     function copyutftag: ttag;   //TAG
     constructor Create;
     destructor freemee;
@@ -1699,7 +1700,8 @@ begin
   i:=0;
   while todos.count>0 do
   begin
-   //WRITELN('<LI>try with',curt.head,todos.count);
+   if curt=nil then
+    WRITELN('<LI>try nil at ',todos.count);
    //i:=i+1;
    //if i>1000000 then break;
   try
@@ -1711,17 +1713,27 @@ begin
      begin
       //writeln('<li>kill:'+curt.vari+'</li></ul></li>');
       todos.Delete(todos.count-1);
+       if todos.count=0 then BEGIN
+         //WRITELN('<LI>NOTHINTODO</UL>');
+         exit;END;
+      try
       nextt:=todos[todos.count-1];
+      except writeln('<li>failedkill:'+'!',todos.count); end;
       //writeln('<li>nextup:'+nextt.vari+'</li>');
       curt.clearmee;
-      if todos.count=0 then BEGIN WRITELN('<LI>NOTHINTODO</UL>');exit;END;
+      if todos.count=0 then BEGIN //WRITELN('<LI>NOTHINTODOnext</UL>');
+        exit;END;
      end else
      begin
+      try
        nextt:=curt.subtags[0];
-       curt.subtags.delete(0);
+       try curt.subtags.delete(0);
+
+       except    end;
        //writeln('<li>dfrom:'+curt.vari+'<ul>');
        //writeln('<li>ndown:'+nextt.vari,'#',TODOS.COUNT,'</li>');
        todos.add(nextt);
+      except writeln('<li>failedaddkills:'+curt.vari+'</li></ul></li>'); end;
      end;
      curt:=nextt;
   except
@@ -2526,7 +2538,7 @@ begin
   //sl := TStringList.Create;
   try
   try
-    logwrite('xmlxmlmxlmxlmxlmlxm');
+    //logwrite('xmlxmlmxlmxlmxlmlxm');
     result:=_listxmlis(self);
    // listxmlish('', SL,false);
    // Result := sl.Text;
@@ -5220,11 +5232,12 @@ begin
 end;
 
 
-function ttag.clonetag(ats:boolean): ttag;
+function ttag.clonetag(par:ttag;subs:boolean): ttag;
 //clones a tag, without copying subtags (only pointers to them)
 var
   i: integer;
   res, atag: ttag;
+
 begin
   //result:=self;exit;
   //writeln('<ul><li>ccs;',vari,subtags.count);
@@ -5233,9 +5246,9 @@ begin
   res.vari := vari;
   res.vali := vali;
   //res.attributes.add('copy='+inttostr(subtags.count));
-  if ats then
   for i := 0 to attributes.Count - 1 do
     res.attributes.add(attributes[i]);
+  if subs then
   for i := 0 to subtags.Count - 1 do
   begin
     //WRITELN('TTT',ttag(subtags[i]).VARI);
@@ -5244,10 +5257,60 @@ begin
   //res.xcopied:=true;
   res.xquoted := xquoted;
   Result := res;
-  res.parent:=parent;
+  res.parent:=par;
+  if par<>nil then par.subtags.add(res);
   //writeln('</li><li>-cc;',result.vari,result.subtags.count,'</li></ul>');
 end;
 function ttag.copytag: ttag;
+var
+  i,subtogo: integer;
+  //res,
+  totag,fromtag: ttag;
+  FROMS,TOS:tlist;
+begin
+  result:=ttag.create;
+  i:=0;
+  tos:=tlist.create;
+  froms:=tlist.create;
+  try
+  fromtag:=self;
+  FROMS.ADD(self);
+  totag:=fromtag.clonetag(nil,false);
+  tos.add(totag);
+  result:=totag;
+  //res.attributes.add('copy='+inttostr(subtags.count));
+  //WRITELN('<li>startCOPYY',fromtag.VARI,froms.count);
+  while froms.count>0 do
+  begin
+    i:=i+1;
+    if i>100 then exit;
+    subtogo:=fromtag.subtags.count-totag.subtags.count;
+    if subtogo=0 then  //bactrack
+    begin
+      froms.Delete(froms.count-1);
+      tos.Delete(tos.count-1);
+      if froms.count=0 then exit;
+      fromtag:=froms[froms.count-1];
+      totag:=tos[tos.count-1];
+      //WRITELN('<li>DIDCOPYY',fromtag.head,'/subtogo:',subtogo,'/done:',totag.subtags.count,'/levs:',tos.count,'=',froms.count);
+      //if cut_ls(attributes[i])='id' then
+      //  writeln('<h4>copyatt:,',res.xmlis,'</h4>');
+    end else  //go deeper
+    begin
+     fromtag:=fromtag.subtags[totag.subtags.count];
+     froms.add(fromtag);
+     totag:=fromtag.clonetag(totag,false);
+     tos.add(totag);
+     //WRITELN('<li>WILLCOPYY',fromtag.head,'/subtogo:',subtogo,'/done:',totag.subtags.count,'/levs:',tos.count,'=',froms.count);
+    end;
+  end;
+    //res.xcopied:=true;
+    //writeln('</li><li>-cc;',result.vari,result.subtags.count,'</li></ul>');
+   //    Result := ;
+   finally
+   froms.free;tos.free;  end;
+end;
+function ttag.copytagnew: ttag;
 var
   i: integer;
   res, atag: ttag;

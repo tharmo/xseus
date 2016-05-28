@@ -1106,7 +1106,6 @@ begin
     wasdatatag:=false;gottafree:=nil;
      //if byvali<>'' then    begin     end;
     //writeln('STARTING XSE:TO');
-    //writeln('xse:to:<xmp>'+curbyele.xmlis,'</xmp>!',curbyele.att('place'));
     //place := '';
     tmpoldres := curtoele;
     browseroutput := CurBYEle.att('browser') = 'true';
@@ -1135,7 +1134,7 @@ begin
   end;
   //    if (curbyele.subtags.Count > 0) then
   //      doelements;
- //  writeln('<h2>DOTO:'+ele+'!</h2><xmp>',curbyele.xmlis,'</xmp>',place,'<hr/>');
+  // writeln('<h2>DOTO:'+ele+'!</h2><xmp>',curbyele.xmlis,'</xmp>',place,'<hr/>');
 
   if ele <> '' then
   begin
@@ -1205,7 +1204,7 @@ begin
   end;
   if curtoele=nil then
   try
-  writeln('<li>DOINGNIL to::'+resupar.head+'//atroot:'+rootsel.HEAD,'/curto',resupar=curtoele,curbyele.head);
+   //writeln('<li>DOINGNIL to::'+resupar.head+'//atroot:'+rootsel.HEAD,'/curto',resupar=curtoele,curbyele.head);
   except writeln('<li>dointonil:',resupar=nil,pseudoroot=nil);end;
 
   //***************************DOIT*******************************************************//
@@ -1324,7 +1323,7 @@ begin
           writeln('faileedtowrite out:' + apus);
         end;
       end;
-      writeln('<li>free element after writing to file');
+      //writeln('<li>free element after writing to file');
       CurToEle.killtree;
     except
       writeln('failed outfileresult');
@@ -4361,7 +4360,6 @@ begin
   try
   // if old=nil then writeln('<li>nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnä');
    //try
-   //  writeln('<li>prepare'+curbyele.head+':'+old.vari);
    //except writeln('<li>nothing to prepare');raise;end;
     Result := nil;
     orignew := nil;
@@ -4424,20 +4422,21 @@ begin
      // newtag.attributescopy(old);
     //  newtag.delatt(ns + 'by');
       //Result := newtag;
-      //writeln('<h3>'+vali+'XSEBY </h3><xmp>'+newtag.xmlis+crlf+'!!!</xmp>');
       except writeln('<h1>failed: nobyby</h1>');end;
       //exit;
     end;
+    //writeln('<li>'+vali+'unprepared=<xmp>'+newtag.xmlis+crlf+'!!!</xmp>');
+
     for k := 0 to old.attributesCount - 1 do
     begin
        try
         vali := old.getattributes[k];
         vari := cut_ls(vali);
         vali := cut_rs(vali);
-      except
-        writeln('<li>NONOSUBS:' + vari + '/' + vali + '!');
-      end;
-      try
+       except
+         writeln('<li>NONOSUBS:' + vari + '/' + vali + '!');
+        end;
+       try
         //if pos(ns,vari) =1 then
         if (vari <> ns + 'if') then
         begin
@@ -4446,7 +4445,6 @@ begin
             //at := ttag.Create;
             //x_bookmarks.subtags.add(at);//addsubtag(bm, '');
             //at.vari := vali;
-            //writeln('<li>bm:'+vari,'_',vali,curfromele.vari, ':',curfromele.xmlis ,'</li>');
             //writeln('<li>TO:'+curTOELe.vari, ':',curtoele.xmlis ,'</li>');
             //at.subtags.add(CurFromEle);
             setbookmark(vali, curfromele);
@@ -4455,7 +4453,7 @@ begin
           if pos(ns,vari)<>1 then
           begin
             newtag.setatt(vari, parsexse(vali, self));
-            if (vari='id') and (pos('s1_1',vali)>1) then writeln('<li>!!!!!SetId',vali,'!!!!', parsexse(vali, self));
+            //if (vari='id') and (pos('s1_1',vali)>1) then writeln('<li>!!!!!SetId',vali,'!!!!', parsexse(vali, self));
           end;
         end;
       except
@@ -4463,7 +4461,7 @@ begin
       end;
     end;
     Result := newtag;
-    //if old.att(ns+'by')<>'' then writeln('<li>'+vali+'BYATT:<xmp>'+result.xmlis+crlf+'!!!</xmp>');
+    //if old.att(ns+'by')<>'' then
   except
     writeln('<li>failed to prepare cmd',old.vari);
     newtag.killtree;
@@ -4631,7 +4629,6 @@ begin
   try
     result:=doelementlist(comlist);
   finally
-    //writeln('<li>/DIO</li></ul>');
     //logwrite('DISUBS***');
     comlist.Clear;
     comlist.Free;
@@ -4683,7 +4680,8 @@ begin
         progcounter := progcounter + 1;
         progt := proglist[progcounter];
          //if progt.vari=ns+'to'
-         //then writeln('<li>cmd:'+progt.vari+'/tonil:',progt.head,'</li>');
+         //then
+         //writeln('<li>cmd:'+progt.vari+'///:',progt.xmlis,'</li><hr>');
         if (curtoele = nil) then if not(progt.vari=ns+'to') then
           curtoele := ttag.Create;
           except        writeln('failed commandlist start');      end;
@@ -4733,7 +4731,6 @@ begin
         //if mydebug then
         //writeln('<li>cmd:'+progt.vari+'/tonil:',curtoele=nil,'/oldtonil:<b>',oldto=nil,'</b></li>');
         //except writeln('<li>cmdnolist:',progt.head,curtoele=nil,'</li>');end;
-        // writeln('<li>preparing'+progt.xmlis+':');
         newtag := preparebytag(progt, orignew);// orignew will point to new even if it changed by to/by;
         if newtag = nil then
         begin

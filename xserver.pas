@@ -4,7 +4,9 @@ unit xserver;
 interface
     uses
       {$IFDEF LINUX}
-       cthreads,//cmem,
+       cthreads,
+       cmem,
+      heaptrc,
       {$ENDIF}
       Classes, SysUtils, strutils,FileUtil, //Forms, Controls, //Graphics, Dialogs,
        blcksock, sockets, Synautil,
@@ -654,7 +656,7 @@ begin
  for i:=0 to 100 do
  begin
  logwrite(inttostr(i)+'/get thread, free:'+inttostr(freeths.count));
-  if freeths.count<2 then begin sleep(200);continue;end;
+  if freeths.count<1 then begin sleep(200);continue;end;
      system.entercriticalsection(g_threadpoolcriti);
    //  try
       if freeths.count>0 then
@@ -680,7 +682,7 @@ var
   i: integer;
   serving: tserving;
 begin
-  threadCount:=2;  //this was xommented out for some reason..???
+  threadCount:=4;
   freeths := TList.Create;
   all := TList.Create;
   inuseths := TList.Create;
@@ -1208,7 +1210,6 @@ begin
           redirect('','?login');
         end else
         txseus(myxseus).dosubelements;
-        writeln(GetFPCHeapStatus.MaxHeapUsed);
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed)+'//'+inttostr(Int64(getheapstatus.totalallocated)));
         except  logwrite('fail:'+s);writecustomheaders('HTTP/1.1 200','text/html',-1); writeln('failed xseus.run');  end;
@@ -1227,7 +1228,9 @@ begin
 
       end else
       begin
-      //logwrite('clear');
+        //writeln(getheapstatus.totalallocated);
+        //writeln(GetFPCHeapStatus.MaxHeapUsed);
+        //logwrite('clear');
   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEMPORARiLY comm out:
       txseus(myxseus).Clear;
       //logwrite('cleared');
