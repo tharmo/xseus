@@ -103,7 +103,7 @@ txseus = class(TObject)
     x_databases:tstringlist;
     //x_svars used to be hashstrings, but no point in that
     x_ids: ThashSTRINGs;
-    xx_connections, objectlist, mylocks: TStringList;
+    xx_connections, x_objectlist, x_mylocks: TStringList;
     inihttp, inidecl, inihtml, inihead, inibodyst, inibodyend: string;
     //request: TIdHTTPRequestInfo;
     //response: TIdHTTPResponseInfo;
@@ -1258,6 +1258,7 @@ begin
         resupar.addatt(curtoele.getatt(i));
       resupar.vali:=curtoele.vali;
       curtoele.clearmee;
+      curtoele.free;
       //if t_debug then
      end;
     //writeln('<li>didto:'+copy(resupar.xmlis,1,50)+'___'+copy(curtoele.xmlis,1,50)+'!!!');
@@ -1297,7 +1298,6 @@ begin
   end  else  //of varoutput
   if outfile <> '' then
     begin
-        writeln('result_tofile:'+OUTFILE);
     try
       if (trim(curbyele.vali) <> '') and (curbyele.subtags.Count = 0) then
       begin
@@ -2752,86 +2752,100 @@ var
   i, ii, ers, orefcount: integer;
   ele: ttag;
 begin
-  //exit;
-  try
-    for i:=0 to x_databases.count-1 do
-     tdb(x_databases.objects[i]).free;
-    x_databases.free;
+ // writeln('!');
+ try
+   try
+     if x_started<>NIL THEN   x_started.Free;
+     IF X_STOPPED<>NIL THEN x_stopped.Free;
+   except WRITELN('<li>xxxxstartstop');end;
+   //exit;
+     try
+     IF x_databases<>NIL THEN
+     BEGIN
+       for i:=0 to x_databases.count-1 do
+        tdb(x_databases.objects[i]).free;
+       x_databases.free;
+
+     end;
+    except WRITELN('dbase');end;try
 
     ers := 0;    //c:=0;
-    x_svars.Free;
-    // x_ids.list;
-    //logwrite('<li>vars');
-    try
-      X_HANDLERS.KILLTREE;
-      //logwrite('<li>hans');
-    except
-      writeln('nokillhands');
-    end;
-    try
-      X_RIGHTS.KILLTREE;
+    //x_svars.clear;
+    IF x_svars<>NIL THEN x_svars.Free;
+    except WRITELN('svars');end;try
+     if x_handlers <>nil then       X_HANDLERS.KILLTREE;
+    except writeln('nokillhands');  end;  try
+      if x_rights <>nil then X_RIGHTS.KILLTREE;
       //logwrite('<li>rigs');
-    except
-      writeln('nokillrights');
-    end;
+    except  writeln('nokillrights'); end; try
     if g_memtest then
       writeln('clearbookmarsk:<pre>', x_bookmarks.xmlis + '</pre>',
         elements_CREATED, ' Killed:', elements_FREED);
-    try
-      X_BOOKMARKS.KILLTREE;
+       if x_bookmarks <>nil then
+       begin
+         //x_bookmarks.clearmee;
+         X_BOOKMARKS.killtree;
+
+         //x_bookmarks.clearmee;
+         //x_bookmarks.free;
+       end;
       //logwrite('<li>bms');
-    except
-      writeln('nokillbook');
-    end;
+    except   writeln('nokillbook');  end;
     if g_memtest then
       writeln('cleedarbookmar:', elements_CREATED, ' Killed:', elements_FREED);
     try
-      X_funcs.KILLTREE;
-    except
-      writeln('nokillfun');
-    end;
-    try
+      if x_funcs <>nil then   X_funcs.KILLTREE;
+    except writeln('nokillfun');  end;  try
       //logwrite('<li>goxml');
-      XML.KILLTREE;
+   if xml <>nil then      XML.KILLTREE;
       //XML.freemEE;
       //logwrite('<li>didgoxml');
-    except
-      writeln('nokillXML');
+    except   writeln('nokillXML');  end;   try
+    IF X_MYLOCKS<>NIL THEN
+    begin for i := 0 to x_myLocks.Count - 1 do
+      g_locks.freefile(x_mylocks[i], x_mylocks);
+    x_mylocks.Free;
+
     end;
-    //  c:=c+sizeof(elems);
-    x_started.Free;
-    x_stopped.Free;
-    for i := 0 to myLocks.Count - 1 do
-      g_locks.freefile(mylocks[i], mylocks);
-    mylocks.Free;
-    objectlist.Clear;
-    objectlist.Free;
+    except writeln('locks');end;try
+   IF X_ids<>NIL THEN
+         x_ids.Free;
+    except writeln('ids');end;try
+    IF X_objectlist<>NIL THEN
+    begin     x_objectlist.Clear;
+    x_objectlist.Free;
+    end;
     // c:=c+sizeof(states);
-    x_times.Clear;
+    except writeln('oblist');end;try
+    IF X_times<>NIL THEN
+       begin     x_times.Clear;
     x_times.Free;
 
-    x_ids.Free;
+       end;
+    except writeln('times');end;try
     if x_called then
     begin
       //states.free;
       //elems.free;
       exit;
     end;
+    except writeln('whatever');end;
+
   except
     ers := ers + 1;
     writeln('could not clear somethinv', i);
-    raise;
+    //raise;
   end;
-  if g_memtest then
+  {if g_memtest then
     if x_elemlist <> nil then
       writeln('<li>TOTAL ELEMENTS:', elements_CREATED, ' Killed:', elements_FREED,
-        ' mem:', getheapstatus.totalallocated div 1000, '!</li>');
+        ' mem:', getheapstatus.totalallocated div 1000000, '!</li>');
   if g_memtest then
     for i := 0 to x_elemlist.Count - 1 do
     begin
       try
         orefcount := integer(x_elemrefcount[i]);
-        writeln('<li>free:', i, '/', orefcount);
+        //writeln('<li>free:', i, '/', orefcount);
         if orefcount < 0 then
           writeln('<li>multifreed:', i, ttag(x_elemlist[i]).vari)
         else
@@ -2882,10 +2896,15 @@ begin
         //raise;
       end;
     end;
-  if g_memtest then
-    writeln('<li>freed elemems:', getheapstatus.totalallocated div 1000, '</li>');
+  }
+    //except writeln('<li>fuckupinclear');end;
+  //  exit;
   try
-    {if states <> nil then
+  //   g_memtest:=true;
+  {if g_memtest then
+    writeln('<li>freed elemems:', getheapstatus.totalallocated div 1000000, '</li>');
+  try
+    if states <> nil then
       for i := 0 to states.Count - 1 do
       begin
         try
@@ -2905,26 +2924,38 @@ begin
     //writeln('<li>states cleared' s.count,'(mem:',getheapstatus.totalallocated div 1000,'</li>');
     states.Clear;
     states.Free;
-    }
+
     if g_memtest then
       writeln('<li>stateLIST cleared', '(mem:', getheapstatus.totalallocated div
-        1000, '</li>');
-    x_elemlist.Clear;
-    if g_memtest then
-      writeln('<li>ELE cleared', SIZEOF(x_elemlist), '(mem:',
-        getheapstatus.totalallocated div 1000, '</li>');
-    x_elemlist.Free;
-    if g_memtest then
+        1000000, '</li>');
+      }
+    try
+      IF X_elemlist<>NIL THEN
+      begin
+        x_elemlist.Clear;
+        if g_memtest then
+        writeln('<li>ELE cleared', SIZEOF(x_elemlist), '(mem:',
+          getheapstatus.totalallocated div 1000000, '</li>');
+         x_elemlist.Free;
+
+      end;
+     except writeln('elemes');end;try
+     if g_memtest then
       writeln('<li>ele freed, next eref', SIZEOF(x_elemrefcount), '(mem:',
-        getheapstatus.totalallocated div 1000, ')</li>');
-    x_elemrefcount.Clear;
-    if g_memtest then
-      writeln('<li>EREF cleared', SIZEOF(x_elemrefcount), '(mem:',
-        getheapstatus.totalallocated div 1000, '</li>');
-    x_elemrefcount.Free;
+        getheapstatus.totalallocated div 1000000, ')</li>');
+    IF X_elemrefcount<>NIL THEN
+    begin
+      x_elemrefcount.Clear;
+      x_elemrefcount.Free;
+    //if g_memtest then
+    //  writeln('<li>EREF cleared', SIZEOF(x_elemrefcount), '(mem:',
+    //    getheapstatus.totalallocated div 1000, '</li>');
+
+     end;
+    except writeln('refs');end;
     if g_memtest then
       writeln('<li>EREFcout freed', '(mem:', getheapstatus.totalallocated div
-        1000, '</li>');
+        1000000, '</li>');
     //loc.free;
     // lists.Free;
     //§    ccall.fields.Free;
@@ -2932,7 +2963,7 @@ begin
     //§    ccall.cookies.Free;
 
     if g_memtest then
-      writeln('<li>!--mem after xseus.clear:', getheapstatus.totalallocated, 'B--</li>');
+      writeln('<li>!--mem after xseus.clear:', getheapstatus.totalallocated div 1000000, 'B--</li>');
   except
     ers := ers + 1;
     writeln('Failed to clear xseus ', i);
@@ -2945,7 +2976,8 @@ end;
 
 constructor txseus.Create(principal: txseus);
 begin
-  x_called := False;
+ inherited create;
+{  x_called := False;
   x_cmdline := False;
   x_relation:=nil;
   x_started := Tstarted.Create;
@@ -2975,7 +3007,7 @@ begin
   x_svars := TStringList.Create;
   //x_svars := ThashStrings.Create;
   x_ids := ThashStrings.Create;
-  registertagowner(self, x_elemlist, x_elemrefcount);
+  //registertagowner(self, x_elemlist, x_elemrefcount);
   //    x_svars:TurboHashedStringList;
   //X_SVARS.SORTED:=TRUE;
   //x_svars.duplicates:=dupaccept;
@@ -3015,7 +3047,7 @@ begin
   //LOGWRITE('XXX6');
   g_xseuscfg.logf := nil;
   //LOGWRITE('XXX7');
-
+}
 end;
 
 function txseus.staselect(st: string; def: ttag): TTAG;
@@ -4024,6 +4056,7 @@ begin
               if atpl.subtags.Count > 0 then
 //*********************************************************************************
                result:=doelementlist(atpl.subtags); //else
+          //  curtoele.addsubtag('c','d');
 //*********************************************************************************
           //writeln('<h3>no template</h3>');//<pre>'+curtoele.xmlis+'</pre>');
             except
@@ -4654,7 +4687,7 @@ var
   did, deb,elsepending,mydebug,trying: boolean;
 
 begin
-  //mydebug := true;
+  mydebug := false;
   result:=true;
   ermes:='';
   mydebug := False;
@@ -4775,7 +4808,7 @@ begin
                   //writeln('</ul></li><li>didsub:<b>'+curtoele.head+'</b>',curtoele.parent.head);
                   //if x_started.count=0 then curtoele:=curtoele.parent else curtoele:=x_started.getele;
                 except   writeln('FAILED DOELE noXSE:', progt.vari); logwrite('FAILED DOELE noXSE:'+ curtoele.head);    raise;    end;
-               end;
+               end else mydebug:=true;
              //try
              // thistagroot.addatt('debug="to:'+curtoele.vali+'/started:'+inttostr(x_started.count)+'/olstarts'+inttostr(oldstarts)+'/'
              // + '/from:'+curfromele.vali+ '/oldto:'+oldto.vari+oldto.vali+'  /backto:'+backto.vari+backto.vali+'"');
@@ -4807,7 +4840,7 @@ begin
         try
           //if progt.vari<>ns+'stop' then
           //begin
-          //writeln('<li>did newnil=',newtag=nil, x_started.count,'/onil:', oldto=nil,'/curnil:',curtoele=nil);
+          //if mydebug then writeln('<li>did newnil=',newtag=nil, '/onil:', oldto=nil,'/curnil:',curtoele=nil);
 
           if newtag <> nil then
           begin
@@ -4828,7 +4861,10 @@ begin
            if (x_started.elems.count=0) then //and (oldto<>nil) then
            begin
              if firststarted=nil then //nothing is, nothing was. Ignore the backto, use original oldto
-               begin  curtoele:=oldto;end
+               begin
+                 //if mydebug then writeln('<li>xxx:',curtoele.head,'///',oldto.head);
+                 curtoele:=oldto;
+               end
              else //something had been startged, but no longer is
                begin curtoele:=firststarted;  end;
            end else
@@ -4850,10 +4886,13 @@ begin
          oldstarts:=x_started.elems.count-oldstarts;
          ns := oldns;
             if progt.att(ns + 'marktime') <> '' then  x_times.return;
+            //if mydebug then writeln('<li>clearprog:',newtag.head,'///',oldto.head);
+
             newtag.CLEARMEE; //note: subtags not cleared, they are raw copies (pointers to the original subtags)
+            newtag.free;
           end else writeln('nonewprogtag');
           if orignew <> nil then
-            begin    orignew.clearmee;end;//orignew - copy of original wtih to/by attr removed, placed under to/by element
+            begin    orignew.clearmee;orignew.free;end;//orignew - copy of original wtih to/by attr removed, placed under to/by element
         except writeln('<h3>failed to clear up after cmd: ', progt.vari, '</h3>');     end;
         curbyele:=oldby;
         // writeln('</ul></li><li>diddo:<b>',progt.vari,'</b> /has:',x_started.count,'):',oldto=nil,curtoele=nil);
@@ -5745,10 +5784,10 @@ begin
         _h1('objn2:' + objn);
       if pos('xse:', objn) > 0 then
         objn := ol.substitutex(objn);
-      writeln('<li>ns:' + ns + 'OBOBOBOBO:' + objn + 'IN:', objectlist.Text, '!</li>');
+      writeln('<li>ns:' + ns + 'OBOBOBOBO:' + objn + 'IN:', x_objectlist.Text, '!</li>');
       if objn <> '' then
       begin
-        if (objectlist.indexof(objn) < 0) or (acom.att('reload') = 'true') then
+        if (x_objectlist.indexof(objn) < 0) or (acom.att('reload') = 'true') then
         begin
           //--if FileExistsUTF8(objn) { *Converted from FileExists*  } then
           if FileExists(objn) { *Converted from FileExists*  } then
@@ -5806,7 +5845,7 @@ begin
           if _debug then
             writeln('<h1>obobob cached', objn, '</h1>');
 
-          x_data := ttag(objectlist.objects[objectlist.indexof(objn)]);
+          x_data := ttag(x_objectlist.objects[x_objectlist.indexof(objn)]);
         end;
       end
       else
@@ -6284,12 +6323,90 @@ end;
 
 function txseus.init(url, host, protocol: string; session: ttag; ser: pointer): boolean;
   //form,uploads:tstringlist);
-var
+var principal:txseus;
   serv: tserving;
   posi,i: integer;
   apust:string;
 begin
-  try
+  //result:=true;  exit;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  try  //moved from create
+    x_started := Tstarted.Create;
+    x_stopped := Tstarted.Create;
+    principal:=nil;
+    x_called := False;
+    x_cmdline := False;
+    x_relation:=nil;
+    x_elemlist := TList.Create;
+    x_elemrefcount := TList.Create;
+    //x_elemlist.free;
+    //x_elemrefcount.free;
+    x_databases:=tstringlist.create;
+   // writeln('<li>eles:',x_elemlist=nil);
+    // states := TList.Create;
+    x_mylocks := TStringList.Create;
+    curselectionset := nil;
+    ns := 'xse:';
+    debug := False;
+    if principal = nil then
+    begin
+      // elems:=tlist.create;
+      //states:=tlist.create;
+      t_currentxseus := self;
+    end
+    else
+    begin
+      x_elemlist := principal.x_elemlist;
+      //states := myxs.states;
+    end;
+    //LOGWRITE('XXX1');
+    x_svars := TStringList.Create;
+    x_times := ttimes.Create;
+    //x_times.curxseus := self;
+    x_OBJECTLIST := TStringList.Create;
+    //x_svars := ThashStrings.Create;
+    x_ids := ThashStrings.Create;
+    //registertagowner(self, x_elemlist, x_elemrefcount);
+    //    x_svars:TurboHashedStringList;
+    //X_SVARS.SORTED:=TRUE;
+    //x_svars.duplicates:=dupaccept;
+    //x_svars := TurbohashedStringList.Create;
+    x_bookmarks := ttag.Create;//.create;
+    x_bookmarks.vari := 'xseus_bookmarks';
+    //result:=true;EXIT;
+    x_funcs := ttag.Create;
+    //x_fORM := ttag.Create;
+    //LOGWRITE('XXX2');
+    x_funcs.vari := ns + 'functions';
+    xml := ttag.Create;
+    xml.parent := nil;
+    //!! parse later x_form := ttag.Create;
+    //!!  parse later x_data := ttag.Create;
+    //x_cgi := ttag.Create;
+    //x_cgi.vari := 'cgi';
+    //LOGWRITE('XXX3');
+    x_rights := ttag.Create;
+    x_rights.vari := 'rights';
+    //x_handlers:=ttag.create;
+    //  handlerlist:=TSTRINGLIST.CREATE;
+    //LOGWRITE('XXX4');
+
+    inihttp := '';//'Content-type:text/html'+crlf+'Pragma: nocache'+crlf+crlf;
+    //inidecl :=
+    //  '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//ENG" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+    //  + crlf;
+    inidecl := '<!DOCTYPE html>'+crlf;// PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ' +
+    // 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' + crlf;
+    //LOGWRITE('XXX5');
+    inihtml := '<html>'+crlf;// xlmns="http://www.w3.org/1999/xhtml">';
+    inihead := '<head>'+crlf+'<title>X-seus</title>'+crlf
+      // +'<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />'
+      + '</head>'+crlf;
+    inibodyst := '<body>';
+    inibodyend := crlf+'</body></html>';
+    //LOGWRITE('XXX6');
+    g_xseuscfg.logf := nil;
+    //LOGWRITE('XXX7');
+
     //logwrite('initing:'+url+'!'+host);
     Result := False;
     serv := tserving(ser);
@@ -6297,9 +6414,12 @@ begin
     x_session := session;
     x_serving := serv;
     x_streaming:=false;
-    x_databases:=tstringlist.create;
     randomize;
     x_form := readparamstoform(serv.params);
+
+
+
+
     if serv.xml then
     begin  //put parsed xml-data is params:
       x_form.subtags.add(tagparse(serv.postdata, False, True));
@@ -6336,7 +6456,7 @@ begin
     //read input files
     x_outdir := extractfilepath(x_objectfile);
     SetCurrentDir(x_outdir); { *Converted from SetCurrentDir*  }
-    x_locked := g_locks.trylockfile(x_objectfile, mylocks);
+    x_locked := g_locks.trylockfile(x_objectfile, x_mylocks);
    //x_locked:=false;
     htmlinited:=false;
     if (pos('.htme', x_objectfile) > 0) or
@@ -6378,7 +6498,7 @@ begin
     if x_myhandler.att('lock') = '' then
     begin
       logwrite('freelock:' + x_objectfile);
-      g_locks.freefile(x_objectfile, mylocks);
+      g_locks.freefile(x_objectfile, x_mylocks);
       x_locked := False;
     end
     else
@@ -6388,7 +6508,7 @@ begin
       else
         logwrite('retry locking');
       if not x_locked then
-        x_locked := g_locks.lockfile(x_objectfile, mylocks);
+        x_locked := g_locks.lockfile(x_objectfile, x_mylocks);
       if not x_locked then  //could not obtain a lock for this instance
       begin
         writeln('<h1>' + x_objectfile + ' is locked</h1>');
@@ -7123,7 +7243,7 @@ begin
   if fn = '' then
     fn := x_objectfile;
   //writeln('<li>locked:'+g_locks.locks.text+'</li><li>trylock;'+fn+'</li>');
-  g_locks.lockfile(fn, mylocks);
+  g_locks.lockfile(fn, x_mylocks);
 
 end;
 
@@ -7148,7 +7268,7 @@ begin
   if fn = '' then
     fn := x_objectfile;
   //writeln('<li>beforefree:'+g_locks.locks.text+'</li>');
-  g_locks.freefile(fn, mylocks);
+  g_locks.freefile(fn, x_mylocks);
   //writeln('<li>afterfree:'+g_locks.locks.text+'</li>');
 
 end;
@@ -7987,6 +8107,7 @@ begin
     for k := 0 to newtag.subtags.Count - 1 do
     resuadd(newtag.subtags[k]);
     newtag.clearmee;
+    newtag.free;
   end;
 end;
 function txseus.c_nop: boolean;
@@ -8017,6 +8138,7 @@ begin
      resuadd(newtag.subtags[k]);
    end;
    newtag.clearmee;
+   newtag.free;
   //acom := CurBYEle;
 
   //aputag := xml.subt(acom.att('in'));
@@ -8381,9 +8503,9 @@ function txseus.c_nosave: boolean;
 }
 
 begin
-  logwrite('locks1:' + mylocks.Text);
+  logwrite('locks1:' + x_mylocks.Text);
   try
-    g_locks.freefile(x_objectfile, mylocks);
+    g_locks.freefile(x_objectfile, x_mylocks);
   except
     logwrite('failfreefile');
 
@@ -8391,7 +8513,7 @@ begin
   try
     //   locks.Delete(locks.IndexOf(ifile));
   finally
-    logwrite('locks2:' + mylocks.Text);
+    logwrite('locks2:' + x_mylocks.Text);
 
   end;
 end;

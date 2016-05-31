@@ -3458,7 +3458,7 @@ var i:integer;
 begin
   for i:=0 to recs.count-1 do tasorter(recs.objects[i]).free;
   recs.free;//ords.free;typ.free;
-  //inherited free;
+  inherited free;
 
 end;
 

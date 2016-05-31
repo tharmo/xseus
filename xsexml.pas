@@ -91,14 +91,14 @@ ttag = class(TObject)
     function lastsubtag:ttag; //TAG
     procedure valitovalue;
     //procedure clear;
-    procedure clearmeE;
-    procedure killtree;
     function copytag: ttag;  //TAG
     function copytagnew: ttag;  //TAG
     function clonetag(par:ttag;subs:boolean): ttag;//TAG
     function copyutftag: ttag;   //TAG
     constructor Create;
+    procedure clearmeE;
     destructor freemee;
+    destructor killtree;
     procedure xfree(x: string);
     procedure list(pre: string; res: TStringList);
     procedure listparts(pre: string; var outfile: string; res: TStringList;
@@ -194,9 +194,9 @@ function tagparsexmlis(sl: TStringList): ttag;
 function tagfromfile(fil: string; hdr: TStringList): ttag;
 function tagfromfileind(fil: string): ttag;
 function tagfromfiledots(fil: string): ttag;
-procedure registertagowner(xse: TObject; e,r: TList);
+//procedure registertagowner(xse: TObject; e,r: TList);
 function createtag(par: ttag; vars: string):ttag;
-function createpersistenttag:ttag;
+//function createpersistenttag:ttag;
 function _p_condition(condst:string; ele:ttag):string;
 
 implementation
@@ -396,7 +396,7 @@ begin
   values[vari]:=vali;
   //add(st);
    if vari='id' then txseus(t_currentxseus).x_ids.addobject(myele,cut_rs(st));
- // writeln('addatt:'+st);
+  //writeln('addatt:'+st);
 
 
 
@@ -419,17 +419,21 @@ begin
   //if vari='id' then t_idlist.addobject(self,cut_rs(st));
 end;
 procedure ttag.delatt(st: string);
-var vari, vali:string;p:integer;
+var vari, vali:string;p:integer;ids:thashstrings;
 begin
    p:=attributes.indexofname(st);
   //writeln('<li>delatt:'+st+'/',p);
   if p>=0 then attributes.delete(attributes.indexofname(st));
   //add(st);
    if st='id' then
-   //txseus(currentxseus).x_ids.delobject(self,att('id'));
-   if t_idlist<>nil then
-   t_idlist.delobject(self,att('id'));
+   begin
+    ids:=txseus(t_currentxseus).x_ids;
+    if ids<>nil then
+       ids.delobject(self,att('id'));
+   //if t_idlist<>nil then
+   //t_idlist.delobject(self,att('id'));
    //writeln('<pre>',xmlis,'</pre>');
+   end;
 
 
 
@@ -499,15 +503,17 @@ end;
 
 
 
-procedure registertagowner(xse: TObject; e,r: TList);
+{procedure registertagowner(xse: TObject; e,r: TList);
 begin
   txseus(t_currentxseus) := txseus(xse);
-  t_idlist:=txseus(xse).x_ids;
+  //t_idlist:=txseus(xse).x_ids;
   t_elemlist:=txseus(xse).x_elemlist;
   t_elemrefcount:=txseus(xse).x_elemrefcount;
   //mythreadelems := e;
   //mythreadrefcount := r;
 end;
+removed: no need for threadvars, it is in xseus (???)
+}
 
 
 
@@ -747,7 +753,7 @@ begin
      try
      apust:=apust+s[i];
     //apust:=copy(s,apui+1,length(s)-apui);// else result:='';
-    //ßresult:=trim(result);
+    //¬ßresult:=trim(result);
    // if (pos('"',result)=1) and (length(result)>1) and (result[length(result)]='"') then
    //  result:=copy(result,2,length(result)-2);
    result:=apust;
@@ -876,7 +882,7 @@ var
     avar: string;
   begin
     try
-      //t‰m‰ lienee ihan turha.. piti tulla jotain prolog-unifikaatioita
+      //t√§m√§ lienee ihan turha.. piti tulla jotain prolog-unifikaatioita
       if (1 = 1) and (t = basetag) then
       begin
         propvars.add(propvaris);
@@ -1462,13 +1468,14 @@ begin
   //if txseus(currentxseus).xstarted then
   //  xrefcount := 1;  //for debugging new mem management
 end;}
-function createpersistenttag:ttag;
+{function createpersistenttag:ttag;
 var elemlist:tlist;
 begin
  elemlist:=t_elemlist;
  result:=ttag.create;
  t_elemlist:=elemlist;
 end;
+}
 
 function createtag(par: ttag; vars: string):ttag;
   begin
@@ -1651,8 +1658,9 @@ begin
 end;
 
 constructor ttag.Create;
+var elist:tlist;
 begin
-  inherited Create;
+  //inherited Create;
   xrefcount := 1;
   xquoted := False;
   elements_created:=elements_created+1;
@@ -1661,16 +1669,24 @@ begin
   //attributes := Tstringlist.Create;
   parent := nil;
   //if g_memtest then
-  //if txseus(t_currentxseus) <> nil then
-  //  if txseus(currentxseus).x_elemlist <> nil then
-   if t_elemlist<>nil then
-    begin
-      memregnum:=t_elemlist.count;
-      t_elemlist.add(self);
-      t_elemrefcount.add(pointer(1));
+  if t_currentxseus=nil then exit;
+  elist:=txseus(t_currentxseus).x_elemlist;
+  if elist <> nil then
+  begin
+      memregnum:=elist.count;
+      elist.add(self);
+      txseus(t_currentxseus).x_elemrefcount.add(pointer(1));
      // writeln(t_elemlist.count,'XXXXXXX');
     end
-    else
+   //  if txseus(currentxseus).x_elemlist <> nil then
+   { if t_elemlist<>nil then
+     begin
+       memregnum:=t_elemlist.count;
+       t_elemlist.add(self);
+       t_elemrefcount.add(pointer(1));
+      // writeln(t_elemlist.count,'XXXXXXX');
+     end
+    else }
    //writeln('<span title="created persistent elem / session started">.</span>');
 end;
 
@@ -1683,10 +1699,10 @@ end;
 destructor ttag.freemee;
 begin
   killtree;
-  inherited Free;
+  //inherited Free;
 end;
 
-procedure ttag.killtree;
+destructor ttag.killtree;
 var
   i,curi: integer;done:boolean;curt,nextt:ttag;todos:tlist;    tmp,turha:string;//mydebug:boolean;
 begin
@@ -1715,12 +1731,12 @@ begin
       todos.Delete(todos.count-1);
        if todos.count=0 then BEGIN
          //WRITELN('<LI>NOTHINTODO</UL>');
-         exit;END;
+         break;END;
       try
       nextt:=todos[todos.count-1];
       except writeln('<li>failedkill:'+'!',todos.count); end;
       //writeln('<li>nextup:'+nextt.vari+'</li>');
-      curt.clearmee;
+      curt.clearmee;curt.free;
       if todos.count=0 then BEGIN //WRITELN('<LI>NOTHINTODOnext</UL>');
         exit;END;
      end else
@@ -1744,7 +1760,10 @@ begin
   end;
 
   finally
-     todos.free;
+  todos.free;
+  clearmee;
+
+  //inherited free;
    // writeln('</ul><h4>killed</h4>');
   end;
 end;
@@ -1791,18 +1810,18 @@ begin //note does not clear subtags in testmem-state
     try
     if g_memtest then
     begin
-      orefcount:=integer(t_elemrefcount[memregnum]);
+      orefcount:=integer(txseus(t_currentxseus).x_elemrefcount[memregnum]);
       //writeln('<li>clear:',vari,orefcount,'(',xrefcount,' ',memregnum);
        //this for temporary test-system to find memory-leaks or extra attemps to free
        try
-        t_elemrefcount[memregnum]:=pointer(orefcount-1);
+        txseus(t_currentxseus).x_elemrefcount[memregnum]:=pointer(orefcount-1);
        except
-         writeln('refcounterrorB:',vari,memregnum,'/', t_elemrefcount.Count)
+         writeln('refcounterrorB:',vari,memregnum,'/', txseus(t_currentxseus).x_elemrefcount.Count)
        end;
        if orefcount<>xrefcount then writeln('refcountcounters differ',vari);
     end;
     except
-      writeln('refcounterrorA:',vari,memregnum,'/', t_elemrefcount.Count)
+      writeln('refcounterrorA:',vari,memregnum,'/', txseus(t_currentxseus).x_elemrefcount.Count)
     end;
     xrefcount := xrefcount - 1;
    // if vari='root' then writeln('<h2>','KILLROOT','</h2>');
@@ -1849,7 +1868,7 @@ begin //note does not clear subtags in testmem-state
   except
     writeln('<li>memory-error</li>');
   end;
-  inherited free;
+  //inherited free;
 end;
 
 
@@ -1918,7 +1937,7 @@ var
       for ii := curpos + 1 to len do
       begin
         c := lin[ii];
-        //if c='§' then break;
+        //if c='¬§' then break;
         //if c=' '  then
         //    continue;
         if skipwhite then
@@ -4294,7 +4313,7 @@ begin
           if pos('/', pathst)>0 then
           pathst := copy(pathst, pos('/', pathst), length(pathst))
           else begin result.add(tag);exit;end;
-          //try writeln('<li>..pathts:'+tag.vari+tag.parent.vari+'</li>'); except writeln('noÂparemt');end;
+          //try writeln('<li>..pathts:'+tag.vari+tag.parent.vari+'</li>'); except writeln('no√•paremt');end;
         end;
         //if pos('testselect',pathst)>0  then writeln('<XMP>xxselect:!'+pathst+'!'+tag.xmlis+'!</XMP>');
         if pathst = '' then
@@ -5268,7 +5287,7 @@ var
   totag,fromtag: ttag;
   FROMS,TOS:tlist;
 begin
-  result:=ttag.create;
+  //result:=ttag.create;
   i:=0;
   tos:=tlist.create;
   froms:=tlist.create;
@@ -5282,8 +5301,8 @@ begin
   //WRITELN('<li>startCOPYY',fromtag.VARI,froms.count);
   while froms.count>0 do
   begin
-    i:=i+1;
-    if i>100 then exit;
+    //i:=i+1;
+    //if i>100 then exit;
     subtogo:=fromtag.subtags.count-totag.subtags.count;
     if subtogo=0 then  //bactrack
     begin
@@ -5308,6 +5327,7 @@ begin
     //writeln('</li><li>-cc;',result.vari,result.subtags.count,'</li></ul>');
    //    Result := ;
    finally
+    froms.clear;tos.clear;
    froms.free;tos.free;  end;
 end;
 function ttag.copytagnew: ttag;
@@ -5845,7 +5865,7 @@ begin
   begin
     if (tmpinde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
     Result := '<' + vari //+' inde="'+inde+'"'
-      //  <b> joo</b>  <em>joo  </em> miss‰ v‰lit
+      //  <b> joo</b>  <em>joo  </em> miss√§ v√§lit
       // ent' <pre>
     else
     Result := ^j + tmpinde+'<' + vari ;//inde="'+inde+'"';

@@ -43,7 +43,8 @@ const
  //both: <meta><br><hr> <col><img> <base><area><input>
   //g_myurl = 'http://valtweb.pc.helsinki.fi/cgi-shl/cgitalk.exe';
 
-const bucketcount=128;
+  //const bucketcount=128;
+  const bucketcount=1;
 
 type
  thashstrings = class(tobject)
@@ -188,7 +189,8 @@ threadvar             //why not part of a txseus??
   //t_context: tidcontext;
   t_currentxseus: pointer; //txseus
   t_thisprocess: pointer;//Tserving;
-  t_idlist:thashstrings;t_elemlist,t_elemrefcount:tlist;
+  //t_idlist:thashstrings;
+  //t_elemlist,t_elemrefcount:tlist;
   t_writehandler:ttextrec;
   t_outbuffer:tmemorystream;
   //t_keepbuff:boolean; //wonder what this was for...
@@ -206,7 +208,7 @@ const
 
 const //g_ds='/';
  g_memtest=false;
- // g_memtest=true;     x
+ // g_memtest=true;
 procedure logshow(st: ansistring);
 procedure logwrite(st: ansistring);
 procedure initcriticals;
@@ -737,6 +739,8 @@ begin
     //config:=(config.subtags[0]);
     logwrite('readingconfig');
     config := tagfromfile(inif, nil);
+  except   logwrite('failed to getconfig' + inif);  end;
+  try
     //logwrite('readconfig'+config.xmlis);
     //writeln('!' + config.vari + '!read config! ' + config.xmlis);
 
@@ -750,9 +754,14 @@ begin
   try
   mimetag:=config.subt('mimetypes');
   sessiontimeout:=config.subs('sessiontimeout');
+  except   logwrite('failed to config  mimetypes' + inif);  end;
+  try
   if mimetag=nil then
   begin
+     try
       mimetag:=ttag.create;
+     except   logwrite('failed to create mimetag' + inif);  end;
+
       mimetag:=tagparse('<mimetypes><type mime="text/plain" ext="txt"/>'+
         '<type mime="text/html" ext="htm"/>'+
         '<type mime="text/html" ext="html"/>'+
@@ -760,9 +769,13 @@ begin
         '<type mime="text/css" ext="css"/>'+
         '<type mime="text/javascript" ext="js"/>',false,false);
   end;// else
+  except   logwrite('failed to read mimetag' + inif);  end;
+  try
   mimelist:=mimetag.subtags;
   defheaders:=tstringlist.create;
   dht:=config.subt('defaultheaders');
+  except   logwrite('failed to create mimelist' + inif);  end;
+  try
   if dht=nil then
   begin
     defheaders.add('transfer-encoding=chunked');
@@ -780,10 +793,7 @@ begin
   end;
   //logwrite('mimetypes:'+mimetag.xmlis);
   //logwrite('defheads:'+defheaders.text);
-  except
-    logwrite('failed to read mimetypes' + inif);
-    //exit;
-  end;
+  except   logwrite('failed to read mimetypes' + inif);  end;
 
   //for i:=0 to config.subt('mimelist').subtags.count-1 do
   //   mimelist.add(ttag(config.subt('mimelist').subtags[i]).att('ext')+'='
@@ -852,6 +862,7 @@ end;
 
 constructor tstarted.Create;
 begin
+  //inherited create;
   elems := TList.Create;
   pars := TList.Create;
 end;
@@ -860,6 +871,7 @@ destructor tstarted.Free;
 begin
   elems.Free;
   pars.Free;
+  //inherited free;
 end;
 
 procedure tstarted.add(ele, par: pointer);

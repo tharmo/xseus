@@ -609,7 +609,7 @@ end;
 
 procedure tserving.Execute;
 var
-  newStatus: string;
+  newStatus: string;smem:carDINAL;
 begin
   //fStatusText := 'tservthread Starting...';
   fStatusText := 'tservthread Running...';
@@ -618,18 +618,20 @@ begin
     try
     logwrite('Open connection '+'/'+sock.getremotesinip+':'+inttostr(sock.getremotesinport));
     HeaderHasBeenWritten := False;
+    smem:=getheapstatus.totalallocated;
     attendconnection(sock);
-    logwrite('Close socket'+inttostr(sock.getremotesinport));
+    //logwrite('Close socket'+inttostr(sock.getremotesinport));
    // SOCK.PURGE;
     //sock.free;
     finally
       try
+      xseusserver.servs.dorelease(self);
       sock.CloseSocket;
       sock.purge;
-      //sock.free;
-      xseusserver.servs.dorelease(self);
-      finally
       suspend;
+      //sock.free;
+      finally
+      logwrite('connectionmemlost:'+floattostr(getheapstatus.totalallocated-smem));
       end;
     end;
   end;
@@ -682,7 +684,7 @@ var
   i: integer;
   serving: tserving;
 begin
-  threadCount:=4;
+  threadCount:=1;
   freeths := TList.Create;
   all := TList.Create;
   inuseths := TList.Create;
@@ -1048,8 +1050,10 @@ var
   timeout: integer;
   s,st,str,cmd,ext,ctype,mime: string;
   hvari,hvali,resutext: string;
+  smem:cardinal;
   keepxseusalive,restfull:boolean; //rest file put
   i,vc,ResultCode,hposi: integer; //contlen,
+
   //mystream:tstringstream;
 
 begin
@@ -1167,6 +1171,13 @@ begin
     try
     try //doxeus
       //logshow('url'+uri);
+      smem:=getheapstatus.totalallocated;
+      //exit;
+      {txseus(myxseus):=txseus.create(nil);
+      if txseus(myxseus).init(uri,host,protocol,session.sestag,self) then //params,uploads);
+      txseus(myxseus).Clear;
+      logwrite('<li>xseusmemlost:'+floattostr(getheapstatus.totalallocated-smem));
+      exit;}
       if not xseusserver.serverchunked then
       begin
         //t_keepbuff:=true;
@@ -1209,7 +1220,10 @@ begin
           //sethe§ader('location','http://localhost:8001/notes/notes.htmi/login.htmi');//url+formst);
           redirect('','?login');
         end else
+
+        /////////**********************
         txseus(myxseus).dosubelements;
+        /////////**********************
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed)+'//'+inttostr(Int64(getheapstatus.totalallocated)));
         except  logwrite('fail:'+s);writecustomheaders('HTTP/1.1 200','text/html',-1); writeln('failed xseus.run');  end;
@@ -1231,12 +1245,12 @@ begin
         //writeln(getheapstatus.totalallocated);
         //writeln(GetFPCHeapStatus.MaxHeapUsed);
         //logwrite('clear');
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEMPORARiLY comm out:
+      //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEMPORARiLY comm out:
       txseus(myxseus).Clear;
       //logwrite('cleared');
       logwrite('freed:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
       txseus(myxseus).free;
-      //logwrite('freedxseus:');
+      writeln('<li>memlost in connection:///////////////////'+floattostr(getheapstatus.totalallocated-smem));
       end;
      except   writeln('failed xseus.clear'); raise; end;
              //xseus cleared
@@ -1279,6 +1293,7 @@ begin
   params.clear;
   requestheaders.free;
   responseheaders.free;
+  //t_outbuffer.Free;
   end;
    //xseus cleared
    logwrite('/closed:'+uri+' for serving '+inttostr(id)+'/a:'+floattostr(getheapstatus.TotalFree));
@@ -1374,7 +1389,7 @@ begin
     if (not Terminated) and (listenersocket.CanRead(1000))  then
     begin
     //  if g_livesession<>nil then aserverprocess:=g_livesession else
-    //  logwrite('dolsit:'+inttostr(stimes));
+      logwrite('***************listernconnection:'+inttostr(stimes));
       aserverprocess := xseusserver.servs.obtain;
       if aserverprocess=nil then
       logwrite('NOconnection'+inttostr(xseusserver.servs.freeths.count));
