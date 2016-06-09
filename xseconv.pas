@@ -21,7 +21,7 @@ public
  function getstring:string;
  function steppaa:char;
  function skippaa:char;
- function getlist(vari:string):ttag;
+ //function getlist(vari:string):ttag;
  function oldgetobjects(basetag:ttag;liststring:string):boolean;
  function getobjectlist(basetag:ttag;defname:string):tlist;
  function getvalue(basetag:ttag;defname:string):ttag;
@@ -29,6 +29,9 @@ public
  function getarray(basetag:ttag;defname:string):ttag;
  constructor create(sr:string);
 end;
+//  function tjson.getlist(vari:string):ttag;
+//  begin
+//  end;
 
 function tjson.steppaa:char;
 begin
@@ -111,6 +114,7 @@ begin
     //writeln('<li>gotvalx:'+basetag.xmlis+'</li>');
  end;
 end;
+
 function tjson.getobjectlist(basetag:ttag;defname:string):tlist;
   var ch:char;anam,aval:string;ntag:ttag;
   begin
@@ -228,9 +232,6 @@ begin
        end;
    until curpos>len;
 
-end;
-function tjson.getlist(vari:string):ttag;
-begin
 end;
 
 constructor tjson.create(sr:string);

@@ -27,6 +27,7 @@ uses
   SysUtils, strutils,
   Classes, dateutils,// Controls, //syncobjs,
   fileutil,
+  xsestrm,
   //what is this: uhashedstringlist,
   //xsesta,
   xseglob,
@@ -284,6 +285,7 @@ txseus = class(TObject)
     //parsers etc
     function c_parse: boolean;  //takes xml-text, produces xml elements
     function c_markdown: boolean;
+    function c_streamread: boolean;
     function c_parsexse: boolean;
     function c_parsecdata: boolean;
     function c_ical: boolean;
@@ -394,6 +396,21 @@ toselector, torootsel,fromselector: string;
 toselected,fromselected:pointer;
 toselecti:integer;
 next:trelation;}
+function txseus.c_streamread: boolean;
+var s:tstreamer;smem:cardinal;
+begin
+ smem:=getheapstatus.totalallocated;
+ s:=tstreamer.create(curbyele.att('file'),curtoele);
+ s.skip:=curbyele.att('skip');
+ //curtoele.subtags.add(s.parsexsi());
+// writeln('<li>streamermade,memlost=',getheapstatus.totalallocated-smem);;
+    s.doparse;
+    s.free;
+//    writeln('<li>streamerfreed,memlost=',getheapstatus.totalallocated-smem);;
+
+ //s.parsexsi();
+ //writeln('<hr><hr><hr><hr><hr><hr>');
+end;
 
 function txseus.c_js:boolean;
 var jssource,js:tstringlist;
@@ -720,11 +737,11 @@ function txseus.c_sqlprepare: boolean;
 //needs a connection with open transaction and query
 var ret:ttag;db:tdb;
 begin
-  writeln('<li>prepare ',x_databases.Count,curbyele.xmlis);
+  writeln('<li>preparequery ',x_databases.Count,curbyele.xmlis);
    db:=getdb_sql(curbyele.vali,x_databases);
    writeln('<li>db: ',db.name);
    db.sql_prepare(curbyele.att('q'));
-   writeln('<li>prepared: ',db.name,' /query:',db.Q.SQL.text,' /params:',db.q.Params.count);
+   writeln('<li>preparedquery: ',db.name,' /query:',db.Q.SQL.text,' /params:',db.q.Params.count);
 
 end;
 
@@ -843,6 +860,7 @@ begin
      for i:=0 to curtoele.subtags.count-1 do st := st+ttag(CurToEle.subtags[i]).listxml('', False, False)
    else
     st := CurToEle.listxml('', False,false);
+   //st:='writeelement disabled';
     //logwrite('testwrite:'+st+'!!!!'+curtoele.head);
     //if t_debug then
     except try writeln('fail curtoele list');//writeln('<li>failed nogotoutputst:'+curtoele.head+'!!!',x_started.count,x_stopped.count,'!!!</li>',curtoele.subtags.count);
@@ -862,8 +880,9 @@ begin
       //logwrite('wasinited:'+curtoele.vari+'!!!'+st+'!!!');
       htmlinited := True;
       //writeln('writetxt:');
-
+      //for i:=1 to 1000 do
       if st<>'' then writeln(st);
+     // if st<>'' then writeln(st);
       //logwrite('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD'+st);
     end;
 
@@ -4135,7 +4154,7 @@ begin
       if pos('attributes::', CurBYEle.att('select')) > 0 then
         for i := 0 to sels.Count - 1 do
         begin //writeln('<li>killatt:',i,ttag(sels[i]).vari);
-          ttag(sels[i]).clearmee;
+          ttag(sels[i]).clearmee;ttag(sels[i]).free;
         end;
       sels.Clear;
       sels.Free;

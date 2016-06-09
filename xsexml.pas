@@ -48,7 +48,7 @@ ttag = class(TObject)
   public
   //   function hasattribute(vari: string): boolean;
     vari, vali: ansistring;
-    memregnum, hasindent: integer;
+    memregnum, hasindent: integer;  //hasindent is only used in xmlis-parse, shall be removed from here
     subtags: TList;
     parent  //,xselected
     : ttag;
@@ -1436,6 +1436,7 @@ begin
     begin
        Result := basetag.subtags[0];
       basetag.clearmee;
+      basetag.free;
     end else
          Result := basetag;
     //writeln('<li>gotresults');
@@ -1762,6 +1763,7 @@ begin
   finally
   todos.free;
   clearmee;
+ // inherited free; //????????
 
   //inherited free;
    // writeln('</ul><h4>killed</h4>');
@@ -1991,46 +1993,6 @@ var
             tagi.addatt(trim(par));
             par := '';
             curpos := ii + 1;
-
-
-          {I HAD CHANGEd TO THIS, CANNOT NOW SEE WHY
-          if c = ' ' then
-          begin
-            //if trim(par)<>'' then tagi.attributes.add(par);
-            if trim(par)<>'' then
-            begin
-              if pos('=',par)>1 then
-              begin
-               tagi.addatt(trim(par));
-               thisfar:=ii;
-              end else
-              begin
-               curpos:=thisfar;
-               exit;
-              end;
-            end;]]]
-            par := '';
-            skipwhite := True;
-            //writeln('<li>aat:',tagi.attributes.text,'</li>');
-          end
-          else
-          if c = '"' then
-            inq := True
-          else
-            par := par + c;
-        end; //for-loop
-      end;
-      if trim(par) <> '' then
-        //tagi.attributes.add(par);
-        if pos('=',par)>1 then
-        tagi.addatt(trim(par)) else
-        begin
-           curpos:=thisfar;
-           exit;
-        en;
-      par := '';
-      curpos := ii + 1;
-      }
     except
       writeln('failed parseatts in parseindents');
     end;
@@ -2065,18 +2027,6 @@ var
     if curpos>len then exit;//begin    writeln('<li>finis:'+tag.head)+'|</li>');   exit;end;
     repeat
       ch := src[curpos];
-      {if ch = '#' then
-        if (curpos + 1 < len) and (line[curpos + 1] = '#') and
-          (line[curpos + 2] = '#') then
-        if (curpos=1) or (line[curpos-1]<>'\') then
-        begin
-        //writeln('<li>nogobslash');
-        exit end else
-        begin
-           //delete(result,length(result),1);
-           result:=copy(result,1,length(result)-1)+'###';
-           curpos:=curpos+3;continue;
-        end;}
       if ch = '''' then
         if (curpos + 1 < len) and (line[curpos + 1] = '''') and
           (line[curpos + 2] = '''') then
@@ -2084,26 +2034,6 @@ var
           inquotedpar := True;
           exit;
         end;
-          //!!end;
-      {if ch + 'noescapin' = '\' then
-      begin
-        nch := src[curpos + 1];
-        curpos := curpos + 2;
-        case nch of
-          '"': Result := '"';
-          '\': Result := Result + '\';
-          '/': Result := Result + '/';
-          'f': Result := Result + ^J;
-          'n': Result := Result + crlf;
-          'r': Result := Result + ^M;
-          't': Result := Result + #09;
-          'b': Result := Result + ^H;
-          '#': Result := Result + '#';
-          else
-            curpos := curpos - 1;
-        end;
-      end
-      else}
       begin
         Result := Result + src[curpos];
         curpos := curpos + 1;
@@ -2112,36 +2042,15 @@ var
     //Result := trimright(Result);
   end;
 
-{ function _gettextline(st:string):string;
- var i,len:integer;
- begin
-   result:='';
-   len:=Length(st);
-   i:=0;
-   while i<len do
-   begin
-    i:=i+1;
-    if st[i]='\' then
-
-   if st[i]='#' then break
-   else  result:=st[i];
-
- end;
-}
 
 var
   curpos: integer;tagword,startwhite:string;
   inquotedpar,incommentedpar: boolean;
 begin
-  //roottag := self;
-  //partag := roottag;
-  //thistag := roottag;
   partag := nil;
   roottag := nil;
-  //roottag.vari:='ROOT';
   inquotedpar := False;
   incommentedpar := False;
-  //roottag.indent := -1;
   try
     for i := 0 to sl.Count - 1 do
     begin
@@ -2155,7 +2064,7 @@ begin
             partag.vali:=partag.vali+copy(sl[i],0, pos('''''''', sl[i])-1);
             continue;
           end;
-          partag.vali := partag.vali + sl[i] + crlf;
+          partag.vali := partag.vali + sl[i] + lf;
           continue;
         end;
         if trim(sl[i]) = '' then
@@ -2186,9 +2095,6 @@ begin
             begin //writeln('endcomment');
              thisind:=prevind;continue;
             end else incommentedpar:=false;
-        //if (line[1]<>'.') and (i<>0) then
-        //writeln('<li>try extract word1 in:',curpos, 'line:'+line,'/fw:',copy(line,thisind,999)+'</li>');
-        //FOUND INDENTATION
         if line[curpos] = '#' then
         begin
           if copy(line,curpos,3)='###' then incommentedpar:=true;
@@ -2242,7 +2148,7 @@ begin
             thistag.vari := '';//VALUE
             thistag.vali := _gettextval(line, curpos, inquotedpar);
             //thistag.vali := copy(line, curpos+1, length(line));
-            if startwhite=crlf then thistag.vali:=crlf+thistag.vali;
+            if startwhite=crlf then thistag.vali:=lf+thistag.vali;
             //writeln('<li>gottextline:',curpos,'|',thistag.vali,'',line[curpos],'</li>');
             //thistag.listraw;
           end;
@@ -2253,13 +2159,6 @@ begin
         begin
            _getfirstword(line, curpos);
            tagword:=copy(line, ichars, curpos - ichars);
-           //if (curpos = ichars) and (line[curpos] = ':') then
-           //first non.ind char was ":"
-          {if partag=roottag then
-          begin
-
-          end else
-          }
           thistag := ttag.Create;
           thistag.hasindent := thisind;
           if partag = nil then
@@ -2273,8 +2172,7 @@ begin
            end;
           //line:=copy(line,thisind,length(line));
           thistag.vari := tagword; //copy(line, ichars, curpos - ichars);
-          //logwrite('elem:'+thistag.vari+inttostr(curpos)+' // '+inttostr(ichars)+' //'+line+'//'
-          //+inttostr(length(line)));
+          //logwrite('elem:'+thistag.vari+inttostr(curpos)+' // '+inttostr(ichars)+' //'+line+'//'+inttostr(length(line)));
           partag := thistag;
           if (length(line) > curpos) then
             //##SYNTAX CHANGE if line[curpos]='(' then  //atts ( start directly
@@ -2337,7 +2235,7 @@ begin
    if (ch=^M) then
    begin
      //if result='' then
-     result:=result+crlf+indent+'. '
+     result:=result+lf+indent+'. '
      ;//else
      //result:=result+crlf+indent+'  ';
     //result:=result+^M^J+indent+'. ';

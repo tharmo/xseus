@@ -365,7 +365,7 @@ begin
             aput2.setatt('to',todir);
            end;
            result:=_ataghaveright(aput,fromdir,todir,rig);
-           aput.killtree;aput2.clearmee;
+           aput.killtree;aput2.clearmee;aput2.free;
     end;end;
 procedure toid.populate;
 begin
