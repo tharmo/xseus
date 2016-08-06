@@ -2811,7 +2811,7 @@ var p_part,p_whole:string;
 begin
   namepars(p_part,p_whole,parlist,pars);
   result:=inttostr(pos(p_part,p_whole));
- // writeln('<li>',result,p_part,'_in_',p_whole);
+  //writeln('<li>',result,p_part,'_in_',p_whole,'!');
  // writeln('<li>',pars.text,pars.count);
 end;
 

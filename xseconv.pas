@@ -15,7 +15,6 @@ uses xsemisc,lazutf8;
 type tjson=class(tobject)
    //-- added public
 public
-
  src:string;resu:string;
   curpos,stpos,epos,len:integer;
  function getstring:string;

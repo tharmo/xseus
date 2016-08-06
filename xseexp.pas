@@ -220,6 +220,7 @@ begin
     sta:=sta+1;
     //for i:=sta to
     spec:=_uptoany(st,'(/:',sta,sta,10);
+    writeln('<li>BG**',spec,'__',st);
    //WHY THIS: if st[sta-1]='/' then sta:=sta-1;
     //t_debug:=true;  =!from/
     //function _fetchst(findfrom,tofind:string;{var} sto:integer;sta,maxlen:integer):string;
@@ -271,17 +272,19 @@ begin
       begin
        try
        //NOT WORKING! or i dont remember how...
-       //writeln('<li>getbookmark:',sta,'//',st,'!!');
+       try
+       writeln('<li>getbookmark:',sta,'//',st,'!!!<pre>',xs.x_bookmarks.xmlis,'</pre>');
+       except writeln('<li>failbmlist:',xs.x_bookmarks.head);end;
        loc:=_uptoany(st,')',sta,sta,100);
-       //writeln('<li>/:',loc,'_',sta);
+       writeln('<li>/:',loc,'_',sta);
        if sta<length(st) then if  st[sta]='/' then sta:=sta+1; //UGLY
-        //writeln('<li>bookmarx/:!!!',loc,'!!!',length(st),'!<b>',copy(st,sta,999)+'!</b>');
+       writeln('<li>bookmarx/:!!!',loc,'!!!',length(st),'!<b>',copy(st,sta,999)+'!</b></b>');
         res := xs.x_bookmarks.subt(loc);
-        if (res<>nil) and (res.subtags.count>0) then res:=res.subtags[0] else res:=nil;
-        //if res<>nil then writeln('<li>@@@'+loc+'!<pre>'+res.xmlis+'</pre>',copy(st,sta,99)+'!</li>')
+        //if (res<>nil) and (res.subtags.count>0) then res:=res.subtags[0] else res:=nil;
+       if res<>nil then writeln('<li>@@@'+res.vari,res.subtags.count,'::',loc+'!<pre>'+res.xmlis+'</pre>',copy(st,sta,99)+'!</li>')
         //if res<>nil then writeln('@@@'+loc+'!'+res.vari+'!rest:',copy(st,sta,99)+'!</li>')
-        //else
-        //writeln('NOBOOKM:<pre>!',xs.x_bookmarks.xmlis,'!</pre>');
+       else
+        writeln('NOBOOKM:',loc,'<pre>!','!</pre>');
        except   writeln(' --nononbiik--');res:=nil; end;
      end
       else

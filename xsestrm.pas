@@ -2,71 +2,439 @@ unit xsestrm;
 
 {$mode delphi}
 
-interface
+{TODO
+ - json, xml
 
+ - streamseek previous pos
+ or
+ - save lines
+
+ - nested sapply's (stream thru subtags)
+  .. substreams  .. prepared
+}
+
+interface
 uses
-  Classes, SysUtils,xsexml;
-//function xmistreamer(fname: String): ttag;
-type tstreamer = class(tobject)
-//constructor Create(CreateSuspended: boolean;);
+
+  Classes, SysUtils,xsexml,math;
+
+type tstreamlevel=class;
+
+tstreamer = class(tobject)
 sfile:tfilestream;
-fname,skip:string;
+fname:string;
 eof:boolean;
-//smem:carDINAL;
-resutag:ttag;
-curline,prevline,lastcline:string;
-//partag, thistag, prevtag, roottag: ttag;
-inskip,inquotedpar,incommentedpar,done: boolean;
-curind,prevind:integer;
-constructor Create(filee:string;resu:ttag);
+curline,prevline:string;
+inquotedpar,incommentedpar: boolean;
+curlineind,prevind,
+curlevel,targetdepth,limitti,changedlev:integer;//,skipbelow
+level: tstreamlevel;
+levels:tlist;
+constructor Create(filee:string;resu,acom:ttag);
 destructor free;
+function gettag(vari:string;curlinepos:integer):ttag;
+procedure skiplevel(dto:integer);
+function getlevel(par:ttag;dto:integer):boolean;
 function ReadLine:boolean;
-//function parsexsi: ttag;
-function parseline: ttag;
-function newparsexsi: ttag;
-//protected
- procedure doparse; //override;
+function ReadLinejson:boolean;
+function createlevels(acom:ttag):tlist;
+function parseline(line:string):ttag;
+function getfirstword(lin: string; var curpos: integer): string;
+function next(lev,ind:integer;res:ttag): ttag;
 end;
 
+tjsonstreamer = class(tstreamer)
+ nextup,nextdown:integer;
+ nextch:ansichar;
+ parts:tstringlist;
+ function ReadLine(var ari,ali:string):boolean;virtual;
+ constructor Create(filee:string;resu,acom:ttag);virtual;
+ destructor free;
+// function next(lev,ind:integer;res:ttag): ttag;virtual;
+{sfile:tfilestream;
+fname:string;
+eof:boolean;
+curline,prevline:string;
+inquotedpar,incommentedpar: boolean;
+curlineind,prevind,
+curlevel,targetdepth,limitti,changedlev:integer;//,skipbelow
+level: tstreamlevel;
+levels:tlist;
+constructor Create(filee:string;resu,acom:ttag);
+procedure skiplevel(dto:integer);
+function ReadLine:boolean;
+function ReadLinejson:boolean;
+function createlevels(acom:ttag):tlist;
+function parseline(line:string):ttag;
+function getfirstword(lin: string; var curpos: integer): string;
+}
+function getlevel(par:ttag;dto:integer):boolean;
+function next: ttag;
+//function gettag(lev:tstreamlevel):ttag;
+end;
+
+tstreamlevel=class(tobject)
+ s:tstreamer;
+ prev:tstreamlevel;
+ lev,ind:integer;
+ lookingfor:string;
+ tagi:ttag;
+ pos:int64;
+ constructor create(leve:integer);
+ destructor free;
+ function dbug:string;
+  end;
 
 implementation
 uses xsemisc,xseglob;
 
-procedure doone;
+{function tjsonstreamer.gettag(lev:tstreamlevel):ttag;
+var p:integer;atag:ttag;vall,varl:string;
 begin
- writeln('<li>gotone');
+parts.clear;
+atag:=nil;
+p:=_split(curline,'"',PARTS);
+if p=3 then begin vall:='';varl:=parts[1];end
+else if p=5 then begin vall:=parts[3];varl:=parts[1];end
+else if nextdown>0 then
+begin vall:='';varl:='item';end else begin vall:='';  varl:='';end;
+//ind:=copy('                             ',1,curlineind*2);
+if varl<>'' then
+begin
+//writeln('<li>','<b>',varl,'</b>:',vall, '<small>(',curline,curlineind,')</small>',p);
+atag:=ttag.create;
+atag.vari:=varl;atag.vali:=vall;
+//curlevel:=curlevel+1;
+//level:=levels[curlevel];
+if lev<>nil then
+begin
+if level.tagi<>nil then begin //writeln('<li>kill:',level.tagi.xmlis);
+  level.tagi.killtree;end;
+  level.tagi:=atag;
+//if level.tagi<>nil then begin writeln('<li>new:',level.tagi.xmlis);end;
+end;
+//level.ind:=curlineind;
+//writeln('<li>got:',curlevel,atag.vari,'/',nextdown,'!');
+
+end;
+result:=atag;
+end;
+}
+constructor tjsonstreamer.Create(filee:string;resu,acom:ttag);
+begin
+//parts:=tstringlist.create;
+nextup:=0;nextdown:=0;
+nextch:=#0;prevline:='';limitti:=0;
+inherited;
+writeln('<li>jsonstream created;<ul>');
+//readline;
+end;
+destructor tjsonstreamer.free;
+begin
+ inherited free;
+end;
+
+function tjsonstreamer.getlevel(par:ttag;dto:integer):boolean;
+var i,odown:integer;vari,vali:string;atag:ttag;
+begin
+  //exit;
+   odown:=nextdown;
+   result:=false;
+   //writeln('<li>dodo:',curline,dto,'/',curlineind,'<ul>');
+   repeat
+    nextdown:=0;
+    readline(vari,vali);
+    if eof then break;
+    //par.vali:=curline;
+    //if eof then exit;
+    //if curlineind<=dto then  break;
+    //cp:=1;
+    //writeln('<li>gotsub:',curline,'??',nextdown,'(',curlineind,'/',dto,')');
+    //if trim(curline)='' then break;
+    //atag:=gettag(nil);
+    atag:=ttag.create;atag.vari:=vari;atag.vali:=vali;
+    curlineind:=curlineind+nextdown;
+    //if atag.vari='lemmacomp' then break;
+    if atag<>nil then
+    begin
+     par.subtags.add(atag);
+     atag.parent:=par;
+    end;
+    //atag.parent:=par;
+    if nextdown>0 then
+    begin
+      //writeln('<li>dolev:',curlineind);
+      getlevel(atag,curlineind);
+      //writeln('<li>didlev:',curlineind,'/',dto);
+    end;
+    //nextdown:=0;
+    if curlineind<dto then
+    begin
+      //writeln('<li>end:',curline,curlineind,'/',dto);
+      //break;
+
+    end;
+   until curlineind<dto ;// (lookingat<2);
+   //end;
+   //prevline:=curline;
+   //prevind:=curlineind;
+   nextdown:=odown;
+   //writeln('</ul><li>diddo:',curline,curlineind,'!',dto);
+end;
+
+function tjsonstreamer.next: ttag;
+var i,p:integer;varl,vall:string;atag:ttag;
+begin
+//writeln('<li>gotmore:',curline,'??',curlineind,'/',curlevel);
+changedlev:=levels.count;
+while not eof do
+ begin
+  try
+  readline(varl,vall);
+
+  //writeln('<li>',varl,'==========',vall);
+  if sfile.position>=sfile.size then eof:=true;
+  limitti:=limitti+1;
+  //if limitti>5000 then begin eof:=true;break;end;
+  if eof then break;
+   //writeln('<li>try:',curlevel,varl,'=',level.lookingfor,'/<b>',curlineind,'</b>!',nextdown);
+   prevline:='';
+  // result:=gettag;exit;
+  // continue;
+   if curlevel<curlineind then begin //we are deeper than what we are looking for
+     continue;end else
+   if curlevel>curlineind then
+   begin
+     //writeln('<li>up:');
+
+     curlevel:=curlevel-1;
+     level:=levels[curlevel];
+     if changedlev>curlevel then changedlev:=curlevel;
+   end;
+    //handle the tag
+  // atag:=gettag(level);
+// if varl<>'' then
+ if nextdown>0 then if varl='' then varl:='item';
+  //if atag<>nil then
+ begin
+  //writeln('<li>m?',varl,'=',level.lookingfor,nextdown);
+  //writeln('<li>t:',atag.HEAD,'!');
+   if _matches(level.lookingfor,varl) then
+   begin
+     atag:=ttag.create;atag.vari:=varl;atag.vali:=vall;
+     if level.tagi<>nil then level.tagi.killtree;
+     level.tagi:=atag;
+     //writeln('<li>m!',curlevel,'=?',targetdepth-1);
+     if curlevel=targetdepth-1 then
+     begin
+          result:=atag;
+          //writeln('<li>sub:',curlevel,curline);
+          getlevel(result,curlevel);
+          //curlineind:=curlineind-1;//+nextdown;
+          //writeln('</ul><li>didsub',curlineind);
+          exit;
+     end else
+     begin
+         //writeln('<li><b>deeper:</b>',curline,'/lv:',level.dbug);
+         curlevel:=curlevel+1;
+         level:=levels[curlevel];
+      end;
+   end;
+ end;
+  finally
+     curlineind:=curlineind+nextdown;
+    //if curlevel<levels.count then level:=levels[curlevel];
+    nextdown:=0;
+    end;
+
+ end;
+end;
+
+function tjsonstreamer.ReadLine(var ari,ali:string):boolean;
+var //invar,inval:boolean;
+   qpas:integer;
+  //RawLine: UTF8String;
+  ch,prevch: AnsiChar;
+begin
+ result:=true;
+
+ //writeln('.');
+ {
+if prevline<>'' then
+begin
+   curline:=prevline;
+   prevline:='';
+   curlineind:=prevind;
+   result:=true;
+   exit;
+end;}
+limitti:=limitti+1;
+//if limitti>200 then begin eof:=true;result:=false;exit;end;
+ch := #0;
+//curlineind:=0;
+curline:='';ari:='';ali:=''; qpas:=0;//invar:=false;inval:=false;
+//writeln('<li>',curlineind);
+while Sfile.Read(ch,1)=1  do
+ begin
+  // writeln('|',ch,qpas,'|');
+   if (ch='"') and (prevch<>'\') then
+     begin qpas:=qpas+1;//if invar then invar:=false else if inval then inval:=false else invar:=true;
+      continue;
+     end;
+    prevch:=ch;
+    if qpas=1 then ari:=ari+ch else
+    if qpas=3 then ali:=ali+ch else
+    case ch of
+    '{': begin
+      nextdown:=nextdown+1;
+      break;
+    end;
+    '[': begin
+      nextdown:=nextdown+1;
+      break;
+    end;
+    ']': begin
+      nextdown:=nextdown-1;
+      break;
+    end;
+    '}': begin
+      nextdown:=nextdown-1;
+      break;
+    end;
+    ',': begin
+      break;
+    end
+  else curline:=curline+ch;
+
+ end;
+   if Sfile.position>=sfile.Size then
+    begin
+    eof:=true;result:=false;
+    exit;
+    end;
+end;
+ prevind:=curlineind;
+end;
+
+constructor tstreamlevel.create(leve:integer);
+begin
+end;
+destructor tstreamlevel.free;
+begin
+  if tagi<>nil then tagi.free;
+end;
+function tstreamlevel.dbug:string;
+begin
+  result:='<b>'+lookingfor+'</b>/llev:'+inttostr(lev)+'/llind:'+inttostr(ind);
+  //if tagi<>nil then writeln('<em >!!!!',tagi.xmlis,'!!!!!</em>');
+
+end;
+function tstreamer.createlevels(acom:ttag):tlist;
+var steps:tstringlist;
+   i:integer;
+   alev:tstreamlevel;
+begin
+  result:=tlist.create;
+  steps:=tstringlist.Create;
+  targetdepth:=_split(acom.att('path'),'/',steps);
+  for i:=0 to targetdepth-1 do
+  begin
+    alev:=tstreamlevel.create(i);
+    alev.lookingfor:=steps[i];
+    alev.ind:=-1;
+    alev.lev:=i;
+    alev.tagi:=nil;
+    result.add(alev);
+  end;
 end;
 
 
-procedure tstreamer.doparse;
-var              MAXTIMES:INTEGER;
-  newStatus: string;t:ttag;
+function tstreamer.next(lev,ind:integer;res:ttag): ttag;
+var i,lim,hitind,curlinepos:integer;vari,toget:string;dbug:boolean;
+  otag,subt:ttag;
 begin
-   maxtimes:=0;
-   //resutag.subtags.add(newparsexsi);
-   newparsexsi;
+ dbug:=false;
+ lim:=1;
+ changedlev:=curlevel;
+ result:=nil;
+ repeat
+   readline;
+   if sfile.position>=sfile.size then exit;
+   //writeln('<span style="fontsize:0.7;color:red">',curline,'</span>');
+   if level.ind=-1 then level.ind:=curlineind;
+   lim:=lim+1;
+   if lim>100 then begin eof:=true;break;end;
+   //writeln('<li>try:',curlineind,curline,'/lev:',level.dbug);
+   if curlineind=level.ind then
+   begin
+     curlinepos:=1;
+     vari:=getfirstword(curline, curlinepos);
+     //writeln('<li>level::<b>',vari,'=!',level.lookingfor,'!</b>',curlevel,'/',targetdepth,'/i:',curlineind,curline,'/lev:',level.dbug);
+     if level.ind=-1 then level.ind:=curlineind;
+     if _matches(level.lookingfor,vari) then
+     begin
+        subt:=gettag(vari,curlinepos);
+       if level.tagi<>nil then level.tagi.killtree;
+        level.tagi:=subt;
+        if curlevel=targetdepth-1 then
+        begin
+            result:=subt;
+            getlevel(result,level.ind);
+            exit;
+        end else
+        begin
+           //writeln('<li><b>deeper:</b>',curline,'/lv:',level.dbug);
+           curlevel:=curlevel+1;
+           level:=levels[curlevel];
+        end;
+     end else
+   end else
+   if curlineind>level.ind then
+   begin
+    skiplevel(level.ind);
+   end else
+   begin
+     //writeln('<li>upper::<b>',curlineind,curline,'=!',level.lookingfor,'!</b>',curlevel,'/',targetdepth,'/lev:',level.dbug);
+     if level.tagi<>nil then begin //writeln('<li>kill:',level.tagi.head,'!');
+     level.tagi.killtree;
+     level.tagi:=nil;
+     end;
+     curlevel:=curlevel-1;
+     changedlev:=min(changedlev,curlevel);
+     prevline:=curline;
+     level:=levels[curlevel];
+   end;
+ until eof;
+  if dbug then writeln('<li>goingdown:',curline,'-',lev,'-',ind);
+  //for i:=0 to resindents.count-1 do writeln('{',integer(resindents[i]),'}');
 end;
 
-constructor tstreamer.Create(filee:string;resu:ttag);
+
+constructor tstreamer.Create(filee:string;resu,acom:ttag);
+var i:integer; // paths:string;
 begin
-  //smem:=getheapstatus.totalallocated;
-  resutag:=resu;//ttag.create;//resu;
-  resutag.vari:='streamed';
-  //inherited Create(false);//,500000);
-  //FreeOnTerminate := true;
    fname:=filee;
    eof:=false;
   try
   sfile:=tfilestream.create(fname,fmopenread);
   except writeln('<li>could not open ['+fname+']');raise;end;
-  //resume;
-  //inherited Create(true);
+  try
+  eof:=false;
+  levels:=createlevels(acom);
+  level:=levels[1];
+  curlevel:=1;
+  except writeln('<li>could not create streamer ['+acom.xmlis+']');raise;end;
 end;
 
+
 destructor tstreamer.free;
+var i:integer;
 begin
-  //resutag.killtree;
+  for i:=levels.count-1 downto 0 do tstreamlevel(levels[i]).free;
+  levels.free;
   sfile.free;
+
+  writeln('<li>fdreed stream');
 end;
 
 procedure skipcomments(var line:string;sfile:tfilestream);
@@ -79,12 +447,25 @@ var
   RawLine: UTF8String;
   ch: AnsiChar;
 begin
+if prevline<>'' then
+begin
+   curline:=prevline;
+   prevline:='';
+   curlineind:=prevind;
+   result:=true;
+   exit;
+end;
+limitti:=limitti+1;
+//if limitti=20 then begin eof:=true;exit;end;
 result := false;
 ch := #0;
-curind:=0;
+curlineind:=0;
 curline:='';
 while Sfile.Read(ch,1)=1  do
-  if ch<>' ' then break else curind:=curind+1;
+ begin
+  if ch<>' ' then break else curlineind:=curlineind+1;
+
+ end;
 while ch<>#10 do
   begin
    if ch<>#13 then if ch<>#0 then
@@ -95,10 +476,44 @@ while ch<>#10 do
     break;
     end;
 end;
+ prevind:=curlineind;
 end;
-function tstreamer.parseline:ttag;
-begin
 
+function tstreamer.ReadLinejson:boolean;
+var
+  RawLine: UTF8String;
+  ch: AnsiChar;
+begin
+if prevline<>'' then
+begin
+   curline:=prevline;
+   prevline:='';
+   curlineind:=prevind;
+   result:=true;
+   exit;
+end;
+limitti:=limitti+1;
+//if limitti=20 then begin eof:=true;exit;end;
+result := false;
+ch := #0;
+curlineind:=0;
+curline:='';
+while Sfile.Read(ch,1)=1  do
+ begin
+  if ch<>' ' then break else curlineind:=curlineind+1;
+
+ end;
+while ch<>#10 do
+  begin
+   if ch<>#13 then if ch<>#0 then
+   curline := curline+ch;
+   if Sfile.Read( ch, 1) <> 1 then
+    begin
+    eof:=true;
+    break;
+    end;
+end;
+ prevind:=curlineind;
 end;
 
 
@@ -113,7 +528,6 @@ begin
     Result := False;
     len := length(line);
     if len<=curpos then exit;
-    //for ii := curpos + 1 to len do
     skipwhite := True;
     thisfar:=curpos+1;
     inq := False;
@@ -164,7 +578,7 @@ begin
   end;
 
 end;
-function _getfirstword(lin: string; var curpos: integer): string;
+function tstreamer.getfirstword(lin: string; var curpos: integer): string;
 var
   i, len: integer;
 begin
@@ -172,13 +586,12 @@ begin
   len := length(lin);
   for i := curpos to len do
   begin
-    if pos(lin[i], ' ;,"+#(''''') > 0 then
+    if pos(lin[i],' ;,"+#(''''') > 0 then
     begin
       curpos := i;
       exit;
     end
     else
-
     if lin[i] = ':' then
       if i = len then
       begin
@@ -188,7 +601,7 @@ begin
       else
       if pos(lin[i + 1], whitespace) > 0 then
       begin
-        curpos := i;
+        curpos := i+1;
         exit;
       end;// else
       result:=result+lin[i];
@@ -204,450 +617,70 @@ begin
   apos:=pos('''''''',src);
   if apos<1 then result:=copy(src,curpos+1,length(src)) else
   begin
-  result:=copy(src,apos+3,length(src));
-  apos:=pos('''''''',result);
-  if apos>0 then result:=copy(result,1,apos-2) else
-  inquotedpar := True;
-
-  //writeln('<li>TVAL['+result+']'+''''''+'/from:{'+src+'}');
-  end;
-  curpos:=length(src);
-  //if pos('<li>GO',src)>0 then writeln('<li>try:['+result+']'+''''''+'!');
-end;
-
-
-function tstreamer.newparsexsi:ttag;
-var newtag,curtot:ttag;
-  levs,indents:tlist;  curpos,i,skipping:integer;
-  counter:integer;vari:string;
-
-begin
- curtot:=resutag;
- counter:=0;
- levs:=tlist.create;
- indents:=tlist.create;
-try
- levs.add(resutag);
- indents.add(pointer(0));
- skipping:=999999;
-
- while not eof do // one line at a time
- begin
-  CURIND:=0;
-  readline;
-  i:=levs.count-1;
-  curpos:=1;
-   //if eof then
-   if eof then if curline='' then exit;
-   if curline='' then continue;
-   //writeln('<li>skip?:',curind,'/',skipping,' ____ ',curline);
-   if skipping<curind then continue else skipping:=9999;
-   vari:=_getfirstword(curline, curpos);
-   if _matches(skip,vari) then begin skipping:=curind;continue;end;
-   //if skipping then
-   begin
-      while (i>0) and (integer(indents[i])>=curind) do
-      begin
-       //writeln('<li>backing: from:'+curtot.head,'  ____to:',ttag(levs[i]).head);
-       curtot:=levs[i-1];
-       levs.delete(i);
-       indents.delete(i);
-       //break;
-       i:=i-1;
-      end;
-     // skipping:=curind>3;
-      //skipcomments(curline,sfile);
-        newtag:=ttag.create;
-        levs.add(newtag);
-        indents.add(pointer(curind));
-        newtag.vari:=vari;
-        if CURline[curpos] <> ':' then   _parseatts(newtag,curline,curpos);
-        newtag.vali := _gettextval(CURline, curpos, inquotedpar);
-        curtot.subtags.add(newtag);
-        counter:=counter+1;
-        //if counter mod 1000=1 then
-        //if curtot=resutag then
-        // writeln('<li>addeD',counter,newtag.heAD,':::',LEVS.COUNT,'___TO:',ttag(curtot).vari);
-        CURTOT:=newtag;
-  end;
-end;
-finally
- levs.free;
- indents.free;
-end;
-
-
-end;
-
-end.
-
-
-
-exit;
-try
-while (not eof) do
-begin
- IF maxtimes>1000000 THEN begin writeln('<li>exceepded_max');exit;end;
- maxtimes:=maxtimes+1;
- try
- writeln('<li>Open connection '+'/'+fname);
- smem:=getheapstatus.totalallocated;
- //roottag:=nil;
- inquotedpar := False;
- incommentedpar := False;
- prevind:=0;
- inskip:=false;
- lastcline:='';
- t:=parsexsi;
- if t=nil then writeln('<li>gotmil') else
- writeln('<li>got <xmp>'+'/'+t.xmlis+'</xmp>');
- resutag.SUBTAGS.ADD(parsexsi);//doone;
- //break;
- //suspend;
- finally
- end;
-
-end;
-finally
- writeln('<li>RESULTx:',resutag.xmlis);
- writeln('close connection '+'/'+fname);
- sfile.free;
- writeln('connectionmemlost:'+floattostr(getheapstatus.totalallocated-smem));
- // terminate;
-  end;
-
-
-function tstreamer.parsexsi: ttag;
-var
- line: string;
-  //i, ichars, thisind, prevind: integer;
-  //partag, thistag, prevtag, roottag: ttag;
-
-  function _getfirstword(lin: string; var curpos: integer): boolean;
-  var
-    i, len: integer;
-  begin
-    Result := True;
-    len := length(lin);
-    for i := curpos to len do
-    begin
-      if pos(lin[i], ' ;,"+#(''''') > 0 then
-      begin
-        curpos := i;
-        exit;
-      end
-      else
-
-      if lin[i] = ':' then
-        if i = len then
-        begin
-          curpos := i;
-          exit;
-        end
-        else
-        if pos(lin[i + 1], whitespace) > 0 then
-        begin
-          curpos := i;
-          exit;
-        end;// else
-
-    end;
-    //curpos:=i;
-    curpos:=len + 1;
-  end;
-
-
-
-  function _parseats(tagi: ttag; lin: string; var curpos: integer): boolean;
-  var
-    ii, len,thisfar: integer;
-    inq, skipwhite: boolean;
-    c: char;
-    par: string;
-  begin
-    try
-      Result := False;
-      skipwhite := True;
-      thisfar:=curpos+1;
-      if trim(line) = '' then
-        exit;
-      //if line[i]<>')' then
-
-      inq := False;
-      len := length(lin);
-      for ii := curpos + 1 to len do
-      begin
-        c := lin[ii];
-        //if c='¤' then break;
-        //if c=' '  then
-        //    continue;
-        if skipwhite then
-        if pos(whitespace, c) > 0 then
-          continue;
-        skipwhite := False;
-        //IF INQ THEN write(',',c) ELSE WRITE('_',C);
-        if inq then  //within quotes
-        begin
-          if c = '"' then
-          begin
-            //tagi.attributes.add(par);par:='';
-            //writeln('***'+par+'///');
-            inq := False;
-          end
-          else
-            par := par + c;
-        end
-        else  //not in quoted
-        begin
-          //if c=')' then  ### SYNTAX CHANGE
-          if (c = ':') and ((ii = len) or (pos(lin[ii + 1], whitespace) > 0)) then
-          begin
-            //writeln('<li>atsend:',tagi.vari,length(par),par,'|');
-            //if trim(par) <> '' then tagi.addatt(trim(par));
-            tagi.addatt(par);
-            //if pos('sep',par)>0 then writeln('<li>parseP|',cut_rs(par)+'|</li>');//<xmp>'+tagi.listraw+'</xmp>');
-            //tagi.attributes.add(par);
-            par := '';
-            curpos := ii + 1;
-            exit;      //no more atts
-          end
-          else
-          if c = ' ' then
-          begin
-            if trim(par)<>'' then tagi.addatt(par);
-            //if trim(par)<>'' then tagi.addatt(trim(par));
-            //if pos('sep',par)>0 then writeln('<li>parseP|',cut_rs(par)+'|</li>');//<xmp>'+tagi.listraw+'</xmp>');
-            par := '';
-            skipwhite := True;
-            //writeln('<li>aat:',tagi.attributes.text,'</li>');
-          end
-          else
-          if c = '"' then
-            inq := True
-          else
-            par := par + c;
-        end; //for-loop
-      end;
-      if trim(par) <> '' then
-            tagi.addatt(trim(par));
-            par := '';
-            curpos := ii + 1;
-    except
-      writeln('failed parseatts in parseindents');
-    end;
-
-  end;
-  function _gettextval(src: string; var curpos: integer;
-  var inquotedpar: boolean): string;  //not used now, needed if we parse inline comments
-  var apos:integer;
-  begin
-    apos:=pos('''''''',src);
-    if apos<1 then result:=copy(src,curpos+1,length(src)) else
-    begin
     result:=copy(src,apos+3,length(src));
     apos:=pos('''''''',result);
     if apos>0 then result:=copy(result,1,apos-2) else
     inquotedpar := True;
-
-    //writeln('<li>TVAL['+result+']'+''''''+'/from:{'+src+'}');
-    end;
-    curpos:=length(src);
-    //if pos('<li>GO',src)>0 then writeln('<li>try:['+result+']'+''''''+'!');
   end;
-
-
-
-  function ReadLine(Stream: TStream):string;
-  var
-    RawLine: UTF8String;
-    ch: AnsiChar;
-  begin
-  result := '';
-  ch := #0;
-  while (Stream.Read( ch, 1) = 1)  do
-  begin
-      //if (ch =#13) then break;
-      if (ch =#10) then break;
-      if ch<>#10 then
-      result := result+ch;
-  end;
-    if (ch<>#10)  then eof:=true;
- end;
-
-var
-  curpos: integer;tagword,startwhite:string;
-  var
-   iii,ichars, thisind: integer;
-
-  //line: string;
-
-   //partag, thistag, prevtag, roottag: ttag;
-
-
-//parsexsi
-begin
- // partag := nil;
- // roottag := nil;
-  try
-    //for i := 0 to sl.Count - 1 do
-    iii:=0;
-    while not eof do
-    begin
-      try
-        if lastcline<>''then
-        begin
-         line:=lastcline;
-         writeln('<li>tryagin:',lastcline);
-         //lastcline:='';
-        end else
-        line:=readline(sfile);
-        iii:=iii+1;
-        writeln('<li>tryline:',iii,line ,'(',lastcline,')</li>');
-        if iii>1000000 then begin writeln('temporaryrestriction');break;end;
-        if inquotedpar then
-        begin
-          //line:=readline(sfile);
-          if pos('''''''', line) > 0 then
-          begin  //will have to deal with escaped """'s
-            inquotedpar := False;
-            partag.xquoted := True;
-            partag.vali:=partag.vali+copy(line,0, pos('''''''', line)-1);
-            continue;
-          end;
-          partag.vali := partag.vali + line + lf;
-          continue;
-        end;
-        if trim(line) = '' then
-          continue;
-        //line := sl[i];
-        ichars := 1;
-        prevind := thisind;
-        thisind := 0;
-        while (ichars < length(line)) do
-        begin
-          if (line[ichars] = ' ') then
-          begin
-            thisind := thisind + 1;
-            ichars := ichars + 1;
-          end
-          else if (line[ichars] = #09) then  //handle tabs: very crude - basically tabs are not supported
-          begin
-            thisind := thisind + (gc_tabsize - (thisind mod gc_tabsize));
-            ichars := ichars + 1;
-          end
-          else
-            break; // whitespace skipped over
-        end;
-        curpos := ichars;
-        if (incommentedpar) then
-            if thisind>prevind then
-            begin //writeln('endcomment');
-             thisind:=prevind;continue;
-            end else incommentedpar:=false;
-        if line[curpos] = '#' then
-        begin
-          if copy(line,curpos,3)='###' then incommentedpar:=true;
-          continue
-        end;
-        if (curpos=1) and (partag<>nil) then //no indent .. should not happen?
-        begin thisind:=partag.hasindent;partag:=partag.parent;
-        end else
-        if (partag <> nil) and (partag <> roottag) then
-        while (thisind <= partag.hasindent) do
-        begin
-            try
-              writeln('<li>back:',partag.head+'/',partag.hasindent);
-              if partag.hasindent<4 then //pauselevel then
-              begin
-                writeln('<li>EXIT<b>',lastcline+'</b>');
-                if lastcline='' then begin  lastcline:=line; exit;end
-                else  lastcline:='';      //why?
-              end;
-              partag := partag.parent;
-            except
-              writeln('failindent', thisind)
-            end;
-        end;
-        if line[curpos] = '@' then
-        begin  //this has to be handled. now just reads one att=val  strig
-          _parseats(partag, LINE, curpos);
-          //partag.attributes.add(copy(line,curpos+1,9999));
-          continue;
-        end;
-        //INDENTATION HANDLED. NOW CONTENT OF LINE
-        if (line[curpos]=':') or (line[curpos]='.') //TEXTNODE
-          or ((curpos=1) and (partag<>nil)) then //A BIT STRANGE:  unindented lines are treated as text values to parent
-        begin
-          //logwrite('#'+line+inttostr(curpos)+line[curpos]);
-          startwhite:=' ';
-          if (line[curpos]='.') then startwhite:=lf;
-          if curpos>1 then  curpos := curpos+1;//2;
-
-          if   (partag.subtags.Count = 0)    then
-          begin
-            //logwrite('w:'+startwhite+'/t:'+partag.vali+'?' + startwhite+'?'+copy(line,curpos,9999)+'!');
-            partag.vali := partag.vali+ startwhite+_gettextval(line, curpos, inquotedpar);
-          end
-          else
-          begin
-            thistag := ttag.Create;
-            thistag.hasindent := thisind;
-            thistag.parent := partag;
-            partag.subtags.add(thistag);
-            thistag.vari := '';//VALUE
-            thistag.vali := _gettextval(line, curpos, inquotedpar);
-            if startwhite=crlf then thistag.vali:=crlf+thistag.vali;
-            //writeln('<li>gottextline:',curpos,'|',thistag.vali,'',line[curpos],'</li>');
-          end;
-          partag:=thistag;
-          continue;
-        end;
-        //normal line wth element, possibly atts and text
-        begin
-           _getfirstword(line, curpos);
-           tagword:=copy(line, ichars, curpos - ichars);
-          thistag := ttag.Create;
-          thistag.hasindent := thisind;
-          if partag = nil then
-          begin
-            partag := thistag;
-            roottag := thistag;
-          end else
-          begin
-            thistag.parent := partag;
-            partag.subtags.add(thistag);
-           end;
-          thistag.vari := tagword; //copy(line, ichars, curpos - ichars);
-          //logwrite('elem:'+thistag.vari+inttostr(curpos)+' // '+inttostr(ichars)+' //'+line+'//'+inttostr(length(line)));
-          partag := thistag;
-          if (length(line) > curpos) then
-            //##SYNTAX CHANGE if line[curpos]='(' then  //atts ( start directly
-            if line[curpos] <> ':' then
-            begin
-              _parseats(thistag, LINE, curpos);
-            end
-            else
-              curpos := curpos + 1;
-          //writeln('<li>noats:'+line+'</li>');
-          if length(line) > curpos then //line goes on .. with value for tag
-            //if line[curpos]=':' then
-          begin
-            try
-              thistag.vali := _gettextval(line, curpos, inquotedpar);
-            except
-              writeln('--------failtextline' + line);
-            end;
-          end;// else  partag:=thistag;
-        end;
-      except
-        writeln('failed parsing line ',iii,line);
-      end;
-    end;
-
-  finally
-    RESULT:=ROOTTAG;
-
-//    sfile.free;
-  end;
+  curpos:=length(src);
 end;
+
+function tstreamer.parseline(line:string):ttag;
+var cpos:integer;b:boolean;
+begin
+
+  result:=ttag.create;
+  //strpos:=tstreampos.create;
+  //strpos.pos:=sfile.position;
+  cpos:=1;
+  result.vari:=getfirstword(line,cpos);
+  if line[cpos] <> ':' then   _parseatts(result,line,cpos);
+  result.vali := _gettextval(line, cpos, b);
+end;
+
+procedure tstreamer.skiplevel(dto:integer);
+var i,cp:integer;vari:string;atag:ttag;
+begin
+   repeat
+    readline;
+     if eof then exit;
+    //if curlineind<=dto then break;
+   until curlineind<=dto ;// (lookingat<2);
+   //end;
+   prevline:=curline;
+   prevind:=curlineind;
+end;
+function tstreamer.getlevel(par:ttag;dto:integer):boolean;
+var i,cp:integer;vari:string;atag:ttag;
+begin
+   result:=false;
+   repeat
+    readline;
+    if eof then exit;
+    if curlineind<=dto then  break;
+    cp:=1;
+    atag:=parseline(curline);
+    par.subtags.add(atag);
+    atag.parent:=par;
+    getlevel(atag,curlineind);
+   until curlineind<=dto ;// (lookingat<2);
+   //end;
+   prevline:=curline;
+   prevind:=curlineind;
+end;
+
+function tstreamer.gettag(vari:string;curlinepos:integer):ttag;
+//var strpos:tstreampos;
+begin
+result:=ttag.create;
+result.vari:=vari;
+if CURline[curlinepos] <> ':' then   _parseatts(result,curline,curlinepos);
+result.vali := _gettextval(CURline, curlinepos, inquotedpar);
+end;
+
+
+
+
+
+end.
 

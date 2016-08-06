@@ -5,7 +5,8 @@ program x6;
 {$APPTYPE CONSOLE}
 uses
 {$IFDEF LINUX}
-cthreads,//  daemonapp,// xsedae,
+  cthreads,//  daemonapp,// xsedae,
+//cmem,
 custapp,
 //syncobjs,
 {$ENDIF}
@@ -20,7 +21,7 @@ custapp,
 //  Forms, Interfaces,//dialogs,
   classes, //uusserv
  //xsegui,
-xserver,  xseglob//, //xseoid, xsetrie, //XSEJUNK,
+xserver,  xseglob,xsecmd //, //xseoid, xsetrie, //XSEJUNK,
 //xsesta, //xsmarkd,
 //estmark,
 ;//xsemarkd, xsedae;//, esimerkkisynhttpsrv;
@@ -87,6 +88,7 @@ if (FindCmdLineSwitch('s', ['-', '/'], True)) then servicemode:=true;
   if (FindCmdLineSwitch('u', ['-', '/'], True)) then servicemode:=true;
   if (FindCmdLineSwitch('UNINSTALL', ['-', '/'], True)) then   servicemode:=true;
 end;}
+
 if servicemode then
  begin
     logwrite('init servicemode!');
@@ -148,9 +150,9 @@ initcriticals;
 
 try
 g_inidir:=extractfiledir(paramstr(0));
-WRITELN('NOW LOGGING TO:' +g_inidir+'/xseus.log');
+//WRITELN('NOW LOGGING TO:' +g_inidir+'/xseus.log');
 lokifile:= tfilestream.create(g_inidir+'/xseus.log',fmcreate or fmopenwrite);
-logWRITE('NOW LOGGING TO:' +g_inidir+'/xseus.log');
+//logWRITE('NOW LOGGING TO:' +g_inidir+'/xseus.log');
 servicemode:=false;
 dateseparator := '-';
 timeseparator := ':';
@@ -158,6 +160,17 @@ shortdateformat := 'yyyy-MM-dd';
 sysutils.DefaultFormatSettings.ShortDateFormat:= 'YYYY-MM-DD';
 sysutils.DefaultFormatSettings.timeseparator:= ':';
 sysutils.DefaultFormatSettings.dateseparator:= '-';
+except writeln('failed to load xseus');exit;end;
+if (FindCmdLineSwitch('c', ['-', '/'], True)) then
+begin
+   try
+   cmdline;
+   exit;
+   except writeln('invalid command-line call');exit;end;
+end;
+  servicemode:=true;
+
+try
 //writeln('daemon');
 //longtimeformat := 'hh.nn.ss';
  //servicemode:=false;
@@ -200,10 +213,11 @@ xseusserver.run;
   ;
 
  finally
-
+   try
    logwrite('STOPPING');
    xseusserver.free;
    logwrite('freed server');
+  except ;end;
    //listener.dofree;
    //application.Terminate;
    //lokiwrite(('app_stop'));

@@ -372,7 +372,7 @@ var
         len := length(s);
         logwrite('len:'+inttostr(len)+'!'+inttostr(f.bufpos));
         //Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html',f.bufpos);
-        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html',f.bufpos);
+        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=utf-8',f.bufpos);
         //Tserving(t_thisprocess).sock.SendBufferTo(f.bufptr,f.bufpos);
         Tserving(t_thisprocess).sock.SendString(hdr+s);
         //logwrite('s:' + s);
@@ -397,7 +397,7 @@ var
        logwrite('allout::'+inttostr(integer(RES.SIZE)));
        end else logwrite('noallout');
         //logwrite('tryallout');
-        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html',RES.position);
+        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=utf-8',RES.position);
         Tserving(t_thisprocess).sock.SendString(hdr);
         Tserving(t_thisprocess).sock.SendBuffer(RES.MEMORY,RES.position);
         //logwrite('s:' + s);
@@ -616,9 +616,9 @@ begin
   while (not Terminated) and (1 = 1) do
   begin
     try
+    smem:=getheapstatus.totalallocated;
     logwrite('Open connection '+'/'+sock.getremotesinip+':'+inttostr(sock.getremotesinport));
     HeaderHasBeenWritten := False;
-    smem:=getheapstatus.totalallocated;
     attendconnection(sock);
     //logwrite('Close socket'+inttostr(sock.getremotesinport));
    // SOCK.PURGE;
@@ -628,11 +628,11 @@ begin
       xseusserver.servs.dorelease(self);
       sock.CloseSocket;
       sock.purge;
-      suspend;
-      //sock.free;
       finally
       logwrite('connectionmemlost:'+floattostr(getheapstatus.totalallocated-smem));
       end;
+      suspend;
+      //sock.free;
     end;
   end;
 end;
@@ -765,7 +765,7 @@ var i:integer;ht:string;
     ht:=responseheaders[i];
     if trim(ht)<>'' then sock.SendString(cut_ls(ht)+':'+cut_rs(ht) + CRLF);
     //sock.SendString(cut_ls(ht)+':'+cut_rs(ht));
-    //logwrite('header:'+ht);
+    //logwrite(('H::'+cut_ls(ht)+':'+cut_rs(ht) + CRLF));
    end;
     sock.SendString(CRLF);
 
@@ -1225,8 +1225,8 @@ begin
         txseus(myxseus).dosubelements;
         /////////**********************
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
-        logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed)+'//'+inttostr(Int64(getheapstatus.totalallocated)));
-        except  logwrite('fail:'+s);writecustomheaders('HTTP/1.1 200','text/html',-1); writeln('failed xseus.run');  end;
+        //logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed)+'//'+inttostr(Int64(getheapstatus.totalallocated)));
+        except  logwrite('fail:'+s);writecustomheaders('HTTP/1.1 200','text/html; charset=utf-8',-1); writeln('failed xseus.run');  end;
       end else
       begin
         writeln('<li>uri'+uri+' /file:');
@@ -1267,7 +1267,7 @@ begin
     //t_keepbuff:=false;//writeln;
     ALLOut(t_outbuffer);
    end;
-   logwrite('finished xseus-serving'+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
+   logwrite('finished xseus-serving'+'/mymem:'+floattostr(getheapstatus.totalallocated-smem)+'/'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
      except
    writeln('notok xseus thread');end;
      //xseus done
@@ -1296,7 +1296,8 @@ begin
   //t_outbuffer.Free;
   end;
    //xseus cleared
-   logwrite('/closed:'+uri+' for serving '+inttostr(id)+'/a:'+floattostr(getheapstatus.TotalFree));
+  // logwrite('/closed:'+uri+'!!+/thread:'+inttostr(id)+'/mem:'+floattostr(getheapstatus.totalallocated-smem));
+
    //sock.closesocket;
    //sock.purge;
 end;

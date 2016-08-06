@@ -33,7 +33,7 @@ uses
   xseglob,
   //xsecgi,
   //xsemuu,
-  xseconv,
+  xseconv,//xsesta,
   xsexml, Math,
   variants,
   xsedif, xsedb;
@@ -114,8 +114,8 @@ txseus = class(TObject)
     //loc:tlocs;
     x_times: ttimes;
     debug, x_critical, unlimited, httpinited, htmlinited, nobody,
-    x_streaming, x_resettimer, x_called, x_locked: boolean;
-
+    x_resettimer, x_called, x_locked: boolean;
+    x_stream:tstreamer;
     CurFromEle, CurByEle, CurToEle: ttag;
     Curselectionset: TList;
     constructor Create(principal: txseus);
@@ -191,6 +191,7 @@ txseus = class(TObject)
 
     //program flow etc
     function c_bookmark: boolean;
+    function c_bookmark_to: boolean;
     function c_foreach: boolean;
     function c_while: boolean;
     function c_sleep: boolean;
@@ -286,6 +287,7 @@ txseus = class(TObject)
     function c_parse: boolean;  //takes xml-text, produces xml elements
     function c_markdown: boolean;
     function c_streamread: boolean;
+    function c_sapply:boolean;
     function c_parsexse: boolean;
     function c_parsecdata: boolean;
     function c_ical: boolean;
@@ -396,20 +398,184 @@ toselector, torootsel,fromselector: string;
 toselected,fromselected:pointer;
 toselecti:integer;
 next:trelation;}
-function txseus.c_streamread: boolean;
-var s:tstreamer;smem:cardinal;
+
+function txseus.c_sapply: boolean;
+var i,j,olookat,c:integer;done,streamroot:boolean;//str:tstreamer;
+atag,res,ofrom,oto,oby:ttag;oldpath:tstringlist;
+stre:tjsonstreamer;
 begin
- smem:=getheapstatus.totalallocated;
- s:=tstreamer.create(curbyele.att('file'),curtoele);
+  done:=false;
+  ofrom:=curfromele;
+  stre:=tjsonstreamer.create(curbyele.att('file'),curtoele,curbyele);
+
+  {while (not jstr.eof) and (jstr.limitti<200) do
+  begin
+    //curtoele.subtags.add (jstr.next);
+    atag:=jstr.next;
+    writeln('<hr/>');
+    try
+    if atag<>nil then writeln('<li>',atag.head);except end;
+    jstr.limitti:=jstr.limitti+1;
+  end;
+
+  exit;+0}
+  {
+  if x_stream=nil then
+  begin
+    streamroot:=true;
+   x_stream:=tstreamer.create(curbyele.att('file'),curtoele,curbyele);
+   olookat:=0;
+  end else}
+  begin
+    { temp disabled, to be replaced by level-stuff
+    oldpath:=x_stream.changepath(curbyele.att('path'));
+    writeln('<li>changepath',x_stream.lookingat);
+    streamroot:=false;
+    olookat:=x_stream.lookingat;
+    x_stream.lookingat:=x_stream.lookingat+1;
+    }
+  end;
+  try
+ //  res:=x_stream.walkthru;
+ // x_stream.readline;
+  c:=0;
+  repeat
+  begin
+   //c:=c+1;
+   //if c>300 then break;
+   //res:=stre.next(1,0,curtoele);
+   try
+   res:=stre.next;
+  //break;
+  except
+  writeln('<li>notgotkot?',res=nil);//,tstreamlevel(x_stream.levels[1]).tagi.head,'???');
+  raise;
+  end;
+    if res=nil then break;
+    if stre.eof then break;
+    try
+   //writeln('<li>gotkot:',stre.curline,i,'!!',stre.changedlev,'/',stre.targetdepth-1,'!!!');//tstreamlevel(x_stream.levels[1]).tagi.head,'???');
+    except end;
+  //curtoele.subtags.add(res.copytag);
+   ofrom:=curfromele;
+   oby:=curbyele;
+   oto:=curtoele;
+    for i:=stre.changedlev to stre.targetdepth-2 do
+      c_stop;
+    for i:=stre.changedlev to stre.targetdepth-2 do
+    begin
+      try
+      //writeln('+++');
+      curfromele:=tstreamlevel(stre.levels[i]).tagi;
+      //curfromele:=curbyele;
+      curbyele:=oby.subtags[i];
+      //dosubelements;
+      //nto:=ttag.create;
+      //curtoele.subtags.add(nto);
+      //curtoele:=nto;
+      //writeln('<pre>',c,i,curbyele.xmlis,'</pre><hr/>');
+      //curtoele.subtags.add(curbyele.copytag);
+      //writeln('<li>',i,curfromele.xmlis);
+      c_start;
+      curbyele:=oby;
+      //doelementlist(ttag(curbyele.subtags[i]).subtags);
+      except writeln('nogo');end;
+    end;
+    //curbyele:=tstreamlevel(x_stream.levels[x_stream.targetdepth-1]).tagi;
+    curbyele:=oby.subtags[stre.targetdepth-1];
+    curfromele:=res;
+    //writeln('<li>TO:',curtoele.head,'</li>');
+    //resuadd(curfromele.copytag);
+    //writeln('<xmp>****',res.xmlis,'</xmp><hr/>');
+    try
+    dosubelements; except writeln('fail do');end;
+    //writeln('<li>DIDto:',curtoele.head);
+    //curtoele.subtags.add(res.copytag);
+    //ofrom:=curfromele;
+    //curfromele:=res;
+    //doelementlist(curbyele.subtags);
+    curfromele:=ofrom;
+    curbyele:=oby;
+
+  end;
+  until (stre.eof) or (c>1000);
+  writeln('<h2>DIDGETSTREAM</H2><xmp>', i,   curtoele.xmlis,'</xmp>');
+
+
+  exit;
+  finally
+   writeln('</ul><li>diddiip');
+    if streamroot then
+    begin
+    stre.free;
+    writeln('<li>saplied');
+    curfromele:=ofrom;
+    end else
+    {begin
+      x_stream.lookingat:=olookat;
+      x_stream.pathtofind.free;
+      x_stream.pathtofind:=oldpath;
+    end;  }
+   end;
+  writeln('alliswell');
+end;
+
+
+function txseus.c_streamread: boolean;
+var s:tstreamer;smem:cardinal;t,tot:ttag;i,newi,pari:integer;
+begin
+ //exit;
+{ smem:=getheapstatus.totalallocated;
+ s:=tstreamer.create(curbyele.att('file'),curtoele,curbyele.att('path'));
  s.skip:=curbyele.att('skip');
  //curtoele.subtags.add(s.parsexsi());
-// writeln('<li>streamermade,memlost=',getheapstatus.totalallocated-smem);;
-    s.doparse;
+ //writeln('<li>streamermade,memlost=',getheapstatus.totalallocated-smem);;
+   try
+    //t:=s.doparse;
+    //t:=s.nexttag;
+    i:=0;
+    resuadd(s.parseone);
+    writeln('<li>stred:<xmp>',curtoele.xmlis,'</xmp>');
     s.free;
-//    writeln('<li>streamerfreed,memlost=',getheapstatus.totalallocated-smem);;
+    exit;
+    while not s.eof do
+    begin
+      //i:=i+1;if i>7 then break;
+      t:=s.nexttag(0);
+      if t<>nil then
+      begin
+        //restags[restags.count-downcount-1]
+        pari:=s.xhilev;//restags.count-s.btcount-1;
+        tot:=curtoele;
+        try
+         //writeln('<h3>placehit:',tot.vari,s.hilev,'</h3>');
+        for i:=pari downto 1 do
+        begin
+         tot:=tot.subtags[tot.subtags.count-1];
+         //writeln(tot.vari,'-');
+        end;
+         except writeln('<li>!!!!!!</li>');end;
+        tot.subtagsadd(ttag(s.restags[pari]).copytag);
+        //writeln('<xmp>',curtoele.xmlis,'</xmp>');
+        //for i:=
+        //curtoele.subtags.add(ttag(s.restags[pari]).copytag);
+try
+//writeln('<h3>tocopy',ttag(s.restags[pari]).xmlis,'</h3>');
+//      writeln('<h3>copiedto',tot.xmlis,'</h3>');
+except writeln('nonononon',tot=nil);end;
+        //try t.free;except writeln('xxxxxxxxxxxx');end;
+      end;
+    end;
+    //writeln('<xmp>???????????',t.xmlis,'</xmp>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+   // resuadd(t);
+   //curtoele.subtags.add(t);
+   except writeln('nogoodstreamreading');end;
+    //writeln('<li>streamerfreed,memlost=',getheapstatus.totalallocated-smem);;
+    s.free;
 
  //s.parsexsi();
  //writeln('<hr><hr><hr><hr><hr><hr>');
+  }
 end;
 
 function txseus.c_js:boolean;
@@ -533,8 +699,7 @@ begin
   js.clear;jssource.clear;
 
 end;
-
-function txseus.setbookmark(vari: string; tagi: ttag): boolean;
+ function txseus.setbookmark(vari: string; tagi: ttag): boolean;
 var
   obi: integer;
   at: ttag;
@@ -546,7 +711,7 @@ begin
     if at.vari = vari then
     begin
       //writeln('<XMP>biik2:');//,x_bookmarks.LISTRAW+'</XMP>');
-      ttag(at.subtags[0]).killtree; //xrefcount:=ttag(at.subtags[0]).xrefcount-1;
+      //ttag(at.subtags[0]).killtree; //xrefcount:=ttag(at.subtags[0]).xrefcount-1;
       at.subtags.Clear;
       at.subtags.add(CurFromEle);
       //at.Clearmee;
@@ -571,7 +736,49 @@ begin
   end;
 
 end;
+{function txseus.setbookmark(vari: string; tagi: ttag): boolean;
+var
+  obi: integer;
+  at: ttag;
+begin
+  //x_bookmarks.subtags.add(tagi);
+  //exit;
+  writeln('<li>bookmarkadd:<b>',vari,'</b>', tagi.xmlis + '</li>',x_bookmarks.subtags.count);
+ try
+  for obi := 0 to x_bookmarks.subtags.Count - 1 do
+  begin
+    at := ttag(x_bookmarks.subtags[obi]);
+    if at.vari = vari then
+    begin
+    //  writeln('<XMP>biik2:');//,x_bookmarks.LISTRAW+'</XMP>');
+      //ttag(at.subtags[0]).killtree; //xrefcount:=ttag(at.subtags[0]).xrefcount-1;
+      //at.subtags.Clear;
+      x_bookmarks.subtags[obi]:=at;
+      //at.subtags.add(tagi);
+//      at.subtags[0]:=tagi;
+      //at.Clearmee;
+      //tagi.xrefcount := tagi.xrefcount + 1;
+      //writeln('<li>oldbookmark',obi,':<b>',vari,'</b>', x_bookmarks.xmlis + '</li>');
+      exit;
+    end;
+  end;
+  begin
+    //at := ttag.Create;
+    x_bookmarks.subtags.add(tagi);//addsubtag(bm, '');
+    //at.vari := vari;
+    //at.subtags.add(tagi);
+    //tagi.xrefcount:=tagi.xrefcount+1;
+    //CurFromEle.xrefcount := CurFromEle.xrefcount + 1;
+    //for i := 0 to x_bookmarks.subtags.Count - 1 do
+    //  writeln('<li>newbm:',vari,':<pre>' + x_bookmarks.xmlis,'</pre>');
+  end;
+  finally
+  //writeln('<li>addedbookmark:<XMP>' + x_bookmarks.xmlis, '</XMP>');
 
+  end;
+
+end;
+}
 function txseus.c_shellexec: boolean;
 begin
   curtoele.vali:=launchprogram('sh -c','"'+curbyele.att('cmd')+'"',true);
@@ -1503,7 +1710,6 @@ begin
   begin
     try
       rootpos := 1;
-      //writeln('<li>xsefrom:'+fromelem);
       fromtag := p_selroot(fromelem, SELF, curfromele, rootpos, True, gottafree);
       fromelem := copy(fromelem, rootpos, 999); //rest;
 //      if fromtag = nil then
@@ -1518,7 +1724,7 @@ begin
     if fromtag  = nil then
     begin
       curfromele:=nil;
-      writeln('<!--xse:from empty element-->');exit;
+      writeln('<li>!--xse:from empty element-->');exit;
     end
     else
     if fromelem <> '' then
@@ -1536,12 +1742,13 @@ begin
     else
       CurFromEle := fromtag;
   except
-    writeln('nogoroot-sel');
+    writeln('nogoroot-from');
+    raise;
     exit;
   end;
   //writeln('<li>FRMe:',FROMFILE,'::<b>', fromelem, '</b>//<pre>', (curbyele.xmlis), '\\</pre>', '\\<b>',fromelem,'</b></li>',curbyele.subtags.count);
   //logwrite('FRM2:'+inttostr(curbyele.subtags.count)+'::'+ CurfromEle.vari+'/FRM2');
- // if fromtext<>'' then writeln('<li>fromreg:<pre>',curfromele.xmlis+'</pre>'+curfromele.vari);
+  //if fromtext<>'' then writeln('<li>fromreg:<pre>',curfromele.xmlis+'</pre>'+curfromele.vari);
 
   if curbyele.subtags.Count > 0 then
     dosubelements
@@ -1648,7 +1855,7 @@ begin
     else
       Curbyele := bytag;
   except
-    writeln('nogoroot-sel');
+    writeln('nogoroot-by');raise;
   end;
   //writeln('!'+byelem,'!<pre>BY:' + curbyele.xmlis,'!</pre>');
 
@@ -2803,7 +3010,7 @@ begin
        if x_bookmarks <>nil then
        begin
          //x_bookmarks.clearmee;
-         X_BOOKMARKS.killtree;
+//         X_BOOKMARKS.killtree;
 
          //x_bookmarks.clearmee;
          //x_bookmarks.free;
@@ -3659,17 +3866,19 @@ type tgrouping=class(tobject)
 
 function txseus.applyall: boolean;
 var
+  //streamer:tstreamer;
+ // oldstreampath:tstringlist;
   sels: TList;
    apulist:tlist;
-  ocrit,hasrelation,sortascending,sortstr,hadmat: boolean;
+  streaming,ocrit,hasrelation,sortascending,sortstr,hadmat: boolean;
   times, i, j, m, apuii, olresi: integer;
   sel2, asel, atpl, septag, atfirsttag, atlasttag, thetpl, aputag,
   rootseltag, //templates1,//xform1,
   respoint, xoldres, oldtemplates, oldbookm, oldappta, oldfrom: ttag;
-  seleat, thisout, sepst, aps, countervar, oldprefix, selst, selector,mat: string;
-  separ, atlast, atfirst: boolean; //, breaks?
+  templateatt, thisout, sepst, aps, countervar, oldprefix, selst, selector,mat: string;
+  separ, atlast, atfirst: boolean; //, breaksf?
   oldvars, withvars, withelems: TStringList;
-  selection1, apptag: ttag; //restag,
+  selection1, apptag: ttag; //restag,     f
   //newstate,newstate2:tstate;
   //oldelemscount, selelemscount: integer;
   //oldstatescount, selstatescount: integer;
@@ -3688,7 +3897,10 @@ begin
       grouping:=nil;
       selection1 := CurFromEle;
       apptag := CurBYEle;
+      //if apptag.att('debug')='true' then writeln('<li>applydebug:',curfromele.xmlis);
       fromdb:=nil;
+      //t_stream:=nil;
+      streaming:=false;
       //logwrite('applytemplates:'+curbyele.head);
       //writeln('<pre>'+curbyele.xmlis+'</pre><hr/>');
       //writeln('<h3>applyfrom</h3><pre>'+ttag(curfromele).xmlis+'</pre><hr/>');
@@ -3716,6 +3928,21 @@ begin
            except on e:exception do writeln('<li>tmpdb_',e.message);end;
            sels := TList.Create;
         end else
+        if apptag.att('stream')<>'' then //very experimental
+        begin
+        t_stream:=tstreamer.create(curbyele.att('stream'),curtoele,curbyele);
+        streaming:=true;
+        //stream.skip:=curbyele.att('skip');
+         //writeln('<li>stream:',curbyele.xmlis)
+        end else
+        {if apptag.att('selectstream')<>'' then //very experimental
+        begin
+          writeln('<li>substream:',t_stream.pathtofind.text);
+         oldstreampath:=t_stream.changepath(apptag.att('selectstream'));
+          //t_stream:=tstreamer.create(curbyele.att('stream'),curtoele,curbyele.att('select'));
+        //stream.skip:=curbyele.att('skip');
+         writeln('<li>substream:',t_stream.pathtofind.text)
+        end else}
         if (CurBYEle.att('list') <> '') then
         begin
            //writeln('<li>apply from list');
@@ -3756,7 +3983,7 @@ begin
       //-templates1 := x_templates;
       selector := apptag.att('selector');
       //writeln('!selector:',selector);
-      seleat := trim(apptag.att('template'));
+      templateatt := trim(apptag.att('template'));
 
       if apptag.subtags.Count > 0 then
       begin
@@ -3786,7 +4013,7 @@ begin
       begin
         //writeln('<li>templates1?'+apptag.head,curtemplates=nil,seleat);
 
-        if seleat <> '' then  //use named template -- the same one for all
+        if templateatt <> '' then  //use named template -- the same one for all
         begin
           if curtemplates=nil then
           begin writeln('<li>failed finding named template</li>');
@@ -3794,7 +4021,7 @@ begin
           end else //writeln('<li>templates for '+apptag.head+curtemplates.xmlis);
           for j := 0 to curtemplates.subtags.Count - 1 do
             //if trim(ttag(templates1.subtags[j]).attributes.values['name']) = seleat then
-            if trim(ttag(curtemplates.subtags[j]).att('name')) = seleat then
+            if trim(ttag(curtemplates.subtags[j]).att('name')) = templateatt then
             begin
               thetpl := curtemplates.subtags[j];
               break;
@@ -3804,19 +4031,21 @@ begin
         else
          if curtemplates=nil then
          begin writeln('<li>failed finding template</li>');
+
+           //perhaps: if no template, then just copy??
             exit;
           end else //writeln('<li>templates for '+apptag.head+curtemplates.xmlis);
         if (curtemplates.vari=ns+'apply') and (ttag(curtemplates.subtags[0]).vari<>ns+'template') then
-        begin
+        begin  //
           try
           thetpl:=curtemplates;//.subtags[0];
           //writeln('<li>defatemp:',thetpl.head+'/:'+curtemplates.head+'!!!</li>');
           //exit;
           except
-            writeln('<li>failed to apply old tml for :',apptag.head+'!!!</li>');
+            writeln('<li>failed to apply old template for :',apptag.head+'!!!</li>');
           end;
         end;
-      end; //thepl nil - no named template of a single non-template under apptag
+      end; //thepl nil - no named template or a single non-template under apptag
       if (thetpl = nil) and (curtemplates = nil) then
       begin
         writeln('!-- no templates to apply-->');
@@ -3885,7 +4114,6 @@ begin
         end;
       end;
       sortstr:=true;
-      //writeln('<li>dbapply1');
       try
       if apptag.att('sort') <> '' then
         //if apptag.att('sort') <> '-' then
@@ -3894,40 +4122,12 @@ begin
       except writeln('<li>failed applysort</li><pre>',sels.count,'</pre>!!!');
       for j:=0 to sels.count-1 do writeln('<li>x:',j,ttag(sels[j]).head);
       end;
-       //else sels.reverse;
-        //inefficient code here, just beating up the lists ins _sorttaaa and again here :
-      {if apptag.att('sortkey') <> '' then
-      begin
-        apulist := _sorttaa(sels, apptag,sortstr,sortascending);
-        //if apptag.att('sorttype') = 'num' then sorttype:=num;
-        sels.Clear;
-        sels.Free;
-        sels := apulist;
-      end;
-      if apptag.att('reverse') = 'true' then
-      begin
-        apulist := TList.Create;
-        for i := sels.Count - 1 downto 0 do
-          apulist.Add(sels[i]);
-        sels.Clear;
-        sels.Free;
-
-        //sels := apulist;
-
-
-      end;
-      if sortstr then
-      begin
-         if sortascending then compfunc:=@_sortcomptags else  compfunc:=@_sortcomptagsrev;
-      end
-      else
-       if sortascending then compfunc:=@_sortcomptagsnum else  compfunc:=@_sortcomptagsrevnum;
-      }
-      //writeln('<li>dbapply2');
       compfunc:=@_sortcomptags;  //this is only for relations (groupings???)
-      times := strtointdef(apptag.att('times'), sels.Count);
-      if fromdb<>nil then times:=99999999;
+      if (fromdb<>nil) or (streaming) then times:=99999999 else
+      if sels<>nil then
+      begin times := strtointdef(apptag.att('times'), sels.Count);
       if times<0 then times:=sels.count+times;
+      end;
       if apptag.att('mintimes') <> '' then
       begin
         times := max(strtointdef(apptag.att('mintimes'), -1), times);
@@ -3954,7 +4154,7 @@ begin
 
       except writeln('failED APPLYSETUP',apptag.head);end;
       //writeln('<li>dbapply_4');
-
+      //if sels=nil then sels:=tlist.create;
       //for i := 0 to times - 1 do
       i:=-1; while i<times-1 do
 //************** APPLY LOOP ****************************************************
@@ -3966,6 +4166,19 @@ begin
         begin
          asel:=fromdb.sql_next;
          if asel=nil then break;
+        end
+        else
+        if streaming then
+        begin
+         //asel:=t_stream.nexttag(0);
+         if asel=nil then begin writeln('<li>gotnilfromsrteam:',t_stream.curline+'!!!');
+           break;end;
+
+         //writeln('<li>xchanged:',t_stream.restags.count,'/',t_stream.downcount,'/',t_stream.restags.count-t_stream.downcount);
+         writeln('<li>RESto:',curtoele.xmlis, '::::from:',asel.xmlis,'');
+         //for apuii:=t_stream.restags.count-t_stream.downcount to t_stream.restags.count-1 do
+         //   writeln('<li>newlev:',              apuii);
+            //writeln('<li>newlev:',ttag(t_stream.restags[apuii]).head,'!');
         end
         else
         if grouping<>nil then
@@ -3985,6 +4198,7 @@ begin
         begin
           asel := sels[sels.Count - 1];
         end;
+        //if apptag.att('debug')='true' then writeln('<li>apply:',curfromele.xmlis);
         if countervar <> '' then
           x_svars.Values[countervar] := IntToStr(strtointdef(x_svars.Values[countervar], 0) + 1);
         if thetpl <> nil then //fixed, named tpl
@@ -4068,7 +4282,7 @@ begin
           if hasrelation then x_relation.findrel(curfromele);
         except writeln('<li>failed reletion:</li>',curfromele.head);end;
         try
-         // writeln('<li>apply by:'+atpl.head+'//from: '+asel.head,'/to:',curtoele.head,'//',i,'/',times,'</li>');
+         if streaming then writeln('<li>applystr:'+atpl.head+'//from: '+asel.xmlis,'/to:',curtoele.head,'//',i,'/',times,'</li>');
           //doelements(nil);
           if atpl <> nil then
             if atpl.subtags <> nil then
@@ -4082,7 +4296,9 @@ begin
               writeln('<li>nogosel3: ' + atpl.vari + atpl.vali);raise;
         end;
         try
-          if x_streaming then //experimebntal
+          if streaming then    writeln('<li><b>GOTRES:',curtoele.xmlis,'!');
+
+          {if x_stream<>nil then //experimebntal
           begin
             for j:=0 to curtoele.subtags.count-1 do
             begin
@@ -4093,9 +4309,9 @@ begin
               try
               begin
                 //db.Q.appendrecord([1]);
-                {db.q.Params.ParamByName('url').AsString := aputag.att('a');
-                db.q.Params.ParamByName('date').AsString := aputag.att('b');
-                db.q.Params.ParamByName('name').AsString := aputag.att('c');}
+                //db.q.Params.ParamByName('url').AsString := aputag.att('a');
+                //db.q.Params.ParamByName('date').AsString := aputag.att('b');
+                //db.q.Params.ParamByName('name').AsString := aputag.att('c');
                 //db.q.execSQL;
               end;
               //db.q.active:=true;
@@ -4104,7 +4320,7 @@ begin
               except on e:exception do writeln('noprep:'+e.message);end;
             end;
             //curtoele.clearmee;
-          end;
+          end;}
           //WRITELN('<li>DIDDOAPPLYLOOP asel:', i, Asel.XMLIS, '<HR/>');
           //if apptag.att('debug') = 'true' then
           //  writeln('<li>debug:<xmp>', CurToEle.xmlis + '</xmp><hr/></li>');
@@ -4146,6 +4362,7 @@ begin
             break;
           end;
         end;
+        //if t_stream<>nil then asel.killtree;
         EXCEPT writeln('<-- apply ONESTEP failed-->');raise;END;
 
       end;  //of the apply select times-loop
@@ -4156,8 +4373,12 @@ begin
         begin //writeln('<li>killatt:',i,ttag(sels[i]).vari);
           ttag(sels[i]).clearmee;ttag(sels[i]).free;
         end;
+      try
       sels.Clear;
       sels.Free;
+
+      except
+      end;
       if apptag.att('resetvars') = 'true' then
       begin  //NOT DOINF NOTHINF
         //x_svars.Clear;
@@ -4172,6 +4393,8 @@ begin
     end;
   finally
     try
+
+      //if t_stream<>nil then streamer.free;
       curfromEle := oldfrom;
       //writeln('EO-APPLY1:<b>',curtoele.xmlis,'</b>',xml.subtags.count);//(getheapstatus.totalallocated) div 1000,'!');
       x_critical := ocrit;
@@ -4254,6 +4477,9 @@ begin
       except
         writeln('apply-freeend failed');
       end;
+      //writeln('<li>donestream:',tstream<>nil,streaming,oldstreampath=nil);
+       if streaming then if t_stream<>nil then //if oldstreampath=nil then
+       t_stream.free;// else t_stream.pathtofind:=oldstreampath;
     except
       writeln('apply-free failed');
     end;
@@ -4329,6 +4555,7 @@ var
   var
     subtag: ttag;//clist:tlist;
   begin
+
     subtag := newtag;
     orignew := subtag;
     newtag := ttag.Create;
@@ -4675,7 +4902,7 @@ begin
   except
     writeln('<li>nodoodoolist', '</li>');
   end;
-  //logwrite('DOSUBS***from:'+curfromele.vari);
+  //writeln('<li>DOSUBS***from:'+curbyele.xmlis);
   //for i:=0 to comlist.count-1 do writeln('<li>c_',ttag(comlist[i]).vari,'</li>');
   //writeln('gogogox');
   try
@@ -4803,13 +5030,14 @@ begin
       oldstarts:=x_started.elems.count;
       //end of one cmd preparations
         //************************************ COMMAND-ELEMENTS
-      if pos(oldns, newtag.vari) = 1 then
+      if (pos(oldns, newtag.vari) = 1) and (curfromele<>nil) then
       begin
           try
             did := Execute(oldns);
             if progt.vari=oldns + 'if' then  begin elsepending:=not did; end;
             //if progt.vari=oldns + 'start' then begin startedhere:=true;//oldto:=x_started.getele;end;
-          except on e:exception do begin writeln('!--failed DO EXEC' + progt.vari + e.message); if trying then ermes:=e.message;   end;end;
+          except on e:exception do begin writeln('<li>failed DO EXEC' + progt.vari + e.message); writeln(curfromele.head,'!!!');
+             if trying then ermes:=e.message; raise;  end;end;
       end
         //end of ns:command
       else //********************************** PLAIN ELEMENTS
@@ -4944,7 +5172,7 @@ begin
     //exit;
     //writeln('<li>biikbarks:',x_bookmarks.xmlis+'</li>');
     bm := CurBYEle.att('name');
-    if bm='' then   bm := trim(CurBYEle.vali);
+    if bm='' then   bm := trim(CurfromEle.vali);
     //writeln('<li>bookmark',bm);
     setbookmark(bm, curfromele);
     //writeln('<li>setbm2:',bm,x_bookmarks.xmlis,'',curfrom);
@@ -4961,6 +5189,33 @@ begin
     // writeln('<li>setbm2:',obi,bm,x_bookmarks.count,x_bookmarks.text);
     // listwrite(CurFromEle);
     //listwrite(ttag(x_bookmarks.objects[0]));
+  except
+    writeln('failedsetbooknmark');
+  end;
+end;
+function txseus.c_bookmark_to: boolean;
+{D:sets a "bookmark" - variables that are pointers to elements
+and referenced by xse:!bm(name)
+
+}
+var
+  obi, i: integer;
+  bm: string;
+  at: ttag;
+begin
+  try
+    bm := CurBYEle.att('name');
+    if bm='' then   bm := trim(CurbyEle.vali);
+    writeln('<h2>dosetbookmark',bm,'</h2><pre>',x_bookmarks.xmlis,'!</pre>?',curtoele.xmlis,'?<hr/><hr/>');
+    try
+    setbookmark(bm, curtoele);
+
+    except
+    end;
+    //writeln('<h2>',curtoele.head,'dosetbookmark',bm,'</h2><pre>',curtoele.xmlis,'</pre><hr/><pre>',x_bookmarks.xmlis,'</pre><hr/>');
+    //x_bookmarks.subtags.add(curtoele);
+    writeln('<h2>didsetbookmark',bm,'</h2><pre>',x_bookmarks.xmlis,'</pre><hr/>');
+   // writeln('<h2>to:',bm,'!</h2><pre>',curtoele.parent.xmlis,'</pre><hr/>');
   except
     writeln('failedsetbooknmark');
   end;
@@ -5111,7 +5366,10 @@ begin
       exit;
 
 
-  //  writeln('<li>xxxCOPY:');//+curfromele.head);
+    if curfromele=nil then
+     writeln('<li>xxxCOPY:nil');
+    //else writeln('<li>nultocopy');
+    //try writeln(curfromele.xmlis,'???'); except writeln('<li>failcopyfrom');end;
     //  if CurBYEle.att('select')<>'' then
     begin
       try
@@ -5141,7 +5399,7 @@ begin
           try
             resUadd(ttag(atag.subtags[i]).copytag);
           except
-            writeln('faild restagadd');
+            writeln('<li>faild restagadd');
           end;
         end;
 
@@ -5164,7 +5422,8 @@ begin
         end;
     end;
   except
-    writeln('failder copyelement');
+    writeln('<li>failder copyelement');
+    raise;
   end;
 end;
 
@@ -5237,18 +5496,19 @@ begin
   //newtag.vari := curbyele.att(ns + 'name');
     newtag.vari := curbyele.att('name');
   newtag.vali := curbyele.vali;
-  ;
-  if curbyele.att(ns + 'attributes') = 'copy' then
+  if curbyele.att('attributes') = 'copy' then
     //if acom.att(ns+'attributes')<>'nocopy' then
+  begin
     newtag.attributescopyfrom(CurFromEle);
-  if curbyele.att(ns + 'attributes') <> 'nomine' then
+  end;
+  if curbyele.att('attributes') <> 'nomine' then
   begin
     //  newtag.attributescopy(curbyle);
     for i := 0 to curbyele.attributesCount - 1 do
     begin
       ast := curbyele.getattributes[i];
       if pos(ns, ast) <> 1 then
-        if cut_ls(ast)<>'name' then
+        if (cut_ls(ast)<>'name') and (cut_ls(ast)<>'attributes') then
         newtag.setatt(cut_ls(ast), cut_rs(ast));
     end;
   end;
@@ -5996,6 +6256,8 @@ var
   cmd: string;
 begin
   try
+  // writeln('*');
+  // writeln('<li>exexc:',curfromele.vari,'/',curbyele.vari);
     Result := False;
     cmd := trim(CurBYEle.vari);
     if pos(ns, cmd) = 1 then
@@ -6018,9 +6280,11 @@ begin
       //Result := True;
     end;
   except
-    _h1('faill' + acom.vari);
+    writeln('<li>faill' + acom.vari,'!!!');
     listwrite(acom);
   end;
+    //fwriteln('/didexexc:',curbyele.vari);
+
 end;
 
 
@@ -6432,7 +6696,7 @@ begin
     x_cookie := serv.cookie;
     x_session := session;
     x_serving := serv;
-    x_streaming:=false;
+    x_stream:=nil;
     randomize;
     x_form := readparamstoform(serv.params);
 
@@ -8611,7 +8875,7 @@ var xsistr:string;apustag:ttag;
 begin
    apustag := ttag.Create;
    apustag.vari := 'xmp';
-   apustag.vali := curfromele.xmlis;
+   apustag.vali := curfromele.xmlis;//+'<hr/>'+x_bookmarks.xmlis;
             //+ xform.xmlis;
             //writeln('</div>');
             resuadd(apustag);
@@ -9131,8 +9395,9 @@ begin
     oldt := curtoele;
    // curtoele := aput;
     //if t_debug then
-    //writeln('<li><b>startunder::',x_started.count, oldt.head,'</b> </li>');
+    //writeln('<li><b>startunder::',x_started.elems.count, oldt.head,'</b> </li>');
     dosubelements;
+    //writeln('<li><b>didsub::',x_started.elems.count, curtoele.xmlis,'</b> </li>');
     //if aput.subtags.Count=0 then begin writeln('<!--nothing to start-->');exit;end;
    // newt := (aput.subtags[0]);
     newt := (curtoele.subtags[curtoele.subtags.count-1]);

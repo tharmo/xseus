@@ -47,7 +47,7 @@
         <PackageName Value="LCLBase"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="14">
       <Unit0>
         <Filename Value="x6.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -55,12 +55,10 @@
       <Unit1>
         <Filename Value="xserver.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="xserver"/>
       </Unit1>
       <Unit2>
         <Filename Value="xseglob.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="xseglob"/>
       </Unit2>
       <Unit3>
         <Filename Value="xseoid.pas"/>
@@ -73,7 +71,6 @@
       <Unit5>
         <Filename Value="xsejunk.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="XSEJUNK"/>
       </Unit5>
       <Unit6>
         <Filename Value="xsesta.pas"/>
@@ -90,12 +87,23 @@
       <Unit9>
         <Filename Value="xsemarkd.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="xsemarkd"/>
       </Unit9>
       <Unit10>
         <Filename Value="xsedae.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="xseauth.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="xseconv.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="xsestrm.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -116,7 +124,8 @@
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
       <RelocatableUnit Value="True"/>
-      <HeapSize Value="1000000000"/>
+      <HeapSize Value="1874919514"/>
+      <StackSize Value="10000000"/>
       <Optimizations>
         <OptimizationLevel Value="3"/>
       </Optimizations>

@@ -1829,7 +1829,7 @@ begin //note does not clear subtags in testmem-state
    // if vari='root' then writeln('<h2>','KILLROOT','</h2>');
    // if vari='form' then writeln('<h2>','KILLform','</h2>');
     elements_freed := elements_freed+ 1;
-    if xrefcount<0 then writeln(' !_'+vari+'_!',xrefcount);
+    //if xrefcount<0 then writeln(' !_'+vari+'_!',xrefcount);
     if g_memtest then
       exit;      // currently only marks as "would have been killed
     if xrefcount>0 then

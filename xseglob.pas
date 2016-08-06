@@ -12,7 +12,7 @@ uses
  //fgl,
 //{$IFNDEF FPC}  Messages, {$ELSE} LCLIntf, LMessages,    LclType, interfaces, LResources, {$ENDIF}
 
-xsexml,
+xsexml,      xsestrm,
     //syncobjs,
     Classes, SysUtils;//,syncobjs;
 const
@@ -193,6 +193,7 @@ threadvar             //why not part of a txseus??
   //t_elemlist,t_elemrefcount:tlist;
   t_writehandler:ttextrec;
   t_outbuffer:tmemorystream;
+  t_stream:tstreamer;
   //t_keepbuff:boolean; //wonder what this was for...
    //t_rematch:boolean; //currentkly only for case-statement, later apply?
  // t_mythreadelems, mythreadrefcount: TList;
