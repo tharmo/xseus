@@ -1,0 +1,12 @@
+xseusauth
+  user name=timo user=h role=admin
+  group name=admins role=users
+  rights name=admins
+    member: timo
+    
+    
+    
+  ###identity - group 
+              - user 
+                 --> role   (1=guest 2=user 3=poweruser 4=admin 5=owner
+                   --> require

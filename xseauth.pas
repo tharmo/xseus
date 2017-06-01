@@ -318,7 +318,7 @@ begin
          end;
        end;
  except
-   _h1('eik√§y rights');listwrite(session);
+   _h1('eik‰y rights');listwrite(session);
      writeln('<li>dir:',dir,'</li>');
 
  end;

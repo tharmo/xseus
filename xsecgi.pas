@@ -494,7 +494,7 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
    fields:=tstringlist.create;
    vars:=tstringlist.create;
    cookies:=tstringlist.create;
-{Â§Â§   vars.add('CONTENT_LENGTH='+inttostr(req.ContentLength));
+{§§   vars.add('CONTENT_LENGTH='+inttostr(req.ContentLength));
    vars.add('CONTENT_TYPE='+req.ContentType);
 
    vars.add('QUERY_STRING='+req.queryparams);
@@ -521,12 +521,12 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
       // cookies.add(req.cookies.Items[i].CookieName+'='+req.cookies.Items[i].CookieText);
       cookies.add(req.cookies.cookies[i].CookieName+'='+req.cookies.cookies[i].CookieText);
      end;
-    Â§Â§}
+    §§}
    addvars('HTTP_COOKIE');
    st:=vars.values['PATH_INFO'];
    vars.add('document_root='+copy(p_t,1,length(p_t)-length(p_i)));
    if st='' then st:=vars.values['SCRIPT_NAME'];
-   //Â§Â§ st:=req.document;
+   //§§ st:=req.document;
    vars.add('me='+st);
    //st:=StringReplace(st,'/','\',[rfreplaceall]);
    //st:=StringReplace(st,'\','/',[rfreplaceall]);
@@ -541,7 +541,7 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
   //conttype:=getenv('CONTENT_TYPE');
    conttype:=vars.values['CONTENT_TYPE'];
    content_length:=strtointdef(vars.values['CONTENT_LENGTH'],0);
-   //Â§Â§content_stream:=req.poststream;
+   //§§content_stream:=req.poststream;
    IF (pos('multipart',CONTTYPE)=1) then
    begin
      loadok:=true;
@@ -575,10 +575,10 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
       //!req.poststream.Read(postblock^,content_length);
       //multipart(postblock,content_length);
       //multipart(postblock,content_length,req.PostStream);
-      //Â§Â§       multipart(content_length,req.PostStream);
+      //§§       multipart(content_length,req.PostStream);
       finally //freemem(postblock,content_length);
       end;
- //Â§Â§     vars.values['content']:=req.formparams;
+ //§§     vars.values['content']:=req.formparams;
       //writeln('<li>parsed<xmp>'+req.unparsedparams+'</xmp>');
       {  stime:=now;
        stl:=tstringlist.create;
@@ -626,7 +626,7 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
         end;}
           for i:=1 to  content_length-1 do
        begin
-        //Â§Â§             req.poststream.read(ch,1);
+        //§§             req.poststream.read(ch,1);
              st:=st+ch;
             //ps.Seek(i,sofrombeginning);
             //  ps.read(ch,1);
@@ -639,7 +639,7 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
   end else
   begin
      begin
-      //Â§Â§         st:=req.FormParams;
+      //§§         st:=req.FormParams;
         if st<>'' then
          begin
            _split(st,'&',fields);
@@ -658,7 +658,7 @@ var i,j,fl,vl,lastmatch,boulen,re,garb:integer;
   MYDIR:=EXTRACTFILEDIR(PARAMSTR(0));
   myprogname:=extractfilename(paramstr(0));
   buf:='';
-  //Â§Â§  query:=req.queryparams;
+  //§§  query:=req.queryparams;
   end;
 
 procedure tcgicall.getquery;
@@ -690,4 +690,4 @@ end;
 
 end.
 
-
+

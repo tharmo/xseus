@@ -268,7 +268,7 @@ try
      begin
        result.setatt('src',copy(st,amark.soff+1,amark.eoff-amark.soff-2));
        result.setatt('alt',result.vali);
-       //result.attributes.add('title=huutomerkki edellÃ¤ ihna kiusaksi'+result.vali);
+       //result.attributes.add('title=huutomerkki edellä ihna kiusaksi'+result.vali);
        result.vari:='img';result.vali:='';
      end else
      result.setatt('href',copy(st,amark.soff+1,amark.eoff-amark.soff-2));
@@ -1092,7 +1092,7 @@ begin
             _addmarked(prev,crlf+' '+cnt,'',empties,0);
             //_addmarked(crlf+' '+cnt,'value',empties,0);
             //prev.attributes.values['indent']:='999';
-            //_addmarked(result,prev,crlf+prev.att('indent')+'Â¤'+inttostr(indent)+cnt,'value',empties,0);
+            //_addmarked(result,prev,crlf+prev.att('indent')+'¤'+inttostr(indent)+cnt,'value',empties,0);
            end
            else
            begin prev:=_addmarked(resus,' '+cnt,'',empties,0);
@@ -1240,7 +1240,7 @@ begin
              if resus.subtags.count>0 then
              prev.vari:='h1';
              empties:=0;
-             prev.attributes.values['indent']:='999';//tÃ¤mÃ¤n alle ei panna mitÃ¤Ã¤n
+             prev.attributes.values['indent']:='999';//tämän alle ei panna mitään
        end
        else
        if (pos(trim(cnt),'--------------------------------------------')=1) and
@@ -1330,7 +1330,7 @@ begin
            begin
             _addmarked(prev,crlf+' '+cnt,'',empties,0);
             prev.attributes.values['indent']:='999';
-            //_addmarked(result,prev,crlf+prev.att('indent')+'Â¤'+inttostr(indent)+cnt,'value',empties,0);
+            //_addmarked(result,prev,crlf+prev.att('indent')+'¤'+inttostr(indent)+cnt,'value',empties,0);
            end
            else
            begin prev:=_addmarked(prev,' '+cnt,'',empties,0);

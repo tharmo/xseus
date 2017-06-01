@@ -1,5 +1,5 @@
 unit xsetrie;
-
+ //looks like triplets. maybe stored in a trie. don't remember what this is all aboutFGL
 {$mode delphi}
 
 interface

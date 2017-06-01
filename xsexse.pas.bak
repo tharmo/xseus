@@ -1,3 +1,5 @@
+
+
 unit xsexse;
 
 interface
@@ -1095,8 +1097,7 @@ begin
     if pos('temporaryto',curtoele.vari)=1 then
      for i:=0 to curtoele.subtags.count-1 do st := st+ttag(CurToEle.subtags[i]).listxml('', False, False)
    else
-    st := CurToEle.listxml(' ', False,true);
-    //if curtoele.vari='xmp' then writeln('xxxxxxxxxxxxxxxx<xmp>',st,'</xmp><hr/><xmp>',curtoele.xmlis,'</xmp>');
+    st := CurToEle.listxml('', False,false);
    //st:='writeelement disabled';
     //logwrite('testwrite:'+st+'!!!!'+curtoele.head);
     //if t_debug then
@@ -1108,11 +1109,8 @@ begin
     begin
       if not htmlinited then
       begin
-        logwrite('Writeeinit');
-        try
+        //logwrite('Writeeinit');
         c_inithtml;
-
-        except writeln('failinithtml');    end;
         //logwrite('//Writeeinit');
         //writeln('initedit+<xmp>'+curbyele.xmlis+'</xmp>------');
         //httpinited := True;
@@ -1359,7 +1357,6 @@ var i:integer; inf:boolean;
 var startedbefore:integer;
 begin
   try
-  try
     startedbefore:=x_started.elems.count;
     // writeln('DOTO::',curbyele.head);
     pseudoroot:=nil;
@@ -1395,7 +1392,6 @@ begin
   //    if (curbyele.subtags.Count > 0) then
   //      doelements;
   // writeln('<h2>DOTO:'+ele+'!</h2><xmp>',curbyele.xmlis,'</xmp>',place,'<hr/>');
-  logwrite('tryingto:'+ele);
 
   if ele <> '' then
   begin
@@ -1492,7 +1488,6 @@ begin
   //except writeln('<li>stopped failed?');end;
   if ele <> '' then
   begin
-    //writeln('<li>TO-END',curtoele=nil,'<xmp>',curtoele.xmlis,'</xmp>!!!!');//<xmp style="color:red">', xml.xmlis, '!</xmp><hr/>');
     //writeln('<li>GOTGOTGOTGO:'+curtoele.xmlis+'いいいいい');
     try
       try
@@ -1608,8 +1603,8 @@ begin
    end else}
   //logwrite('TO/TO:');//RESUPAR.head,resupar=curtoele,'</li>');
   CurToEle := tmpoldres;
-
-  finally if curtoele<>nil then logwrite('didto:'+curtoele.xmlis+'!') else logwrite('tonil');end;
+  //writeln('<li>TO-END',curtoele=nil,'</li>!!!!');//<xmp style="color:red">', xml.xmlis, '!</xmp><hr/>');
+  if curtoele<>nil then logwrite('didto:'+curtoele.xmlis+'!') else logwrite('tonil');
 end;
 
 function txseus.c_clearvars: boolean;
@@ -1906,9 +1901,9 @@ begin
     //writeln('<li>OLDbyb2:',byelem, '<PRE>', oldbytag.xmlis, '/by2</PRE>');
 
   end;
+  //writeln('<li>byb3:',byelem, '<PRE>', curbyele.xmlis ,'/byb2</PRE>');
 
   dosubelements;
-  //writeln('<li>byb3:',byelem, '<PRE>', curtoele.xmlis ,'/byb2</PRE>');
   CurbyEle := oldbytag;
   if byfile + byurl <> '' then
     bytag.killtree;
@@ -3500,11 +3495,10 @@ var
   end;
 
 begin
-  try
-  logwrite('inithtml');
+  //logwrite('inithtml');
   if htmlinited then
   begin
-    logwrite('itwasinited');
+    //logwrite('itwasinited');
     exit;
   end;
   head:=nil;
@@ -3535,28 +3529,18 @@ begin
     end;
     //inihead:='huihai';
   end;
-  head:=nil;
-  if acom.subtags.count>0 then
   head := acom.subt('head');
+  //logwrite('INIGHEAD1:' + inidecl  + '!'+ inihtml + '!' + inihead  + '!'+ inibodyst + '!');
   if head <> nil then
   begin
-    //logwrite('DO ONE');
     head := doone(head);
-    //logwrite('DID ONE');
-    //inihead := head.listst;
-    try
-    //logwrite('INIHEAD:');logwrite(head.listxml('',false,false));
-    if head=nil then writeln('!!!!!!!!!!!!!!!NILHEAD');
-    except logwrite('CANNOTLIST');end; //+ inidecl  + '!'+ inihtml + '!' + inihead  + '!'+ inibodyst + '!');
-    try
-    inihead := head.listxml('',false,false);
-    except logwrite('NOTINITTEDHTML:');logwrite(head.xmlis); //+ inidecl  + '!'+ inihtml + '!' + inihead  + '!'+ inibodyst + '!');
-    end;
-  end  else    doat('head', inihead);
+    inihead := head.listst;
+  end
+  else
+    doat('head', inihead);
   htmlinited := True;
   //if not httpinited then
-  //try  writeln(inidecl + inihtml +inihead + inibodyst);except logwrite('failedwritehead');end;
-  //try  logwrite(^j+'INITSTRING:'+inidecl + ^j+'/html:'+inihtml +^j+'/head:'+ inihead + ^j+'/body:'+inibodyst+'/INITST');except logwrite('failedlogwritehead');end;
+  writeln(inidecl + inihtml + inihead + inibodyst);
   httpinited := True;
   //writeln('<xmp>XXXXX'+acom.xmlis+'</xmp>');
   //writeln('<xmp>'+inidecl + '!!!' +crlf+'html:'+inihtml+'HEAZ:'+ inihead+ '!!!' + inibodyst+'</xmp>');
@@ -3568,7 +3552,7 @@ begin
   //_h1('init');
   //if acom.att('zzz')='sss' then listwrite(acom);
   //logwrite('initedhtml');
-  except logwrite('failedinithtml');end;
+
 end;
 
 procedure txseus.writelog(msg: string; form: boolean);
@@ -3910,35 +3894,6 @@ type tgrouping=class(tobject)
     end;
    end;
 
-  function txseus.c_foreach: boolean;
-  { Simple loop, apply without any
-  }
-  var
-    ALIST: TList;
-    ok: boolean;
-
-    newtag, turha: ttag;
-    i, ipoint: integer;
-    asel,oldsel:ttag;
-  begin
-    oldsel:=curfromele;
-    if (CurBYEle.att('select') = '') then
-    begin
-      ALIST := TList.Create;
-      if curfromele<>nil then ALIST.Assign(CurFromEle.subtags);
-    end
-    ELSE ALIST := CurFromEle.select(CurBYEle.att('select'), True, True);
-    FOR I:=0 TO alist.COUNT-1 DO
-    begin
-       curfromele:=alist[i];
-       //writeln('<blockquote style="margin-left:0.2em">',
-       //logwrite('#'+curfromele.head);
-       doelementlist(curbyele.subtags);
-    end;
-    curfromele:=oldsel;
-    //writeln('GOTFOR<xmp>',curtoele.xmlis,'</xmp>');
-  end;
-
 
 function txseus.applyall: boolean;
 var
@@ -3951,7 +3906,7 @@ var
   sel2, asel, atpl, septag, atfirsttag, atlasttag, thetpl, aputag,
   rootseltag, //templates1,//xform1,
   respoint, xoldres, oldtemplates, oldbookm, oldappta, oldfrom: ttag;
-  templateatt, thisout, sepst, aps, counterdown,counterup, oldprefix, selst, selector,mat: string;
+  templateatt, thisout, sepst, aps, countervar, oldprefix, selst, selector,mat: string;
   separ, atlast, atfirst: boolean; //, breaksf?
   oldvars, withvars, withelems: TStringList;
   selection1, apptag: ttag; //restag,     f
@@ -3960,84 +3915,9 @@ var
   //oldstatescount, selstatescount: integer;
   templist: TList; //to hold created elements that need to be freed
   grouping:tgrouping;
-  apuiii:word;apuv1,apuv2:string;
   debugst: string;
    compfunc: function(Item1, Item2: Pointer): integer;  //sortcomp
   db,fromdb:tdb;
-  oldval,newval,oldvar,newvar:string;
- procedure _emptywithvars;  //when there is nothing to apply
-  var i,ii:word;varpart,ovar,nvar:string;
- begin
-  _split(apptag.att('withvar'), ',', withvars);
-   for i:=0 to withvars.count-1 do
-   begin
-         varpart:=cut_ls(withvars[i]);
-         if pos('>',varpart)>1 then
-         begin
-           nvar:=copy(varpart,pos('>',varpart)+1);
-           ovar:=copy(varpart,1,pos('>',varpart)-1);
-           x_svars.values[nvar]:=ovar;
-         end;
-
-   end;
-
- end;
-procedure _setwithvars;
-  var i,ii:word;
-begin
-  _split(apptag.att('withvar'), ',', withvars);
-  //x_svars.fromlist(withvars, oldvars);
-  for i := 0 to withvars.Count - 1 do
-  begin
-    //apuii := x_svars.IndexOfName(withvars.Names[I]);
-    apuv1:=cut_ls(withvars[i]);
-    newval:=cut_rs(withvars[i]);
-    if pos('>',apuv1)>0 then
-    begin
-      apuv2:=copy(apuv1,pos('>',apuv1),99999);  //note: the > is included
-      apuv1:=copy(apuv1,1,pos('>',apuv1)-1);
-    end else apuv2:='';
-    //apuii := x_svars.IndexOfName(apuv1);
-    oldval:=x_svars.values[apuv1];
-    if newval='' then newval:=oldval;
-    oldvars.add(apuv1+apuv2+'='+oldval);
-    x_svars.values[apuv1]:=newval;
-   // x_svars.values['line']:=x_svars.values['line']+'['+apuv1+' &lt;'+newval+' &gt;'+oldval+']';
-  end;
-end;
-
-procedure _restorevars;
-var ii:word;
- begin
-  try
-    oldvars.values['line']:=oldvars.values['line']+'#'+inttostr(times)+' frombelow:'+curfromele.vari+'/'+oldfrom.vari+'|';
-   {if withvars.Count > 0 then
-   begin
-     for ii:=0 to x_svars.count-1 do if pos('line',cut_ls(x_svars[ii]))<1 then
-    oldvars.values['line']:=oldvars.values['line']+'<small style="color:red">'+x_svars[ii]+'</small>';//+cut_ls(x_svars[ii]) ;
-     for ii:=0 to oldvars.count-1 do if pos('line',cut_ls(oldvars[ii]))<1 then
-    oldvars.values['line']:=oldvars.values['line']+'<small style="color:green">'+oldvars[ii]+'</small>' ;
-   end;}
-    for ii := 0 to oldvars.Count - 1 do
-    begin
-      oldvar:=cut_ls(oldvars[ii]);
-      if pos('>',oldvar)>0 then
-      begin
-        newvar:=copy(oldvar,pos('>',oldvar)+1);  //var that gets the value from below
-        oldvar:=copy(oldvar,1, pos('>',oldvar)-1);  //var that will be reset
-        x_svars.Values[newvar]:=x_svars.Values[oldvar];
-        x_svars.values['line']:=oldvars.values['line']+'+<b>['+newvar+'='+x_svars.Values[newvar]+']</b>';
-        x_svars.values['line']:=x_svars.values['line']+'+<b>['+newvar+'='+x_svars.Values[newvar]+']</b>';
-      end;
-      x_svars.Values[oldvar]:=cut_rs(oldvars[ii]);//oldvars.valuefromindex[i];
-    end;
-    //for ii:=0 to x_svars.count-1 do if pos('line',cut_ls(x_svars[ii]))<1 then
-    //  x_svars.values['line']:=x_svars.values['line']+'<small style="color:blue">'+x_svars[ii]+'</small>';//+cut_ls(x_svars[ii]) ;
-
-  except
-    writeln('apply-restorevars failed');
-  end;
- end; //restorevars
 begin
 
   try
@@ -4052,7 +3932,7 @@ begin
       fromdb:=nil;
       //t_stream:=nil;
       streaming:=false;
-      logwrite('applytemplates:'+curfromele.head);
+      //logwrite('applytemplates:'+curbyele.head);
       //writeln('<pre>'+curbyele.xmlis+'</pre><hr/>');
       //writeln('<h3>applyfrom</h3><pre>'+ttag(curfromele).xmlis+'</pre><hr/>');
       oldtemplates := curtemplates;
@@ -4125,27 +4005,11 @@ begin
           end;}
           except writeln('<li>failed apply select1');end;
         end;
-      except   writeln('faileapplyselect:' + aps, '/sle:');    raise;    end;
-      if (fromdb<>nil) or (streaming) then times:=99999999 else
-      if sels<>nil then
-      begin times := strtointdef(apptag.att('times'), sels.Count);
-      if times<0 then times:=sels.count+times;
+      except
+        writeln('faileapplyselect:' + aps, '/sle:');
+        raise;
       end;
-      if apptag.att('mintimes') <> '' then
-      begin
-        times := max(strtointdef(apptag.att('mintimes'), -1), times);
-      end;
-      if apptag.att('maxtimes') <> '' then
-        times := min(strtointdef(apptag.att('maxtimes'), times), times);
-      if times < 0 then
-        times := sels.Count + times;
-
       TRY
-        if times <= 0 then
-        begin
-          _emptywithvars;
-          exit;
-        end;
       olresi := CurToEle.subtags.Count;
       //-templates1 := x_templates;
       selector := apptag.att('selector');
@@ -4221,6 +4085,13 @@ begin
       separ := False;
       atlast := False;
       atfirst := False;
+      countervar := apptag.att('counter');
+      if pos('=', countervar) > 0 then
+      begin
+        x_svars.Values[cut_ls(countervar)] := cut_rs(countervar);
+        //x_svars.add(cut_ls(countervar), cut_rs(countervar));
+        countervar := cut_ls(countervar);
+      end;
 
       if apptag.att('separator') <> '' then
       begin
@@ -4246,16 +4117,23 @@ begin
         atlasttag.vali := apptag.att('atlast');
         ;
       end;
-      counterdown := apptag.att('counter');
-      counterup := apptag.att('countto');
-      if pos('=', counterdown) > 0 then
+      if apptag.att('withvar') <> '' then
       begin
-        x_svars.Values[cut_ls(counterdown)]:=cut_rs(counterdown);
-        //x_svars.add(cut_ls(countervar), cut_rs(countervar));
-        counterdown := cut_ls(counterdown);
-      end else x_svars.Values[counterdown]:='0';
-
-      if apptag.att('withvar') <> '' then _setwithvars;
+        _split(apptag.att('withvar'), ',', withvars);
+        //x_svars.fromlist(withvars, oldvars);
+        for i := 0 to withvars.Count - 1 do
+        begin
+          //apuii := x_svars.IndexOfName(withvars.Names[I]);
+          apuii := x_svars.IndexOfName(cut_ls(withvars[I]));
+          if apuii<0 then
+          begin
+            x_svars.add(cut_ls(withvars[i])+'=');apuii:=x_svars.Count-1;{'<li>failed svars at  ',i);}
+          end;
+          //aps:=x_svars.values[cut_rs(withvars[i])];
+          try oldvars.add(x_svars[apuii]);except writeln('<li>failed Oldvars at  ',apuii,'/',i,'/',x_svars.count);end;
+          try x_svars[apuii]:=withvars[i];except writeln('<li>failed svars at  ',apuii);end;
+        end;
+      end;
       if apptag.att('withelems') <> '' then
       begin
         _split(apptag.att('withelems'), ',', withelems);
@@ -4276,6 +4154,19 @@ begin
       for j:=0 to sels.count-1 do writeln('<li>x:',j,ttag(sels[j]).head);
       end;
       compfunc:=@_sortcomptags;  //this is only for relations (groupings???)
+      if (fromdb<>nil) or (streaming) then times:=99999999 else
+      if sels<>nil then
+      begin times := strtointdef(apptag.att('times'), sels.Count);
+      if times<0 then times:=sels.count+times;
+      end;
+      if apptag.att('mintimes') <> '' then
+      begin
+        times := max(strtointdef(apptag.att('mintimes'), -1), times);
+      end;
+      if apptag.att('maxtimes') <> '' then
+        times := min(strtointdef(apptag.att('maxtimes'), times), times);
+      if times < 0 then
+        times := sels.Count + times;
       if apptag.att('resetvars') = 'true' then
       begin
         //HASHED?       oldvars.Text := x_svars.Text;
@@ -4339,12 +4230,8 @@ begin
           asel := sels[sels.Count - 1];
         end;
         //if apptag.att('debug')='true' then writeln('<li>apply:',curfromele.xmlis);
-        if counterdown <> '' then
-        begin
-          x_svars.Values[counterdown] := IntToStr(strtointdef(x_svars.Values[counterdown],0)+1);
-          //writeln('<h1>',i,counterdown,'=',x_svars.Values[counterdown],'</h1>');
-          //write(x_svars.text,'<hr>');
-        end;
+        if countervar <> '' then
+          x_svars.Values[countervar] := IntToStr(strtointdef(x_svars.Values[countervar], 0) + 1);
         if thetpl <> nil then //fixed, named tpl
         begin
           atpl := thetpl;
@@ -4438,11 +4325,8 @@ begin
           //writeln('<h3>no template</h3>');//<pre>'+curtoele.xmlis+'</pre>');
             except
               writeln('<li>nogosel3: ' + atpl.vari + atpl.vali);raise;
-
         end;
         try
-          if counterup <> '' then
-            x_svars.Values[counterup] := IntToStr(strtointdef(x_svars.Values[counterup], 0) + 1);
           if streaming then    writeln('<li><b>GOTRES:',curtoele.xmlis,'!');
 
           {if x_stream<>nil then //experimebntal
@@ -4520,8 +4404,12 @@ begin
         begin //writeln('<li>killatt:',i,ttag(sels[i]).vari);
           ttag(sels[i]).clearmee;ttag(sels[i]).free;
         end;
+      try
+      sels.Clear;
+      sels.Free;
 
-
+      except
+      end;
       if apptag.att('resetvars') = 'true' then
       begin  //NOT DOINF NOTHINF
         //x_svars.Clear;
@@ -4531,12 +4419,11 @@ begin
       {start! if apptag.att('nonstop') = 'true' then
         while x_started.elems.Count > 0 do
           c_stop;}
-      if withvars.count>0 then _restorevars;
-    except   writeln('<-- apply failed-->');  end;
+    except
+      writeln('<-- apply failed-->');
+    end;
   finally
     try
-       sels.Clear;
-       sels.Free;
 
       //if t_stream<>nil then streamer.free;
       curfromEle := oldfrom;
@@ -4571,6 +4458,35 @@ begin
         ns := oldprefix;
       except
         writeln('apply-free1 failed');
+      end;
+      try
+       //if withvars.Count > 0 then
+        //  writeln('<li>withvars not impl. / qworking'+withvars.text+'///');
+        //writeln('<li>WVmem2:'+x_svars.find('sel')+'</li>!');
+        //x_svars.fromlist(oldvars, withvars);
+        for i := 0 to oldvars.Count - 1 do
+        begin
+          //writeln('<li>resetvar:',oldvars.Names[i],'/from:',x_svars.Values[oldvars.Names[i]],'/to:',oldvars.valuefromindex[i]);
+          //writeln('<li>resetvar:',oldvars.text);
+
+          x_svars.Values[cut_ls(oldvars[i])]:=oldvars.valuefromindex[i];
+          //apust:=oldvars.names[i];
+          //apuii := x_svars.IndexOfName(oldvars.Names[I]);
+          //x_svars.values[cut_rs(withvars[i])];
+          //oldvars.add(x_svars[apuii]);
+        end;
+        {for i := 0 to withvars.Count - 1 do
+        begin
+           x_svars.add(cut_ls(withvars[i]), oldvars.values[cut_ls(withvars[i])]
+           );
+          writeln('<li>wvmem:'+withvars[i]+'!'
+          +x_svars.find(cut_ls(withvars[i])));
+        end;
+         // x_svars.add(cut_ls(withvars[i]), cut_rse(withvars[i]));
+        }
+        //writeln('<li>WVmem2:'+x_svars.find('sel')+'!'+oldvars .text+'!</li></ul></li>!');
+      except
+        writeln('apply-free2 failed');
       end;
       try
     {DISABLED temporarily - do we need this?
@@ -4616,7 +4532,6 @@ var
 begin
   ivar := CurBYEle.att('var');
   ibys := CurBYEle.att('by');
-  if ivar='' then ivar:=curbyele.vali;
   if ibys='' then iby:=1 else iby:=strtointdef(ibys,1);
   if ivar <> '' then x_svars.values[ivar]:=inttostr(strtointdef(x_svars.values[ivar],0)+1);
 
@@ -4993,8 +4908,6 @@ begin
           writeln('FAILEDDOELE');
           listwrite(newtag);
         end;
-        logwrite('DIDONE');//+newtag.xmlis+'////DIDONE');
-        listwrite(newtag);
     finally
       CurToEle := OLDto;
       CurbyEle := OLDby;
@@ -5078,7 +4991,6 @@ begin
         progt := proglist[progcounter];
          //if progt.vari=ns+'to'
          //then
-
          //writeln('<li>cmd:'+progt.vari+'///:',progt.xmlis,'</li><hr>');
         if (curtoele = nil) then if not(progt.vari=ns+'to') then
           curtoele := ttag.Create;
@@ -5087,22 +4999,20 @@ begin
 
       begin //some special commands, should not be handled here (?)
       try
-        if (progt.att(ns + 'try') <> '') then begin trying:=true;writeln('<li>trying!');end;
+      if (progt.att(ns + 'try') <> '') then begin trying:=true;writeln('<li>trying!');end;
         if (progt.att(ns + 'if') <> '') then
         begin  //will take care of this in the main doelementlist-loop and remove from here
             elsepending:=false;
             apui:=1;
             {INFIX if _p_infix(parsexse(progt.att(ns + 'if'), self),apui, self,'') <> '1' then)}
             if parsefromele(curfromele,parsexse(progt.att(ns + 'if'), self)) <> '1' then
+
             begin
-              //writeln('<li>FALSE:',curfromele.head,' / ',progt.head);
               elsepending:=true;
-              continue; //???????????
               progcounter := progcounter + 1;
               if progcounter>=proglist.count then break;
-              progt := proglist[progcounter]; write('next:', progt.head);
-            end;// else       writeln('<li>TRUE:',curfromele.head,' / ',progt.head);
-
+              progt := proglist[progcounter];
+            end;
          end;
         if progt.vari=ns + 'else' then
         begin
@@ -8250,6 +8160,53 @@ begin
 
 end;
 
+function txseus.c_foreach: boolean;
+{D: creates an element and runs it as a command
+ -usage_ not uncommon
+ about same as <add element=commands><apply select=whatever><a cmd/></app></add><do commands="commands"/>
+
+}
+var
+  ALIST: TList;
+  ok: boolean;
+
+  newtag, turha: ttag;
+  i, ipoint: integer;
+begin
+{  newstate := tstate.Create(state, self);
+  newtag := ttag.Create;
+  newCurToEle := newtag;
+  //newstate.resta:=CurBYEle.parent;
+  //newstate.resta:=CurBYEle.parent;
+  //newstate.respoint:=
+  ipoint := CurBYEle.parent.subtags.indexof(CurBYEle) + 1;
+  //writeln('<li>respoint',newstate.respoint);
+  //listwrite(CurBYEle);
+  //listwrite(CurBYEle.parent);
+  //setstate(newstate);
+  applyall(newstate);
+  newstate.dofree;
+  //ipoint:=0;
+  // turha:=ttag.create;
+  // turha.vari:='exit';
+  //turha.subtags.add(newtag);
+  for i := newtag.subtags.Count - 1 downto 0 do
+  begin
+    //turha:=newtag.subtags[i];
+    //listwrite(turha);
+    // CurBYEle.parent.subtags.add(newtag.subtags[i]);
+    //turha.subtags.insert(ipoint,newtag.subtags[i]);
+    CurBYEle.parent.subtags.insert(ipoint, newtag.subtags[i]);
+    ttag(newtag.subtags[i]).parent := ttag(CurBYEle.parent);
+  end;
+  //  CurBYEle.parent.subtags.insert(ipoint+1,turha);
+  //CurBYEle.parent.subtags.insert(ipoint,newtag.subtags[i]);
+  Result := ok;
+  //listwrite(newtag);
+  //listwrite(CurBYEle.parent);
+  }
+end;
+
 
 
 function txseus.c_json: boolean;
@@ -8723,7 +8680,7 @@ begin
   //wrITELN('<LI>SETelename:',ele.vari,'<pre>'+ELE.XMLIS+'<hr>!'+curbyele.xmlis+'</pre><li>');
 end;
 function txseus.c_value: boolean;
-{D: change text value of  current result element
+{D: adds an attribute to current result element
 }    var ele:ttag;
 begin
   if curbyele.att('element')<>'' then

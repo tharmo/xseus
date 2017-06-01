@@ -160,7 +160,7 @@ smtpsend,
 xseexp,
 xsereg;//idmessage,idmessageparts;
 
-const konsonantit ='bcdfghjklmnpqrstvxz'; vokaalit='aeiouyÃ¤Ã¶';
+const konsonantit ='bcdfghjklmnpqrstvxz'; vokaalit='aeiouyäö';
 function _hyphenfi(w:string):ttag;
 var i,len,vpos:integer;hy,vocs:string;ch,chn:char;lasttag:ttag;
 begin
@@ -383,7 +383,7 @@ end;
   end;
   function thttps.verf(sender:tobject):boolean;
   begin
-    writeln('XXXXXXXXXQQQQQQQQQQQQQQQQÃ¤');
+    writeln('XXXXXXXXXQQQQQQQQQQQQQQQQä');
   end;
   function thttps.connect(sender:tobject):boolean;
   begin
@@ -1661,14 +1661,14 @@ begin
     result:=trim(result);
     if (pos('"',result)=1) and (length(result)>1) and (result[length(result)]='"') then
      result:=copy(result,2,length(result)-2);
-     //writeln('cut_par:',apui,'!',result,'Â¤',s);
+     //writeln('cut_par:',apui,'!',result,'¤',s);
    end;
 function cut_rs(s:string):string;
 var apui:integer;
 begin
     apui:= pos('=',s);
     if apui>0 then result:=copy(s,apui+1,length(s)) else result:='';
-    //Â§result:=trim(result);
+    //§result:=trim(result);
     if (pos('"',result)=1) and (length(result)>1) and (result[length(result)]='"') then
      result:=copy(result,2,length(result)-2);
    end;
@@ -2302,11 +2302,11 @@ begin
      result:=copy(base,1,pos('/',base)-1)+url
     else //jos eka ei oo /
      result:=base+url; //nii muodostetaan urli
-    if (pos('./',result)>0) or (pos('../',result)>0) then //jos lÃ¶ytyy ../
-     result:=_getpath(result,'/');//kÃ¤ytetÃ¤Ã¤n _getpath functioo
+    if (pos('./',result)>0) or (pos('../',result)>0) then //jos löytyy ../
+     result:=_getpath(result,'/');//käytetään _getpath functioo
     if not (result[length(result)] = '/') and (_poslast('/',result) > _poslast('.',result)) then
-    //jos resultin vika ei oo / ja resultissa vika / on vikan . jÃ¤lkeen
-    result := result+'/'; //niin resulttiin lisÃ¤tÃ¤Ã¤n /
+    //jos resultin vika ei oo / ja resultissa vika / on vikan . jälkeen
+    result := result+'/'; //niin resulttiin lisätään /
   end else
     result:=url;//jos urlin alussa on http:
     // niin se annetaan sellaisenaan

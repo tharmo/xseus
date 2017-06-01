@@ -63,7 +63,7 @@ type
     procedure addobject(t:ttag;vari:string);
     procedure delobject(t:ttag;vari:string);
     procedure fromlist(newvals,oldvals:tstringlist);
-  procedure inc(vari:string;plus:integer);
+  procedure incr(vari:string;plus:integer);
   procedure clearvars(pattern:string);
    constructor create;
    destructor free;
@@ -477,7 +477,7 @@ begin
   for i:=1 to bucketcount do
      writeln('<li><b>',buckets[i].count,'</b>:',buckets[i].text,'</li>');
 end;
-procedure thashstrings.inc(vari:string;plus:integer);
+procedure thashstrings.incr(vari:string;plus:integer);
 var hs:byte;olde:integer;
 begin
    try
@@ -596,8 +596,8 @@ begin
     result:=ttag(elelist[0]);
    if pos('s1_1',vari)>0 then     writeln('foundidi:',vari,'/',elelist.count,'/hash:',hs,'/hit:',hit,'!'+result.vari,'!','!'+result.vali,'!');
     end;
-      // ------------------Getid_0_0!64#-1Â¤Â¤Â¤#
-  //if    result<>nil then writeln('<li>------------------Getid_',vari,'!hash:',hs,'#',hit,'¤¤¤',tstringlist(buckets[hs]).text,'#',result.xmlis,'!!!</li>')
+      // ------------------Getid_0_0!64#-1¤¤¤#
+  //if    result<>nil then writeln('<li>------------------Getid_',vari,'!hash:',hs,'#',hit,'���',tstringlist(buckets[hs]).text,'#',result.xmlis,'!!!</li>')
   //else writeln('<li>noid',hit,vari,'#',hs,'#</li>'+'!'+tstringlist(buckets[hs])[0]+'!/noid');
  except writeln('failedtogetst_obj:forobj_'+vari,result=nil);
  end;

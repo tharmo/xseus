@@ -113,7 +113,7 @@ C:=0;
 Repeat
 Sleep(1000);
 inc(c);
-//Application.Logger.Info(Format(’Tick : %d’,[C]));
+//Application.Logger.Info(Format(?Tick : %d?,[C]));
 Until Terminated;
 end;
 }

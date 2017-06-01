@@ -207,7 +207,7 @@ public
  function f_wrap:string;
  function f_entities:string;
  function f_noentities:string;
- function f_nouml:string;  //Ã¤Ã¶Ã¥
+ function f_nouml:string;  //äöå
  function f_cleanspaces:string;
  function f_oneline:string;
  function f_unfold:string;
@@ -1186,13 +1186,13 @@ end;
     i:=1;
      //t_debug:=true;
      {INFIX   test:=_p_infix(pars[0],i,xs,'');}
+    // writeln('<li>if:'+pars[0]+'/x1='+pars[1]+'/x2='+pars[2]+'?',result);
      test:=parsefromele(xs.curfromele,pars[0]);
      //t_debug:=false;
      ifval:=pars[1];
      elseval:=pars[2];
      if test='1' // if(test,x1,x2,xs)
        then result:=ifval else result:=elseval;
-     //writeln('<li>if:'+pars[0]+'/x1='+pars[1]+'/x2='+pars[2]+'?',result);
 
  end;
  function tfunc.f_eq:string;
@@ -1668,7 +1668,7 @@ const parlist:array[0..0] of string =('file');
    // writeln('<li>x:',floattostr(cx+r*cos(fang)));
    // writeln('<li>y:',floattostr(cy+r*sin(fang)));
     writeln('<div style="color:red;background:black;position: absolute;left:',floattostr(cx+r*cos(fang)),'px;top:',floattostr(cy+r*sin(fang)),'px">',inttostr(ang),'</div>');
-//    (a+rcos(Î¸+Ï•),b+rsin(Î¸+Ï•))
+//    (a+rcos(?+?),b+rsin(?+?))
  end;
  function tfunc.f_rotatex:string;
  const parlist:array[0..0] of string =('UU');
@@ -1694,7 +1694,7 @@ const parlist:array[0..0] of string =('file');
    //writeln('<li>x:',floattostr(cx));
    // writeln('<li>y:',floattostr(cy+r*sin(fang)));
    // writeln('<div style="color:red;background:black;position: absolute;left:',floattostr(cx+r*cos(fang)),'px;top:',floattostr(cy+r*sin(fang)),'px">',floattostr(fang),'</div>');
-//    (a+rcos(Î¸+Ï•),b+rsin(Î¸+Ï•))
+//    (a+rcos(?+?),b+rsin(?+?))
   result:=inttostr(round(cx+r*cos(fang)));
   //writeln('<li>RES:',result);
 
@@ -1723,7 +1723,7 @@ const parlist:array[0..0] of string =('file');
    // writeln('<li>y:',floattostr(cy+r*sin(fang)));
     //writeln('<div style="color:red;background:black;position: absolute;left:',floattostr(cx+r*cos(fang)),'px;top:',floattostr(cy+r*sin(fang)),'px">',floattostr(fang),'</div>');
     result:=inttostr(round(cy+r*sin(fang)))
-    //    (a+rcos(Î¸+Ï•),b+rsin(Î¸+Ï•))
+    //    (a+rcos(?+?),b+rsin(?+?))
  end;
 
 
@@ -1859,7 +1859,7 @@ end;
 
  function tfunc.f_mod:string;
  const parlist:array[0..1] of string =('div','by');
-{D: integer modulus. Devides first par by next and returns modulus (jakojÃ¤Ã¤nnÃ¶s) of result
+{D: integer modulus. Devides first par by next and returns modulus (jakojäännös) of result
 }
 var p_div,p_by:string;
  begin
@@ -2552,7 +2552,7 @@ function tfunc.f_makename:string;
  string of several words
 }
 var astl:tstringlist;i:integer;ch:ansichar;poch:integer;
-const aaks='Ã¤Ã¶Ã¥Ã„Ã–Ã…';aaks2='aooAOO';
+const aaks='äöåÄÖÅ';aaks2='aooAOO';
 
 
  begin
@@ -2562,9 +2562,9 @@ const aaks='Ã¤Ã¶Ã¥Ã„Ã–Ã…';aaks2='aooAOO';
    else result:=copy(astl[0],1,8);
    if astl.count>2 then result:=result+copy(astl[2],1,1);
    result:=ansilowercase(result);
-   result:=StringReplace(result,'Ã¤','a',[rfreplaceall]);
-   result:=StringReplace(result,'Ã¶','o',[rfreplaceall]);
-   result:=StringReplace(result,'Ã¥','o',[rfreplaceall]);
+   result:=StringReplace(result,'ä','a',[rfreplaceall]);
+   result:=StringReplace(result,'ö','o',[rfreplaceall]);
+   result:=StringReplace(result,'å','o',[rfreplaceall]);
    for i:=1 to length(result) do
    begin
     ch:=result[i];
@@ -2594,9 +2594,9 @@ astl:tstringlist;i:integer;//oldvars:string;
    else result:=copy(astl[0],1,8);
    //if astl.count>2 then result:=result+copy(astl[2],1,1);
    result:=ansilowercase(result);
-   result:=StringReplace(result,'Ã¤','a',[rfreplaceall]);
-   result:=StringReplace(result,'Ã¶','o',[rfreplaceall]);
-   result:=StringReplace(result,'Ã¥','o',[rfreplaceall]);
+   result:=StringReplace(result,'ä','a',[rfreplaceall]);
+   result:=StringReplace(result,'ö','o',[rfreplaceall]);
+   result:=StringReplace(result,'å','o',[rfreplaceall]);
    for i:=1 to length(result) do
     if not (result[i] in ['A'..'Z', 'a'..'z','0'..'9'])
     then result[i]:='_';
@@ -2685,12 +2685,12 @@ function tfunc.f_trim:string;
  var apu:string;
  begin
     apu:=(pars[0]);
-    apu:=StringReplace(apu,'&auml;','Ã¤',[rfreplaceall]);
-    apu:=StringReplace(apu,'&Auml;','Ã„',[rfreplaceall]);
-    apu:=StringReplace(apu,'&Ã¶uml;','Ã¶',[rfreplaceall]);
-    apu:=StringReplace(apu,'&Ouml;','Ã–',[rfreplaceall]);
-    apu:=StringReplace(apu,'&aring;','Ã¥',[rfreplaceall]);
-    apu:=StringReplace(apu,'&Aring;','Ã…',[rfreplaceall]);
+    apu:=StringReplace(apu,'&auml;','ä',[rfreplaceall]);
+    apu:=StringReplace(apu,'&Auml;','Ä',[rfreplaceall]);
+    apu:=StringReplace(apu,'&öuml;','ö',[rfreplaceall]);
+    apu:=StringReplace(apu,'&Ouml;','Ö',[rfreplaceall]);
+    apu:=StringReplace(apu,'&aring;','å',[rfreplaceall]);
+    apu:=StringReplace(apu,'&Aring;','Å',[rfreplaceall]);
     result:=apu;
  end;
 
@@ -2906,7 +2906,7 @@ var p_pattern,p_ext:string;
    //logwrite('reading');
    //apu:= pars.values['file'];
    //if apu='' then apu:=cut_rs(pars.strings[0]);
-   //>writeln('<li>read: file='+p_file+' pars='+pars.text+g_ds+'\\',pos('https:',p_file));
+   //writeln('<li>read: file='+p_file+' pars='+pars.text+g_ds+'\\',pos('https:',p_file));
     if (pos('http:',p_file)=1) or (pos('https:',p_file)=1) then
     begin
       apu2:='-1';
@@ -2927,14 +2927,14 @@ var p_pattern,p_ext:string;
    _readfile(p_file,result)
      else
      begin
-      // writeln('<h1>read</h1><h2>_'+p_file+'_</h2>_'+_indir(p_file,xs.odir,xs,false),'_');
+       //writeln('<h1>read</h1><h2>_'+p_file+'_</h2>_'+_indir(p_file,xs.x_objectdir,xs,false),'_');
       _readfile(_indir(p_file,xs.x_objectdir,xs,false),result);
 
      end;
    except
    writeln('failed readfile '+_indir(p_file,xs.x_objectdir,xs,false)+'<xmp>'+result+'</xmp>');
    end;
-   //writeln(p_file,'xxxxxxxxxxreadfile '+_indir(p_file,xs.odir,testallow,xs)+'<xmp>'+result+'</xmp>');
+   //writeln(p_file,'xxxxxxxxxxreadfile '+'<xmp>'+result+'</xmp>');
    end;
 
  function tfunc.f_mapurltofile:string;

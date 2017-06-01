@@ -4,8 +4,8 @@ xseus
      sudo cat /var/log/upstart/xseus.log
      sudo nano /etc/init/xseus.conf 
  
-    port: 8001
-    #port: 443
+    #port: 8001
+    port: 443
     threadcount: 10
     test: testii
     xproxyport: 5000
@@ -15,7 +15,6 @@ xseus
         cmd name="r" call="/usr/bin/R"
             option name="cmd" call="" sep=" --"
     apppaths
-        map path="/home/t/sanakone/" ns="hiero"
         map path="/home/t/xseus/www/tvt/" ns="tvt"
         map ns="studio" path="/home/t/xseus/studio/"
         map ns="jere" path="/home/t/xseus/jere/"
@@ -33,7 +32,6 @@ xseus
         map path="/home/t/xseus/apps/xpas/xsi/" ns="xpas"
         map path="/home/t/xseus/www/stat/" ns="stat"
     urlpaths
-        map path="/home/t/sanakone/" url="/hiero/"
         map path="/home/t/xseus/studio/" url="/studio/"
         map path="/home/t/xseus/prettify/" url="/prettify/"
         map path="/home/t/xseus/apps/xpas/htmi/" url="/xpas/"
@@ -55,8 +53,7 @@ xseus
     chunked: false
     defaultheaders
         transfer-encoding: chunked
-        content-type: text/html; charset=iso-8859-1
-        #content-type: text/html; charset=utf-8
+        content-type: text/html
         connection: close
         pragma: no-cache
         #connection: keep-alive

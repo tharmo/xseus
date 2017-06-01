@@ -92,8 +92,8 @@ procedure tschedthread.execute;
   timer.name:=ini.Values['name'];
   name:=ini.Values['name'];
   cookie:=''+ini.Values['cookie'];
-//Â§Â§  sessio:=tidhttpsession.CreateInitialized(xseusserver.server.sessionlist,cookie,'127.0.0.1');
-//Â§Â§  xseusserver.server.sessionlist.add(sessio);
+//§§  sessio:=tidhttpsession.CreateInitialized(xseusserver.server.sessionlist,cookie,'127.0.0.1');
+//§§  xseusserver.server.sessionlist.add(sessio);
 
   cookie:='IDHTTPSESSIONID='+cookie+'; path=/';
   url:=ini.Values['url']; //'http://localhost/test.htme?sauna';
@@ -127,4 +127,4 @@ procedure ttimertask.dotimer(Sender: TObject);
     //sleep(interval);
   end;
 
-end.
+end.

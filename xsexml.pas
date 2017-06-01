@@ -358,7 +358,7 @@ begin                        //remember to handle id's
 end;
 function ttag.head:string;
 begin                        //remember to handle id's
-  result:='<b>'+vari+'</b> '+attributes.text+': '+vali+ '(['+inttostr(subtags.count)+']';
+  result:='<b>'+vari+'</b> '+attributes.text+': '+vali+ '>'+inttostr(subtags.count)+'!';
 end;
 procedure ttag.attributesclear;
 begin//remember to handle id's
@@ -753,7 +753,7 @@ begin
      try
      apust:=apust+s[i];
     //apust:=copy(s,apui+1,length(s)-apui);// else result:='';
-    //¬ßresult:=trim(result);
+    //ßresult:=trim(result);
    // if (pos('"',result)=1) and (length(result)>1) and (result[length(result)]='"') then
    //  result:=copy(result,2,length(result)-2);
    result:=apust;
@@ -882,7 +882,7 @@ var
     avar: string;
   begin
     try
-      //t√§m√§ lienee ihan turha.. piti tulla jotain prolog-unifikaatioita
+      //t‰m‰ lienee ihan turha.. piti tulla jotain prolog-unifikaatioita
       if (1 = 1) and (t = basetag) then
       begin
         propvars.add(propvaris);
@@ -1939,7 +1939,7 @@ var
       for ii := curpos + 1 to len do
       begin
         c := lin[ii];
-        //if c='¬§' then break;
+        //if c='§' then break;
         //if c=' '  then
         //    continue;
         if skipwhite then
@@ -2290,16 +2290,132 @@ begin
       end;
     end;
    except writeln('<li>failed xmlis corrupt attribute!!'+st+'??',length(st));end;
-   if (tagi.subtags.count=0)
-     and (tagi.vali='') then
+   if (tagi.subtags.count=0) then
+   begin
+     if (tagi.vali='') then
        result:=inde+'<'+result+'/>' else
-  result:=inde+'<'+result+'>'+tagi.vali;
+  result:=inde+'<'+result+'>'+tagi.vali+'</'+tagi.vari+'>';
+
+   end else   result:=inde+'<'+result+'>'+tagi.vali;
+
 
 end;
-function _listxml(ele:ttag):string;
-var i,j,curlev:integer;atag:ttag;alev,levs:tlist;
+
+function x_list(ele:ttag):string;
+var   counter:word;stop:boolean;
+procedure res(st:string);
 begin
-  result:='';
+ result:=result+st+^j;
+ //writeln('<xmp>',st,'</xmp>');
+end;
+procedure tick;
+begin
+  counter:=counter+1;
+  if counter>10000 then halt;
+  //write('tic');
+end;
+vAR curs:ARRAY[0..64000] OF WORD; //,togos
+  i,togo:WORD;curtag:ttag;ind:string;
+  curlev:integer;
+  stakki:tlist;
+begin
+ if ele=nil then exit;
+ try
+  try
+   //logwrite('ELE:'+ele.xmlis);
+  //writeln('start1:::',ele.vari,'!');
+  except writeln('!!!startfail');raise;end;
+  stakki:=tlist.create;
+  curlev:=0;
+  curs[curlev]:=0;
+  //togos[curlev]:=1;
+  curtag:=ele;
+  counter:=0;
+  stop:=false;
+  //writeln('start2???');
+  while curlev>=0 do
+  begin
+    counter:=counter+1;
+    try
+    //write(curlev,'.',stop);
+    if stop then break;
+    //if curlev<1 then break;
+    try
+    res(_onelinexml(curtag,ind));
+    except writeln('<li>failoneline',curlev,'/',counter);write(curtag.vari,'xx');end;
+    curs[curlev-1]:=curs[curlev-1]+1;
+    //if curlev>0 then togos[curlev-1]:=togos[curlev-1]-1;// else write('<li>gogo');
+    //if togos[curlev-1]>10000 then writeln('timetostop?',curlev);
+    except writeln('!!!!!fail element list:',curlev);end;
+    try
+    if curtag.subtags.count>0 then
+    begin  //go deeper
+     try
+      curlev:=curlev+1;
+      curs[curlev-1]:=0;
+      //togos[curlev-1]:=curtag.subtags.count;
+      stakki.add(curtag);
+      curtag:=curtag.subtags[0];
+      ind:=ind+'  ';
+      //writeln('<li>down:',curtag.head,'/');
+      continue;
+     except writeln('!!!deeper');raise;end;
+    end;
+    except writeln('!!!subtags');raise;end;
+    try
+    if curlev<=0 then break;
+    //if togos[curlev-1]>0 then
+    //write('<li>next from:',curtag.head,'_',curs[curlev-1],'/', ttag(stakki[curlev-1]).subtags.count);
+    if curs[curlev-1]<ttag(stakki[curlev-1]).subtags.count then
+    begin  //unhandled stuff at this level
+      try
+        curtag:=ttag(stakki[curlev-1]).subtags[curs[curlev-1]];
+        //writeln(' to:',curtag.head,'/');
+        //curs[curlev-1]:=curs[curlev-1]+1;
+        //curtag:=ttag(stakki[curlev-1]).subtags[togos[curlev-1]];
+      except writeln('<li>!!!next',curlev);raise;end;
+
+    end else
+    begin  //bactrack
+     //while (curlev>0) and (togos[curlev-1]=0) do
+      while (curlev>0) and (curs[curlev-1]>=ttag(stakki[curlev-1]).subtags.count) do
+      begin //the previous one has no subtags left
+        try
+        //if curlev<1 then write('---------------shouldstop?');
+        curlev:=curlev-1;
+        //if curlev>0 then write(curlev,'!!',ttAG(stakki[curlev]).vari);
+        ind:=copy(ind,3,9999);
+        res(ind+'</'+ttAG(stakki[curlev]).vari+'>');
+        stakki.delete(curlev);
+        //if curlev<2 then try write('<li>closetoroot:',curlev,':',togos[1],'.',togos[0],'!',ttAG(stakki[0]).vari);except write('X');end;
+        if curlev<1 then //begin writeln('EOS  ');
+          break;//end;
+        except writeln('<li>!!!faioneback',curlev);raise;end;
+      end;
+      if curlev<1 then begin //writeln('EOSX',curlev,' ');
+        stop:=true;curlev:=curlev-1;break;end;
+      try       //the level to jump back to has been found
+        curtag:=ttag(stakki[curlev-1]).subtags[curs[curlev-1]];
+        //writeln('<li>backtrack to: ',curtag.head);
+        //curtag:=ttag(stakki[curlev-1]).subtags[togos[curlev-1]];
+      //if curlev<1 then write('<li>xxxclosetoroot:',curlev,':',togos[1],'.',togos[0],'!',ttAG(stakki[0]).vari);
+      except writeln('<li>!!!failstasck',curlev,'/',curs[curlev-1]);raise;end;
+     end;
+     except writeln('<li>!!!furtherx',curlev);raise;end;
+    if curlev<0 then begin //writeln('EOSZ');
+      continue;end;
+  end;
+ finally
+    //writeln('<li>DONE');
+    stakki.free;
+ end;
+
+end;
+
+function _listxml(ele:ttag):string;     //old, not used. remove if  x_list has no problems
+var i,j,curlev:integer;atag:ttag;alev,levs,prevlev:tlist;ind:string;waslast:boolean;
+  curs:array[0..64000] of word;
+begin
   levs:=tlist.create;
   alev:=tlist.create;
   try
@@ -2308,15 +2424,22 @@ begin
  curlev:=0;
  i:=0;
  atag:=ele;
+ waslast:=false;//alev.count=0;
+ result:='<!--start-->';
  while curlev>=0 do
  begin
    //writeln('<li>sofar<xmp>:'+result,'</xmp><hr/>');
-   //WRITELN('<LI>doing:',ATAG.VARI,ATAG.SUBTAGS.COUNT,'@',curlev,' with ',alev.count,' levs [',levs.count,']');//+atag.vari); for i:=0 to levs.count-1 do writeln('<li>',tlist(levs[i]).count,'</li>');
-     if alev.count<1 then
+   try
+   result:=result+(^j+(ind)+'['+atag.vari+' id='+atag.att('id')+'|'+inttostr(alev.count)+'/'+inttostr(levs.count)+']');
+   writeln(^j+(ind)+'['+atag.vari+' id='+atag.att('id')+'|'+inttostr(alev.count)+'/'+inttostr(levs.count)+']<br/>');
+   except    write('DEB[-]');   end;
+     //if (alev.count<1) then
     ///// NOTHING MORE ON THIS LEVEL: end the tag (unless "<simple/>") and backtrack one level
+    {if waslast then
     begin
+
        //WRITELN('<LI>backing:',curlev,' with ',alev.count,' levs [',levs.count,']');//+atag.vari); for i:=0 to levs.count-1 do writeln('<li>',tlist(levs[i]).count,'</li>');
-       if (atag.subtags.count>0) or (atag.vali<>'') then
+       if (atag.subtags.count>0) then //or (atag.vali<>'') then
        result:=result+'</'+atag.vari+'>';// else result:=result+'//'+atag.head;
        if curlev=0 then if alev.count=0 then exit;
        alev.Free;
@@ -2326,30 +2449,62 @@ begin
        try  ///this tag removed from parent as this has been handled
        atag:=alev[0];
        alev.delete(0);
+       result:=result+(^j+ind+'(('+atag.vari+'/'+atag.att('id')+'#'+inttostr(alev.count)+'))');
        except  WRITELN('<LI>troubleat:',curlev,' with ',alev.count,', levs [',levs.count,']');   end;
+       //comeback:=true;
        continue;
-    end;
+    end;}
+    try
+
+    if alev.count=0 then break;
     atag:=ttag(alev[0]);
+    alev.Delete(0);
+    //waslast:=alev.count=0;
+    ind:=copy('                                                            ',1,curlev*2);
+    result:=result+^j+ind+'>>'+atag.vari+'/'+atag.att('id');// else result:=result+'//'+atag.head;
     //WRITELN('<LI>doing:',curlev,' with ',alev.count,' to go [',atag.head+']');
-    result:=result+lf+_onelinexml(atag,copy('                                                    ',1,curlev));
+    result:=result+lf+_onelinexml(atag,ind);
+    //if curlev>0 then if tlist(levs[curlev+1]).count>0 then write('*');
+
+    //if  curlev>0 then if levs.count>0 then    begin prevlev:=levs[curlev-1];result:=result+'****'+inttostr(prevlev.count);if prevlev.count>0 then prevlev.delete(0);end;
     // writeln('<li>got:<xmp>'+_onelinexml(atag,copy('                                                    ',1,curlev))+'</xmp>');
+    except writeln('oinelaine!!!'); end;
     if atag.subtags.count>0 then
     //////////HAS SUBTAGS - add them and continue
     begin
+      try
+      waslast:=false;
       alev:=tlist.create;
       alev.AddList(atag.subtags);
       levs.add(alev);
       curlev:=curlev+1;
+
       //WRITELN('<LI>adding:',curlev,' with ',alev.count,' unhandled [',atag.head+']');
       continue;
+    except writeln('subtas!!!'); end;
     end else
     ///////// NO SUBTAGS: continue with next tag
     begin
-      if atag.vali<>'' then result:=result+'</'+atag.vari+'>';
-      alev.Delete(0);
+      //if atag.vali<>'' then
+      //alev.Delete(0);
+      //levs[curlev-1].delete(0);
+    try
+    while alev.count=0 do
+    //if alev.count=0 then
+      begin
+        write('@',levs.count,curlev);
+        //alev.Free;
+        levs.delete(levs.Count-1);
+        curlev:=curlev-1;
+         if curlev<1 then break;
+        alev:=levs[curlev];
+        result:=result+' --';
+      end;
+      if alev.count>0 then atag:=alev[0];
+      writeln('<li>',curlev,'*',LEVS.COUNT, '/',alev.count,'</li>');
 
+    except writeln('failedloopingback');end;
     end;
-
  end;
  finally  //these have been freed already?
   //for curlev:=levs.count-1 downto 0 do tlist(levs[curlev]).free;
@@ -2358,6 +2513,19 @@ begin
 
  end;
 end;
+{if comeback then result:=result+'************';
+if comeback then if alev.count<1 then
+begin
+   alev.delete(0);
+   result:=result+(^j+ind+'<<<<<'+atag.vari+'/'+atag.att('id')+'#'+inttostr(alev.count)+'))');
+   //curlev:=curlev-1;
+   if curlev=0 then break;
+   //alev:=levs[curlev];
+   comeback:=false;
+   continue;
+
+ end;}
+//WRITELN('<LI>doing:',ATAG.VARI,ATAG.SUBTAGS.COUNT,'@',curlev,' with ',alev.count,' levs [',levs.count,']');//+atag.vari); for i:=0 to levs.count-1 do writeln('<li>',tlist(levs[i]).count,'</li>');
 
 function __oneline(tagi:ttag;inde: string): string;
 var
@@ -2473,8 +2641,10 @@ function ttag.listxml(inde:string; ents,isroot: boolean): string;
 {D: one of despare efforts to handle whitespace correctly
 }
 begin
-
- result:=_listxml(self);
+  // result:=listst;
+  //result:=_listxml(self);
+  result:=x_list(self);
+  //logwrite('listed:'+result+'//////////////listed');
 end;
 
 {
@@ -3717,7 +3887,7 @@ begin
       try   //negatives do not work
        if numcond<0 then numcond:=maybehits.count-numcond-1;
         if (numcond<0) or (numcond>maybehits.count) then
-          writeln('<li>',path.con.cond,'wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'')
+          writeln('<!--li >',path.con.cond,'wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'-->')
         else
         //writeln('<li>o:',numcond,'/',maybehits.count,'=');//+ttag(maybehits[numcond]).head);
         begin //writeln('<li>hitnum',i,'::',numcond,ttag(maybehits[numcond-1]).head);
@@ -4211,7 +4381,7 @@ begin
           if pos('/', pathst)>0 then
           pathst := copy(pathst, pos('/', pathst), length(pathst))
           else begin result.add(tag);exit;end;
-          //try writeln('<li>..pathts:'+tag.vari+tag.parent.vari+'</li>'); except writeln('no√•paremt');end;
+          //try writeln('<li>..pathts:'+tag.vari+tag.parent.vari+'</li>'); except writeln('noÂparemt');end;
         end;
         //if pos('testselect',pathst)>0  then writeln('<XMP>xxselect:!'+pathst+'!'+tag.xmlis+'!</XMP>');
         if pathst = '' then
@@ -4799,7 +4969,7 @@ begin
             if tag.parent <> nil then
             begin
               Result := IntToStr(tag.parent.subtags.indexof(tag) + 1);
-              writeln('<li>position: ',result,'/',tag.parent.subtags.count);
+              //writeln('<li>position: ',result,'/',tag.parent.subtags.count);
 
             end
             else
@@ -5763,7 +5933,7 @@ begin
   begin
     if (tmpinde='') or (pos('<'+uppercase(vari)+'>', gc_inlineelems)>0) then
     Result := '<' + vari //+' inde="'+inde+'"'
-      //  <b> joo</b>  <em>joo  </em> miss√§ v√§lit
+      //  <b> joo</b>  <em>joo  </em> miss‰ v‰lit
       // ent' <pre>
     else
     Result := ^j + tmpinde+'<' + vari ;//inde="'+inde+'"';

@@ -1016,7 +1016,7 @@ begin
         //writeln('xxxxsdxxx');
         //apui := pos('/', st);
         //if apui=0 then apui:=length(st);
-        //if (length(st)<2) or (st[2] <> 'ยง') then
+        //if (length(st)<2) or (st[2] <> 'ง') then
         //Result := txseus(xseusp).x_handlers.subt(copy(st, 2, apui - 2))
         //else
         //Result := appta.subt(copy(st, 2, apui - 2));

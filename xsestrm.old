@@ -1,0 +1,892 @@
+unit xsestrm;
+
+{$mode delphi}
+
+interface
+//pe 12.30 op tapaaminen anna lammi
+uses              //Generics.Collections,
+
+  Classes, SysUtils,xsexml;
+//function xmistreamer(fname: String): ttag;
+
+type tstreamlevel=class;
+
+ tstreamer = class(tobject)
+//constructor Create(CreateSuspended: boolean;);
+sfile:tfilestream;
+fname,skip:string;
+eof:boolean;
+//smem:carDINAL;
+resutag:ttag;
+curline,prevline:string;
+//lookingat,lookingatind,prevind,xhilev:integer;lookingfor:string;
+restags,resindents:tlist;
+ inquotedpar,incommentedpar,done: boolean;
+curlineind,prevind, //,xxxtargetlevel,subtarglev,prevind,subtargind
+curlevel,targetdepth,limitti :integer;//,skipbelow
+pathtofind:tstringlist;
+level: tstreamlevel;
+levels:tlist;
+constructor Create(filee:string;resu,acom:ttag);
+destructor free;
+function gettag(vari:string;curlinepos:integer):ttag;
+procedure dolevel(dto:integer;skip:boolean);
+function ReadLine:boolean;
+//function parsexsi: ttag;
+//function parsexsi: ttag;
+//function nexttag(below:integer): ttag;
+//function parseone: ttag;
+function createlevels(acom:ttag):tlist;
+function getnext(path:string): ttag;
+//protected
+//function doparse:ttag; //override;
+function parseline(line:string):ttag;
+function changepath(p:string):tstringlist; //override;
+function walkthru(acom:ttag): ttag;
+function getfirstword(lin: string; var curpos: integer): string;
+function next(lev,ind:integer;res:ttag): ttag;
+end;
+
+tstreamlevel=class(tobject)
+ s:tstreamer;
+ prev:tstreamlevel;
+ lev,ind:integer;
+ lookingfor:string;
+ tagi:ttag;
+ pos:int64;
+ function get:ttag;
+ constructor create(leve:integer);
+ destructor free;
+ function dbug:string;
+  end;
+
+implementation
+uses xsemisc,xseglob;
+constructor tstreamlevel.create(leve:integer);
+begin
+end;
+destructor tstreamlevel.free;
+begin
+  if tagi<>nil then tagi.free;
+end;
+function tstreamlevel.dbug:string;
+begin
+  result:='<b>'+lookingfor+'</b>/llev:'+inttostr(lev)+'/llind:'+inttostr(ind);
+  //if tagi<>nil then writeln('<em >!!!!',tagi.xmlis,'!!!!!</em>');
+
+end;
+function tstreamer.createlevels(acom:ttag):tlist;
+var steps:tstringlist;
+   i:integer;
+   alev:tstreamlevel;
+begin
+  result:=tlist.create;
+  steps:=tstringlist.Create;
+  targetdepth:=_split(acom.att('path'),'/',steps);
+  for i:=0 to targetdepth-1 do
+  begin
+    writeln('<li>alev:',steps[i],i,'/',steps.count);
+    alev:=tstreamlevel.create(i);
+    alev.lookingfor:=steps[i];
+    alev.ind:=-1;
+    alev.lev:=i;
+    alev.tagi:=nil;
+    writeln('<li>thalev:',alev.dbug,i,'/',steps.count);
+    result.add(alev);
+  end;
+
+end;
+
+function tstreamer.walkthru(acom:ttag): ttag;
+begin
+ result:=ttag.create;result.vari:='aaa';
+ readline;
+ writeln('<ul><li>START',curline);
+next(1,0,result);
+end;
+constructor tstreamer.Create(filee:string;resu,acom:ttag);
+var i:integer; // paths:string;
+begin
+  //smem:=getheapstatus.totalallocated;
+  resutag:=resu;//ttag.create;//resu;
+  //resutag.vari:='streamed';
+  //inherited Create(false);//,500000);
+  //FreeOnTerminate := true;
+   restags:=tlist.create;
+   fname:=filee;
+   eof:=false;
+  //  writeln('<li>create streamer ['+fname+']');
+  try
+  sfile:=tfilestream.create(fname,fmopenread);
+  //curpath:=tstringlist.create;
+  //nextpath:=tstringlist.create;
+  except writeln('<li>could not open ['+fname+']');raise;end;
+  try
+  //levs:=tlist.Create;
+  resindents:=tlist.Create;
+  eof:=false;
+  resindents.add(pointer(0));
+  //lookingat:=0;
+  //skipbelow:=0;
+  pathtofind:=tstringlist.Create;
+  //targetdepth:=_split(paths,'/',pathtofind);
+  //lookingat:=0;
+  writeln('<li>createlevs:',acom.xmlis);
+  levels:=createlevels(acom);
+  level:=levels[1];
+  curlevel:=1;
+  except writeln('<li>could not create streamer ['+acom.xmlis+']');raise;end;
+
+  //resume;
+  //inherited Create(true);
+end;
+
+function tstreamer.next(lev,ind:integer;res:ttag): ttag;
+var i,lim,hitind,curlinepos:integer;vari,toget:string;dbug:boolean;
+  otag,subt:ttag;
+begin
+ dbug:=true;
+ lim:=1;
+ result:=nil;
+ repeat
+   readline;
+   if eof then exit;
+   //writeln('<span style="fontsize:0.7;color:red">',curline,'</span>');
+   if level.ind=-1 then level.ind:=curlineind;
+   lim:=lim+1;
+   if lim>100 then begin eof:=true;break;end;
+   //writeln('<li>try:',curlineind,curline,'/lev:',level.dbug);
+   if curlineind=level.ind then
+   begin
+     curlinepos:=1;
+     vari:=getfirstword(curline, curlinepos);
+     //writeln('<li>level::<b>',vari,'=!',level.lookingfor,'!</b>',curlevel,'/',targetdepth,'/i:',curlineind,curline,'/lev:',level.dbug);
+     if level.ind=-1 then level.ind:=curlineind;
+     if _matches(level.lookingfor,vari) then
+     begin
+       //otag:=level.tagi;
+        subt:=gettag(vari,curlinepos);
+       if level.tagi<>nil then level.tagi.killtree;
+       //end;
+        level.tagi:=subt;
+        //subt.paren
+        if curlevel=targetdepth-1 then
+        begin
+            result:=subt;
+            {if otag<>nil then
+            begin
+            //writeln('<li><b>GOT:</b>',otag.head);
+            otag.killtree;
+            //writeln('killok',level.dbug);
+            end;// else writeln('<li>NO_OTAG',level.dbug);}
+            dolevel(level.ind,false);
+            exit;
+
+        end else
+        begin
+           //writeln('<li><b>deeper:</b>',curline,'/lv:',level.dbug);
+           curlevel:=curlevel+1;
+           level:=levels[curlevel];
+        end;
+     end else
+   end else
+   if curlineind>level.ind then
+   begin
+    dolevel(level.ind,true);
+   end else
+   begin
+     //writeln('<li>upper::<b>',curlineind,curline,'=!',level.lookingfor,'!</b>',curlevel,'/',targetdepth,'/lev:',level.dbug);
+     if level.tagi<>nil then begin //writeln('<li>kill:',level.tagi.head,'!');
+     level.tagi.killtree;
+     level.tagi:=nil;
+     end;
+     curlevel:=curlevel-1;
+     prevline:=curline;
+     level:=levels[curlevel];
+   end;
+ until eof;
+ //resindents.add(pointer(0));
+  if dbug then writeln('<li>goingdown:',curline,'-',lev,'-',ind);
+  //for i:=0 to resindents.count-1 do writeln('{',integer(resindents[i]),'}');
+end;
+{
+  //for i:=0 to pathtofind.count-1 do writeln('[',pathtofind[i],']');
+  toget:=pathtofind[lev];
+  hitind:=-1;
+  result:=nil;
+  //if dbug then writeln('<li>frepeat');
+  repeat
+    readline;
+    if hitind=-1 then hitind:=curlineind;
+    writeln('<li>try:',lev,'  ',curline,curlineind,'/',hitind,' ',toget);
+    if curlineind<hitind then
+    begin
+      writeln('<li>past:',CURLINEIND,curline);
+      prevline:=curline;
+      result:=nil;
+      exit;
+    end;
+    if curlineind=hitind then
+    begin
+      curlinepos:=1;
+      vari:=getfirstword(curline, curlinepos);
+      //if dbug then writeln('<li>maymatch:',vari,'-',toget);
+      if _matches(toget,vari) then  //rigth kind of element ar right level -
+      begin
+        subt:=GETTAG(vari,curlinepos);
+        //if subt<>nil then res.subtags.add(subt);
+        if lev=pathtofind.count-1 then
+        begin
+           writeln('<li><b>got:</b>',subt.xmlis);
+           result:=subt;
+           while not done do
+           begin
+           end;
+        end;
+        writeln('donext:',curlineind,'<ul>');
+        result:=next(lev+1,curlineind,subt);
+        if result<> nil then writeln('<li>gotupper:',result.xmlis,'</ul>')
+        else writeln('<li>turhareissu:',subt.xmlis,'</ul>');
+      end else
+      begin
+        writeln('<li>skippi');
+        skiplevel(lev);
+     // if next(lev+1)<>nil
+      end;
+    end
+    //curlev
+
+  until eof;
+end;}
+
+
+{function tstreamlevel.parse(opos:int64):ttag;
+begin
+ s.sfile.seek(pos,sobeginning);
+ tagi:=s.parseone;
+end;}
+
+procedure doone;
+begin
+ writeln('<li>gotone');
+end;
+
+function tstreamer.changepath(p:string):tstringlist; //override;
+begin
+ result:=pathtofind;
+ pathtofind:=tstringlist.Create;
+ targetdepth:=_split(p,'/',pathtofind);
+ // REMEMBER TO FREE IT LATER!
+end;
+
+{function parsepath(pa:string):tstringlist;
+begin
+   result:=tstringlist.create;
+   _split(pa,'/',result);
+end;}
+
+function tstreamer.getnext(path:string): ttag;
+begin
+  pathtofind.clear;  //maybe we often want to keep the path .. a separate function for that
+  _split(path,'/',pathtofind);
+  {while nextpath.count<levs.count do
+  begin
+
+  end;
+  while nextpath.count<levs.count do
+  begin
+
+  end;}
+
+end;
+
+
+destructor tstreamer.free;
+var i:integer;
+begin
+  //resutag.killtree;
+//curpath.free;
+  for i:=restags.count-1 downto 0 do ttag(restags[i]).killtree;
+  restags.free;
+  for i:=levels.count-1 downto 0 do tstreamlevel(levels[i]).free;
+  pathtofind.free;
+  sfile.free;
+  writeln('<li>fdreed stream');
+end;
+
+procedure skipcomments(var line:string;sfile:tfilestream);
+begin
+     // to be handled later
+end;
+
+function tstreamer.ReadLine:boolean;
+var
+  RawLine: UTF8String;
+  ch: AnsiChar;
+begin
+if prevline<>'' then
+begin
+   curline:=prevline;
+   prevline:='';
+   curlineind:=prevind;
+   result:=true;
+   exit;
+end;
+limitti:=limitti+1;
+//if limitti=20 then begin eof:=true;exit;end;
+result := false;
+ch := #0;
+curlineind:=0;
+curline:='';
+while Sfile.Read(ch,1)=1  do
+ begin
+  //if eof then writeln('<li>EOF::',ch,curline,'!');
+  if ch<>' ' then break else curlineind:=curlineind+1;
+
+ end;
+while ch<>#10 do
+  begin
+   if ch<>#13 then if ch<>#0 then
+   curline := curline+ch;
+   if Sfile.Read( ch, 1) <> 1 then
+    begin
+     //if sfile.eof then writeln('<li>EOF1::',ch,curline,'!');
+    eof:=true;
+     //if eof then writeln('<li>EOF2::',ch,curline,'!');
+    break;
+    end;
+end;
+ prevind:=curlineind;
+end;
+
+
+function _parseatts(tagi: ttag; line: string; var curpos: integer): boolean;
+var
+  ii, len,thisfar: integer;
+  inq, skipwhite: boolean;
+  c: char;
+  par: string;
+begin
+  try
+    Result := False;
+    len := length(line);
+    if len<=curpos then exit;
+    //for ii := curpos + 1 to len do
+    skipwhite := True;
+    thisfar:=curpos+1;
+    inq := False;
+    ii := curpos;
+    repeat
+    begin
+      ii:=ii+1;
+      c := line[ii];
+      if skipwhite then
+      if pos(whitespace, c) > 0 then
+        continue;
+      skipwhite := False;
+      if inq then  //within quotes
+      begin
+        if c = '"' then
+        begin
+          inq := False;
+        end
+        else
+          par := par + c;
+      end
+      else  //not in quoted
+      begin
+        if (c = ':') and ((ii = len) or (pos(line[ii + 1], whitespace) > 0)) then
+        begin
+          tagi.addatt(par);
+          par := '';
+          curpos := ii + 1;
+          exit;      //no more atts
+        end
+        else
+        if c = ' ' then
+        begin
+          if trim(par)<>'' then tagi.addatt(par);
+          par := '';
+          skipwhite := True;
+        end
+        else
+        if c = '"' then
+          inq := True
+        else
+          par := par + c;
+      end; //for-loop
+    end;
+    until ii>=len;
+  except
+    writeln('failed parseatts in parseindents');
+  end;
+
+end;
+function tstreamer.getfirstword(lin: string; var curpos: integer): string;
+var
+  i, len: integer;
+begin
+  Result := ''; //lin[curpos-1];//
+  len := length(lin);
+  //writeln('<li>rr:',lin,len,'!',curpos);
+  for i := curpos to len do
+  begin
+    //writeln('<li>!',lin[i],i,'!');
+    if pos(lin[i],' ;,"+#(''''') > 0 then
+    begin
+      curpos := i;
+      exit;
+    end
+    else
+    if lin[i] = ':' then
+      if i = len then
+      begin
+        curpos := i;
+        exit;
+      end
+      else
+      if pos(lin[i + 1], whitespace) > 0 then
+      begin
+        curpos := i+1;
+        exit;
+      end;// else
+      result:=result+lin[i];
+  end;
+  //curpos:=i;
+
+  curpos:=len + 1;
+end;
+function _gettextval(src: string; var curpos: integer;
+var inquotedpar: boolean): string;
+var apos:integer;
+begin
+  apos:=pos('''''''',src);
+  if apos<1 then result:=copy(src,curpos+1,length(src)) else
+  begin
+  result:=copy(src,apos+3,length(src));
+  apos:=pos('''''''',result);
+  if apos>0 then result:=copy(result,1,apos-2) else
+  inquotedpar := True;
+
+  //writeln('<li>TVAL['+result+']'+''''''+'/from:{'+src+'}');
+  end;
+  curpos:=length(src);
+  //if pos('<li>GO',src)>0 then writeln('<li>try:['+result+']'+''''''+'!');
+end;
+
+function tstreamer.parseline(line:string):ttag;
+var cpos:integer;b:boolean;
+begin
+
+  result:=ttag.create;
+  //strpos:=tstreampos.create;
+  //strpos.pos:=sfile.position;
+  cpos:=1;
+  result.vari:=getfirstword(line,cpos);
+  if line[cpos] <> ':' then   _parseatts(result,line,cpos);
+  result.vali := _gettextval(line, cpos, b);
+     { newtag:=ttag.create;
+      levs.add(newtag);
+      indents.add(pointer(curlineind));
+      newtag.vari:=vari;
+      if CURline[curlinepos] <> ':' then   _parseatts(newtag,curline,curlinepos);
+      newtag.vali := _gettextval(CURline, curlinepos, inquotedpar);
+      }
+end;
+
+procedure tstreamer.dolevel(dto:integer;skip:boolean);
+var i,cp:integer;vari:string;atag:ttag;
+begin
+   //if lookingat<1 then exit;
+   //oind:=lookingatind; i:=0;
+   //while (curlineind>oind) do // and (lookingat>0) do
+  // skip:=true;
+   repeat
+   //begin
+    readline;
+    //writeln('<li>Skip::',level.lookingfor,'/',level.ind,'/',curline,'__',curlineind,'/',dto);
+    //if curlineind>lookingat then //if dto<0 then
+    //dto:=curlineind else break;
+     if eof then exit;
+    //if (curlineind<=dto) then break;
+    //resindents.delete(resindents.count-1);
+    //lookingat:=lookingat-1;
+    if curlineind<=dto then break;
+    if not skip then
+    begin
+       cp:=1;
+       vari:=getfirstword(curline,cp);
+       atag:=gettag(vari,cp);
+       level.tagi.subtags.add(atag);
+    end;
+   until curlineind<=dto ;// (lookingat<2);
+   //end;
+   prevline:=curline;
+   prevind:=curlineind;
+   //writeln('/skippedto:',curline,eof);
+end;
+
+function tstreamer.gettag(vari:string;curlinepos:integer):ttag;
+//var strpos:tstreampos;
+begin
+result:=ttag.create;
+//strpos:=tstreampos.create;
+//strpos.pos:=sfile.position;
+result.vari:=vari;
+if CURline[curlinepos] <> ':' then   _parseatts(result,curline,curlinepos);
+result.vali := _gettextval(CURline, curlinepos, inquotedpar);
+{if restags.Count>0 then
+ begin
+   result.parent:=restags[restags.count-1];
+   ttag(restags[restags.count-1]).subtags.add(result);
+     //writeln('<li>FAILADDtag topos:',lookingat,'/rescount:',restags.count);
+ end;// else
+restags.add(result);
+}
+end;
+
+
+function tstreamlevel.get:ttag;//(below:integer): ttag;
+// path=/top/inter/target  -
+//var
+  //targlev, // level below which everything is skipped
+var
+  i,curlinepos,lim:integer; //indentation corresponding to targlev
+  newtag:ttag;vari:string;dbug:boolean;
+  newlev:tstreamlevel;
+
+
+begin
+{  dbug:=true;
+  RESULT:=NIL;
+  lim:=1;
+  //xhilev:=lookingat;
+  try
+  //if dbug then begin writeln('(<ul><li>newtry:',s.curline,s.prevline,' at=<b>',dbug,'/rcount=',s.resindents.count,'/',s.pathtofind.count);for i:=0 to s.resindents.count-1 do writeln('[',integer(s.resindents[i]),']');  for i:=0 to s.pathtofind.count-1 do writeln('(P',i,'=',s.pathtofind[i],')');end;  except writeln('yyyyyyyyyyyyyyyyyyyyyyyyyyy'); end;
+  //errors;
+    if lev<0 then begin writeln('<h1>err: backtrack below zero:',s.curline);s.eof:=true;exit;end;
+    if lev>=s.pathtofind.count then begin if dbug then writeln('<h1>err: looking too deep:',s.curline,'</h1>');s.eof:=true;exit;end;  //should not happen
+  if lev<s.resindents.count then
+  begin //if not digging deeper, skip all under prev hit
+     s.skiplevel(s.curlineind);
+  end;
+  if s.resindents.count>lev then ind:=integer(s.resindents[lev]);  //update intendentation according to level if current level has established the indentation
+  //*****************************
+
+  if dbug then begin writeln('(<ul><li>TRY:',s.prevline,' at=<b>',lev,'</b>/ind:',ind,'/rcount=',s.prevline,'/',s.pathtofind.count);end;
+  repeat
+   lim:=lim+1;
+   IF EOF THEN  begin  writeln('<h1>EOF</h1>');  EXIT; end;
+   if s.restags.count>=s.pathtofind.count then
+   begin //
+    if dbug then writeln('<li>enuff',s.curline,'/restags:',s.restags.count,'/path:',s.pathtofind.count);
+    //ttag(restags[restags.count-1]).killtree;
+    //restags.delete(restags.count-1);
+   end;
+   s.readline;
+   writeln('<li>gogo:',s.curline,'/cind:',s.curlineind,'/lind:',ind);
+   try
+   try   // fix indentation to next level even if not a fit
+     if lev>s.resindents.count-1 then
+     begin
+       if dbug then writeln('<li>establish indent for next level:',s.curlineind, '/AT:',lev,'/rescount:',s.restags.count, '/',s.pathtofind.count);//[lookingat],'/line:',curline,'<ul>');
+       //s.resindents.add(pointer(s.curlineind));
+       //restags.add(nil);
+       //lookingatind:=integer(resindents[lookingat]);
+       newlev:=tstreamlevel.create(lev+1);
+
+     end;
+   except writeln('<li>FAILI:',dbug);end;
+         //debug
+          try
+          if dbug then writeln('<li><b>[',s.curline,'</b>/find:',s.pathtofind[lev],'/atlevel:',lev,'<b>/Lind:',ind,'=',s.curlineind,'</b>/rescount',s.restags.count,']');
+          except writeln('</i></b>***********');end;
+   if s.curlineind>=ind then
+   begin
+     curlinepos:=1;//curlineind;  what the fuck!
+     vari:=s.getfirstword(s.curline, curlinepos);
+     if dbug then writeln('<li>maymatch:',vari,'-',s.pathtofind[lev]);
+     if _matches(s.pathtofind[lev],vari) then  //rigth kind of element ar right level -
+         begin
+           if dbug then writeln('<li>RIGHT LEVEL<b>:',s.pathtofind[lev],'=?',vari,'</b>=',_matches(s.pathtofind[lev],vari),'!','<b>',lev,'=',s.pathtofind.count-1,'</b>');
+            if lev>=s.pathtofind.count-1 then
+            begin
+              if dbug then writeln('<li>matches:',s.restags.count,'-',vari);
+              s.GETTAG(vari,curlinepos);
+              writeln('<li>gottag:',s.restags.count,'!');
+              //!!!!result:=restags[restags.count-1];//hilev];
+
+              //if dbug then  writeln('<li><b>HIT:',result.vari,':',ttag(restags[0]).xmlis,'/at:',lookingat,'/',lookingatind,'</b>-',pathtofind.count,pathtofind[lookingat],'</li></ul>!');
+              exit;
+            end else
+            begin
+              if dbug then writeln('<li>SUBHIT:',s.curline,'<ul>');
+              s.gettag(vari,curlinepos);
+              lookingat:=lookingat+1;
+              lookingfor:=pathtofind[lookingat];
+              continue;
+            end;
+            //result:=parseline...
+         end else
+         begin
+          if dbug then writeln('<li>MISMATCH:',curlineind,copy(curline,1,5),'--',lookingatind,eof);
+         skiplevel(curlineind);
+          if dbug then writeln('<li>nISnATCH:',curlineind,copy(curline,1,5),'--',lookingatind,eof);
+         continue;
+
+         end;
+   end else
+   //backtrack target
+   begin
+      if dbug then writeln('<li>toodeep:',curline,lookingat,'</b>/Lookind:',lookingatind,'/rescount:',resindents.count,'!</li>');
+
+     if below>=lookingat then
+     begin
+       result:=nil;prevline:=curline;lookingat:=below-1;curlineind:=prevind;
+       while resindents.count>lookingat do resindents.Delete(resindents.count-1);
+       writeln('<li>end-of-level, no hit',below,'/',lookingat,'/',resindents.count);
+       exit;
+     end;
+     repeat   //bactyrack to prev level
+       resindents.Delete(resindents.count-1);
+       ttag(restags[restags.count-1]).killtree;
+       restags.delete(restags.count-1);
+       lookingat:=lookingat-1;
+     //  if lookingat<0 then exit;
+       //if lookingat<xhilev then xhilev:=lookingat;  //the hilev-stuff should be replaced
+       try
+       //writeln('Ntry:',subtarglev,pathtofind[subtarglev],'*');
+       lookingatind:=integer(resindents[lookingat]);
+       //                     up    /sl:1                /si:0             /ii:2[eiei/i:6/s:0/t:1/TT:b]skip:;eiei:1:-[b/i:3/s:0/t:1/TT:b]{
+       except writeln('fail:',lookingat,'/',resindents.count);end;
+     until  curlineind<=lookingatind;
+     prevline:=curline;prevind:=curlineind;
+
+   end;
+
+   except writeln('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+   end;
+  until eof;// or (lim>100000000);
+  //writeln('<li>eofeofeofoefoef:',curline);
+  }
+end;
+
+
+
+end.
+
+
+function tstreamer.parseone: ttag;
+var vari:string;curlinepos:integer;
+
+  function parserecur(tagi:ttag;below:integer):boolean;
+  var atag:ttag;myindent:integer;
+  begin  //recursive.. maybe rewrite later.. but perhaps ok, this is meant for smaller chunks
+     result:=false;
+     //exit;
+     repeat
+         limitti:=limitti+1;
+         if limitti>1000 then exit;
+         readline;
+         writeln('<li>Xline to:',tagi.xmlis,'/try:',curline,'/ind=',curlineind,'/',below);//,'/match:',pathtofind[lookingat],lookingat);
+         writeln('[',limitti,'/',eof);
+         if eof then exit;
+         if curlineind<=below then begin writeln('<li>donelevel:',curline);prevline:=curline;exit;end;
+         result:=true;
+         //myindent:=curlineind;
+         atag:=parseline(curline);
+         //writeln('<li>test:',pathtofind[lookingat],'?=?',atag.vari,lookingat,_matches(pathtofind[lookingat],atag.vari));
+         //if not _matches(pathtofind[lookingat],atag.vari) then  //rigth kind of element ar right level -
+         if atag.vari='b' then
+         begin
+          skiplevel(curlineind);
+          atag.killtree;
+         end
+
+         else begin
+           //lookingat:=lookingat+1;
+         writeln('<li>descends. of ',curline,'//',curlineind,'?<ul>');
+         repeat  until (parserecur(atag,myindent)=false)  or (eof)  or (limitti>1000);
+         tagi.subtags.add(atag);
+         //lookingat:=lookingat-1;
+         writeln('!***************************');
+         writeln('</ul><li>resx:',tagi.xmlis,below);
+         end;
+
+         result:=true;
+
+
+     until (eof) or (curlineind<below) or (limitti>1000);
+  end;
+  var firstindent:integer;
+begin
+  limitti:=-1000;
+  readline;
+  writeln('<li>gotfirstline:',curline,curlineind);
+  curlinepos:=1;
+  vari:=getfirstword(curline, curlinepos);
+  writeln('<li>gotline:',vari,curlinepos);
+  //if pos(pathtofind[lookingat],curline)=1 then  //rigth kind of element ar right level -
+  firstindent:=curlineind;
+  result:=GETTAG(vari,curlinepos);
+  writeln('<li>parse:',result.xmlis,'<ul>');
+  lookingat:=lookingat+1;
+  repeat until (parserecur(result,firstindent)=false) or (eof) or (limitti>10);
+
+  writeln('</ul><li>parsed:<xmp>',result.xmlis,'</xmp>');
+end;
+
+function tstreamer.nexttag(below:integer): ttag;
+// path=/top/inter/target  -
+//var
+  //targlev, // level below which everything is skipped
+var
+  i,curlinepos,lim:integer; //indentation corresponding to targlev
+  newtag:ttag;vari:string;dbug:boolean;
+
+
+begin
+  dbug:=true;
+  RESULT:=NIL;
+  lim:=1;
+  //xhilev:=lookingat;
+  try
+  if dbug then begin writeln('(<ul><li>newtry:',curline,prevline,' at=<b>',level.dbug,'/rcount=',resindents.count,'/',pathtofind.count);for i:=0 to resindents.count-1 do writeln('[',integer(resindents[i]),']');  for i:=0 to pathtofind.count-1 do writeln('{P',i,'=',pathtofind[i],'}');end;  except writeln('yyyyyyyyyyyyyyyyyyyyyyyyyyy'); end;
+  //errors;
+    if lookingat<0 then begin writeln('<h1>err: backtrack below zero:',curline);eof:=true;exit;end;
+    if lookingat>=pathtofind.count then begin if dbug then writeln('<h1>err: looking too deep:',curline,'</h1>');eof:=true;exit;end;  //should not happen
+  if lookingat<resindents.count then
+  begin //if not digging deeper, skip all under prev hit
+     skiplevel(curlineind);
+  end;
+  if resindents.count>lookingat then lookingatind:=integer(resindents[lookingat]);  //update intendentation according to level if current level has established the indentation
+  //*****************************
+
+  if dbug then begin writeln('(<ul><li>TRY:',prevline,' at=<b>',lookingat,'</b>/ind:',lookingatind,'/rcount=',resindents.count,'/',pathtofind.count);end;
+  repeat
+   lim:=lim+1;
+   IF EOF THEN  begin  writeln('<h1>EOF</h1>');  EXIT; end;
+   if restags.count>=pathtofind.count then
+   begin //
+    if dbug then writeln('<li>enuff',curline,'/restags:',restags.count,'/path:',pathtofind.count);
+    ttag(restags[restags.count-1]).killtree;
+    restags.delete(restags.count-1);
+   end;
+   readline;
+   writeln('<li>gogo:',curline,'/cind:',curlineind,'/lind:',lookingatind);
+   try
+   try   // fix indentation to next level even if not a fit
+     if lookingat>resindents.count-1 then
+     begin
+       if dbug then writeln('<li>establish indent for next level:',curlineind, '/AT:',lookingat,'/rescount:',restags.count, '/',pathtofind.count);//[lookingat],'/line:',curline,'<ul>');
+       resindents.add(pointer(curlineind));
+       //restags.add(nil);
+       lookingatind:=integer(resindents[lookingat]);
+     end;
+   except writeln('<li>FAILI:',lookingat,'.',resindents.count);end;
+         //debug
+          try
+          if dbug then writeln('<li><b>[',curline,'</b>/find:',pathtofind[lookingat],'/atlevel:',lookingat,'<b>/Lind:',lookingatind,'=',curlineind,'</b>/rescount',restags.count,']');
+          except writeln('</i></b>***********');end;
+   if curlineind>=lookingatind then
+   begin
+     curlinepos:=1;//curlineind;  what the fuck!
+     vari:=getfirstword(curline, curlinepos);
+     if dbug then writeln('<li>maymatch:',vari,'-',pathtofind[lookingat]);
+     if _matches(pathtofind[lookingat],vari) then  //rigth kind of element ar right level -
+         begin
+           if dbug then writeln('<li>RIGHT LEVEL<b>:',pathtofind[lookingat],'=?',vari,'</b>=',_matches(pathtofind[lookingat],vari),'!','<b>',lookingat,'=',pathtofind.count-1,'</b>');
+            if lookingat>=pathtofind.count-1 then
+            begin
+              if dbug then writeln('<li>matches:',restags.count,'-',vari);
+              GETTAG(vari,curlinepos);
+              writeln('<li>gottag:',restags.count,'!',xhilev);
+              result:=restags[restags.count-1];//hilev];
+
+              if dbug then  writeln('<li><b>HIT:',result.vari,':',ttag(restags[0]).xmlis,'/at:',lookingat,'/',lookingatind,'</b>-',pathtofind.count,pathtofind[lookingat],'</li></ul>!');
+              exit;
+            end else
+            begin
+              if dbug then writeln('<li>SUBHIT:',curline,'<ul>');
+              gettag(vari,curlinepos);
+              lookingat:=lookingat+1;
+              lookingfor:=pathtofind[lookingat];
+              continue;
+            end;
+            //result:=parseline...
+         end else
+         begin
+          if dbug then writeln('<li>MISMATCH:',curlineind,copy(curline,1,5),'--',lookingatind,eof);
+         skiplevel(curlineind);
+          if dbug then writeln('<li>nISnATCH:',curlineind,copy(curline,1,5),'--',lookingatind,eof);
+         continue;
+
+         end;
+   end else
+   //backtrack target
+   begin
+      if dbug then writeln('<li>toodeep:',curline,lookingat,'</b>/Lookind:',lookingatind,'/rescount:',resindents.count,'!</li>');
+
+     if below>=lookingat then
+     begin
+       result:=nil;prevline:=curline;lookingat:=below-1;curlineind:=prevind;
+       while resindents.count>lookingat do resindents.Delete(resindents.count-1);
+       writeln('<li>end-of-level, no hit',below,'/',lookingat,'/',resindents.count);
+       exit;
+     end;
+     repeat   //bactyrack to prev level
+       resindents.Delete(resindents.count-1);
+       ttag(restags[restags.count-1]).killtree;
+       restags.delete(restags.count-1);
+       lookingat:=lookingat-1;
+     //  if lookingat<0 then exit;
+       //if lookingat<xhilev then xhilev:=lookingat;  //the hilev-stuff should be replaced
+       try
+       //writeln('Ntry:',subtarglev,pathtofind[subtarglev],'*');
+       lookingatind:=integer(resindents[lookingat]);
+       //                     up    /sl:1                /si:0             /ii:2[eiei/i:6/s:0/t:1/TT:b]{0}{3}skip:;eiei:1:-[b/i:3/s:0/t:1/TT:b]{
+       except writeln('fail:',lookingat,'/',resindents.count);end;
+     until  curlineind<=lookingatind;
+     prevline:=curline;prevind:=curlineind;
+
+   end;
+
+   except writeln('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+   end;
+  until eof;// or (lim>100000000);
+  //writeln('<li>eofeofeofoefoef:',curline);
+end;
+
+function tstreamer.doparse:ttag;
+var              MAXi:INTEGER;
+  newStatus: string;t:ttag;
+begin
+   maxi:=0;
+  { subtarglev:=0;
+   //inskip:=false;
+   subtargind:=0;
+   subtarglev:=0;
+   }
+   //result:=resutag;//ttag.create;
+   //result:=ttag.create;
+   //result.vari:='sax';
+   while not eof do
+    begin
+      maxi:=maxi+1;
+      //if maxi>100 then brek;
+      try
+      t:=nexttag(0);
+      except
+       logwrite('****************endstrerror');
+       //writeln('<h1>errorstr',eof,'</h1>');
+       //raise;
+      end;
+      if eof then break;
+      if level.lev<0 then break;
+        if t<>nil then resutag.subtags.add(t);
+        //writeln('<h1>str</h1><xmp>',result.xmlis,'</xmp>!!!',lookingat);
+    end;
+   result:=resutag;
+   //parsexsi;
+end;
+

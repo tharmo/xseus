@@ -83,7 +83,7 @@ begin
 
         //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         try
-         //WRITELN('HELÃ–LO');
+         //WRITELN('HELÖLO');
         axseus.dosubelements;
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         //writeln(uri+'!DIDIDID');//+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));

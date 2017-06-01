@@ -7,19 +7,20 @@
       <Unit0>
         <Filename Value="x6.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
         <TopLine Value="10"/>
         <CursorPos X="4" Y="24"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="xserver.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1234"/>
-        <CursorPos X="9" Y="1255"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1201"/>
+        <CursorPos X="19" Y="1214"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
@@ -145,7 +146,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="379"/>
         <CursorPos X="22" Y="449"/>
-        <UsageCount Value="69"/>
+        <UsageCount Value="108"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit15>
       <Unit16>
@@ -153,66 +154,184 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="161"/>
         <CursorPos Y="163"/>
-        <UsageCount Value="290"/>
+        <UsageCount Value="329"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="xsexse.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="5068"/>
-        <CursorPos X="18" Y="5097"/>
-        <FoldState Value=" T0jv06}lj"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="3911"/>
+        <CursorPos Y="3929"/>
         <UsageCount Value="101"/>
         <Bookmarks Count="3">
-          <Item0 Y="1095"/>
-          <Item1 X="6" Y="9488" ID="1"/>
-          <Item2 Y="511" ID="2"/>
+          <Item0 Y="1097"/>
+          <Item1 X="6" Y="9490" ID="1"/>
+          <Item2 Y="513" ID="2"/>
         </Bookmarks>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
         <Filename Value="xsexml.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="470"/>
-        <CursorPos X="49" Y="494"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="3863"/>
+        <CursorPos X="27" Y="3882"/>
         <UsageCount Value="117"/>
         <Bookmarks Count="1">
-          <Item0 Y="2719" ID="3"/>
+          <Item0 Y="2711" ID="3"/>
         </Bookmarks>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
       <Unit19>
         <Filename Value="xseexp.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="775"/>
-        <CursorPos X="60" Y="805"/>
-        <UsageCount Value="101"/>
+        <TopLine Value="639"/>
+        <CursorPos X="54" Y="651"/>
+        <UsageCount Value="76"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit19>
       <Unit20>
         <Filename Value="xsedb.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="26" Y="14"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="60"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit20>
       <Unit21>
         <Filename Value="xsefunc.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1160"/>
-        <CursorPos X="108" Y="1188"/>
-        <UsageCount Value="111"/>
+        <TopLine Value="2913"/>
+        <CursorPos X="6" Y="2956"/>
+        <UsageCount Value="67"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit21>
     </Units>
-    <General>
-      <ActiveWindowIndexAtStart Value="-1"/>
-    </General>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3549" Column="20" TopLine="3517"/>
+      </Position1>
+      <Position2>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3552" Column="48" TopLine="3520"/>
+      </Position2>
+      <Position3>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2331" Column="6" TopLine="2327"/>
+      </Position3>
+      <Position4>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3540" Column="35" TopLine="3527"/>
+      </Position4>
+      <Position5>
+        <Filename Value="xsexse.pas"/>
+      </Position5>
+      <Position6>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="1339" Column="34" TopLine="1338"/>
+      </Position6>
+      <Position7>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3937" Column="19" TopLine="3897"/>
+      </Position7>
+      <Position8>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3967" Column="14" TopLine="3931"/>
+      </Position8>
+      <Position9>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="2636" Column="15" TopLine="2548"/>
+      </Position9>
+      <Position10>
+        <Filename Value="xsexml.pas"/>
+        <Caret Line="3883" Column="137" TopLine="3863"/>
+      </Position10>
+      <Position11>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4138" Column="29" TopLine="4363"/>
+      </Position11>
+      <Position12>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="196" Column="14" TopLine="178"/>
+      </Position12>
+      <Position13>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="8228" TopLine="8227"/>
+      </Position13>
+      <Position14>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="132" Column="22" TopLine="114"/>
+      </Position14>
+      <Position15>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3992" TopLine="3954"/>
+      </Position15>
+      <Position16>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4012" TopLine="3979"/>
+      </Position16>
+      <Position17>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3929" Column="11" TopLine="3905"/>
+      </Position17>
+      <Position18>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3925" Column="13" TopLine="3905"/>
+      </Position18>
+      <Position19>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3926" Column="40" TopLine="3906"/>
+      </Position19>
+      <Position20>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3989" Column="62" TopLine="3979"/>
+      </Position20>
+      <Position21>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3998" Column="16" TopLine="3979"/>
+      </Position21>
+      <Position22>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4018" Column="16" TopLine="3986"/>
+      </Position22>
+      <Position23>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4023" Column="15" TopLine="3991"/>
+      </Position23>
+      <Position24>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4024" Column="39" TopLine="3992"/>
+      </Position24>
+      <Position25>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4033" Column="35" TopLine="4001"/>
+      </Position25>
+      <Position26>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4035" Column="15" TopLine="4003"/>
+      </Position26>
+      <Position27>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="4036" Column="29" TopLine="4004"/>
+      </Position27>
+      <Position28>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3883" Column="46" TopLine="3843"/>
+      </Position28>
+      <Position29>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3933" Column="22" TopLine="3901"/>
+      </Position29>
+      <Position30>
+        <Filename Value="xsexse.pas"/>
+        <Caret Line="3922" Column="10" TopLine="3902"/>
+      </Position30>
+    </JumpHistory>
   </ProjectSession>
   <Debugging>
-    <Watches Count="12">
+    <Watches Count="10">
       <Item1>
         <Expression Value="xs.x_session"/>
       </Item1>
@@ -243,12 +362,6 @@
       <Item10>
         <Expression Value="'->'"/>
       </Item10>
-      <Item11>
-        <Expression Value="_____"/>
-      </Item11>
-      <Item12>
-        <Expression Value="']&lt;/b>'"/>
-      </Item12>
     </Watches>
   </Debugging>
 </CONFIG>

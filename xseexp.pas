@@ -220,7 +220,7 @@ begin
     sta:=sta+1;
     //for i:=sta to
     spec:=_uptoany(st,'(/:',sta,sta,10);
-    writeln('<li>BG**',spec,'__',st);
+    //writeln('<li>BG**',spec,'__',st);
    //WHY THIS: if st[sta-1]='/' then sta:=sta-1;
     //t_debug:=true;  =!from/
     //function _fetchst(findfrom,tofind:string;{var} sto:integer;sta,maxlen:integer):string;
@@ -292,7 +292,7 @@ begin
       begin
         Res := xs.curtoele;
         try
-       // writeln('<li>FromTo:'+res.HEAD+'/with:'+copy(st,sta,100)+'!');
+        writeln('<li>FromTo:'+res.HEAD+'/with:'+copy(st,sta,100)+'!');
        // writeln('<li>FromTo2:'+'/UNDER'+RES.PARENT.HEAD);
         except     writeln('<li>didtryto'); end;
       end else
@@ -344,7 +344,8 @@ begin
           Res := xs.curbyele
      else
         Res := nil;
-     if st[sta]='/' then begin writeln('GET:'+copy(st,sta,999));sta:=sta+1;end;  //breaks something? We don't want the leading "/" ... ever?
+     if st[sta]='/' then begin //writeln('GET:'+copy(st,sta,999));
+       sta:=sta+1;end;  //breaks something? We don't want the leading "/" ... ever?
    end
    else
    if st[sta]='/' then
@@ -449,7 +450,7 @@ begin
     begin
     sta:=sta+1; //to prevent from trying all over
     end;}
-    //Â§Â§t_debug:=false;
+    //§§t_debug:=false;
     //if bracks<0 then writeln('NONGOBRAC');result:='NONOGOGO';
   end;
 end;
@@ -578,6 +579,7 @@ ok,hasparams,debug:boolean;fun:tfunc;
    // result:=''; what the fuck was this?
  end;
 begin
+ try
  //t_debug:=true;
  // writeln('<li>parsefun ',fname,'/from:',copy(st,sta,length(st)),'      at!',sto,st[sto-1],hasparams,'<ul>');
  stlen:=length(st);
@@ -636,10 +638,10 @@ begin
    fun:=tfunc.create(fname,pars,xs);
    try
       result:=fun.execute;
-   except writeln('failed p_func exec',fname,'!');end;
+   except writeln('failed p_func exec:?',fname,'!',pars.text);end;
       fun.Free;
      //writeln('</ul><li>failed function:?',fname,'!<b>',result,'</b>!',pars.text,pars.count,' (...',copy(st,sto,9999),')');
-  try
+  {try
     if pos('contains',st)>0 then
   //writeln('<li>gtfun:<b>',fname,'!</b>',subexp.count, '/left:',copy(st,sto,999),'/pars:<b>',subexp.text+'!</b>',result,'</li>');
    subexp.Free;
@@ -647,10 +649,13 @@ begin
    try
    pars.free;
 
-   except  writeln('failed free p_func pars');  end;
+   except  writeln('failed free p_func pars');  end;}
    //if pars=nil then
    // writeln('nopars');
    //t_debug:=false;
+  finally
+     subexp.free;pars.free;
+  end;
 
   end;
 
@@ -797,7 +802,7 @@ begin
  end;
  while (sta<length(st)) and (st[sta]=' ') do sta:=sta+1;
 
-except writeln('<li>failed to parse xpart</li>');
+except writeln('<li>failed to parse xpart:{',st,' in ' ,xs.curbyele.vari,'}</li>');
 end;
 //if pos('contains',st)>0 then writeln('<li>containsx:',result);
 

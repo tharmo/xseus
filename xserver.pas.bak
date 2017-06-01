@@ -372,8 +372,7 @@ var
         len := length(s);
         logwrite('len:'+inttostr(len)+'!'+inttostr(f.bufpos));
         //Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html',f.bufpos);
-        //hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=utf-8',f.bufpos);
-        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=ISO-8859-1',f.bufpos);
+        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=utf-8',f.bufpos);
         //Tserving(t_thisprocess).sock.SendBufferTo(f.bufptr,f.bufpos);
         Tserving(t_thisprocess).sock.SendString(hdr+s);
         //logwrite('s:' + s);
@@ -398,7 +397,7 @@ var
        logwrite('allout::'+inttostr(integer(RES.SIZE)));
        end else logwrite('noallout');
         //logwrite('tryallout');
-        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=iso-8851-1',RES.position);
+        hdr:=Tserving(t_thisprocess).writecustomheaders('HTTP/1.0 200','text/html; charset=utf-8',RES.position);
         Tserving(t_thisprocess).sock.SendString(hdr);
         Tserving(t_thisprocess).sock.SendBuffer(RES.MEMORY,RES.position);
         //logwrite('s:' + s);
@@ -766,7 +765,7 @@ var i:integer;ht:string;
     ht:=responseheaders[i];
     if trim(ht)<>'' then sock.SendString(cut_ls(ht)+':'+cut_rs(ht) + CRLF);
     //sock.SendString(cut_ls(ht)+':'+cut_rs(ht));
-    logwrite(('H::'+cut_ls(ht)+':'+cut_rs(ht) + CRLF));
+    //logwrite(('H::'+cut_ls(ht)+':'+cut_rs(ht) + CRLF));
    end;
     sock.SendString(CRLF);
 
@@ -1252,7 +1251,7 @@ begin
       //logwrite('cleared');
       logwrite('freed:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));
       txseus(myxseus).free;
-      //writeln('<li>memlost in connection:///////////////////'+floattostr(getheapstatus.totalallocated-smem));
+      writeln('<li>memlost in connection:///////////////////'+floattostr(getheapstatus.totalallocated-smem));
       end;
      except   writeln('failed xseus.clear'); raise; end;
              //xseus cleared
