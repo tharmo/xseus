@@ -3456,9 +3456,10 @@ end;
 destructor ttagsorter.free;
 var i:integer;
 begin
-  for i:=0 to recs.count-1 do tasorter(recs.objects[i]).free;
+ try
+  for i:=0 to recs.count-1 do tasorter(recs.objects[i]).free;except writeln('failfreesorter',i);end;
   recs.free;//ords.free;typ.free;
-  inherited free;
+  //inherited free;
 
 end;
 
@@ -3473,7 +3474,7 @@ begin
 for i:=0 to t_listsorter.recs.count-1 do
 begin
   try
-   str:=t_listsorter.recs[i];
+   str:=trim(t_listsorter.recs[i]);
    if str='' then continue;
    arec:=tasorter(t_listsorter.recs.objects[i]);
    if pos('?',str)=1 then
@@ -3484,7 +3485,10 @@ begin
    begin
    s1:=ttag(a1).subs(str);
    try
-   s2:=ttag(a2).subs(str);
+    s2:=ttag(a2).subs(str);
+    //writeln('!',s1,'!',ttag(a1).att('a'),'|',str,'|');
+    //writeln('!',s2,'!',ttag(a2).att('a'),'|',str,'|');
+
    except
      writeln('<li>failed to get tag to compare',ttag(a2).xmlis);raise;
    end;
@@ -3497,44 +3501,47 @@ begin
         n2:=strtofloatdef(s2,0);
         //test:=n1>n2;
    end;
-  if ((arec.numcomp) and (n1>n2)) or (s1>s2) then
+  if ((arec.numcomp) and (n1>n2)) or ((not(arec.numcomp)) and (s1>s2))  then
     begin
        result:=arec.orde;
+       //writeln('<li>?',formatfloat('000',n1),'/',formatfloat('000',n2),'=',result,n1>n2);
        break;
     end else
-    if ((arec.numcomp) and (n1<n2)) or (s1<s2) then
+    if ((arec.numcomp) and (n1<n2)) or ((not(arec.numcomp)) and (s1<s2)) then
       begin
          result:=0-arec.orde;
+         //writeln('<li>?!',formatfloat('000',n1),'/',formatfloat('000',n2),'=',result);
          break;
       end else
       result:=0;
       //writeln('<li>',result,'  ', s1,'!',s2,'!!',t_listsorter.recs[i]);
 
 end;
-  //writeln('<li>compare:'+str,': ',ttag(a1).vari,'(',s1,')   /  ',ttag(a2).vari,'(',s2,')=',result);
+  //writeln('<li>compare:'+str,': ','(',s1,')   /  ','(',s2,')=',result,'/',ttag(a1).att('a'));
+  //riteln('<li>sortrec:',s1,'/',s2,'--',str,result);
 
 end;
 function _dosort(slist:tlist;st:string): boolean;
 var //slist:tlist;
     i:integer;
 begin
-
- //for i:=0 to slist.count-1 do writeln('<li>o:',i,'/'+ttag(slist[i]).head);
+ try
+  //write('<ul>');  for i:=0 to slist.count-1 do    writeln('<li>o:','/'+ttag(slist[i]).head);
 
    try  t_listsorter:=ttagsorter.create(st);  except writeln('<li>failed to create sorter');end;
    try  slist.sort(@mycompare);    except writeln('<li>failed to sortby sorter');raise;
   //  for i:=
    end;
+ except writeln('<li>failed to list sorted');end;
    t_listsorter.free;
   //slist.addlist(curfromele.subtags);    except writeln('<li>failed to add items to  sorter');end;
 
  // try
-  // for i:=0 to slist.count-1 do writeln('<li>',i,'/'+ttag(slist[i]).head);
+  // for i:=0 to slist.count-1 do writeln('<li>',i,'/'+ttag(slist[i]).head); write('</ul>');
  //    except writeln('<li>failed to list unsorted');end;
   //writeln('<li>gosort:',slist.count,curfromele.head);
 // try
  // for i:=0 to slist.count-1 do writeln('<li>s:',i,'/'+ttag(slist[i]).head);
-  //  except writeln('<li>failed to list sorted');end;
 end;
 
 

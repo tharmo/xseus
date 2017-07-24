@@ -651,7 +651,7 @@ begin
       try
         if xseuscfg.smtp <> nil then
         begin
-          //Â§Â§ smtpserver := txseussmtp.Create(xseuscfg.smtp);
+          //§§ smtpserver := txseussmtp.Create(xseuscfg.smtp);
           logwrite('smtpserver created');
         end;
       except
@@ -856,4 +856,4 @@ runserver;
    //showmessage('running');
   //xseusserver := TxseusServer.Create;
 
-end.
+end.

@@ -11,3 +11,48 @@ startlistener
 listener created
 ** STARTing LISTEN PORT:8001
 **  LISTENING PORT:8001
+***************listernconnection:5
+0/get thread, free:3
+started connection0/2@10:48:16
+Open connection /127.0.0.1:44690
+/mem+0/a:2592
+read headers:host=localhost:8001
+user-agent=Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0
+accept=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+accept-language=en-US,en;q=0.5
+accept-encoding=gzip, deflate
+cookie=xseus_session=lees2zdv
+connection=keep-alive
+upgrade-insecure-requests=1
+cache-control=max-age=0
+
+nosession
+attenhtmi
+OUTBUFFER:0
+assign outoput
+outputmodeok
+assigned outoput1
+assigned outoput2
+buffer:256
+assigned outoput
+URL:/hiero/hiero.htmi!!!
+created lock for /home/t/sanakone/hiero.htmi
+freelock:/home/t/sanakone/hiero.htmi
+inited xseus10:48:16 (0) for:/hiero/hiero.htmi
+Writeeinit
+inithtml
+freed:/hiero/hiero.htmi/mymem:142336
+finishing Non-chunked
+allout::110702
+custheads: HTTP/1.0 200
+Content-length: 110702
+Content-type: text/html; charset=iso-8851-1
+Date: Mon, 24 Jul 2017 10:48:21 +0300
+Set-Cookie: xseus_session=lees2zdv; path=/
+Server: Xseus / Synapse
+
+193!
+finished xseus-serving/mymem:4544/17024
+closing-----------------------------------
+released thread 0 now at 2/3
+connectionmemlost:11264

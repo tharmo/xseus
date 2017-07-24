@@ -3513,6 +3513,7 @@ begin
     end;
     if pos('#', ele) = 1 then
     begin
+      //writeln('@@##',ele);
       Delete(ele, 1, 1);
       idi := ele;
     end;
@@ -3887,7 +3888,7 @@ begin
       try   //negatives do not work
        if numcond<0 then numcond:=maybehits.count-numcond-1;
         if (numcond<0) or (numcond>maybehits.count) then
-          writeln('<!--li >',path.con.cond,'wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'-->')
+         // writeln('<!--li >',path.con.cond,'wrong count',numcond,'/',maybehits.count,'//',subtags.count,ttag(subtags[0]).parent.head+'-->')
         else
         //writeln('<li>o:',numcond,'/',maybehits.count,'=');//+ttag(maybehits[numcond]).head);
         begin //writeln('<li>hitnum',i,'::',numcond,ttag(maybehits[numcond-1]).head);
@@ -4528,10 +4529,11 @@ begin
               if t_debug then path.list;
 
               if path.idi<>'' then
-              begin
+              begin  //writeln('###:',path.idi);
+                //txseus(t_currentxseus).x_ids.list;
                 ids:=txseus(t_currentxseus).x_ids.findobjects(path.idi);
-                if ids=nil then begin result:=nil;exit;end;//writeln('<h1>no id='+path.idi+'</h1><xmp>'+tag.xmlis+'</xmp>!');
-                //writeln('id-in-path:'+path.idi,ids.count,'////');
+                if ids=nil then begin writeln('noids;',path.idi);result:=nil;exit;end;//writeln('<h1>no id='+path.idi+'</h1><xmp>'+tag.xmlis+'</xmp>!');
+                writeln('id-in-path:'+path.idi,ids.count,'////');
                 //path.list;
                 j:=0;
                 while j<ids.count do

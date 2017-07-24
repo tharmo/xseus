@@ -594,7 +594,7 @@ begin
   HeaderHasBeenWritten := False;
   resutxt:='';
   xml:=false;
-  chunked:=false;
+  //chunked:=false;
   uploads:=tstringlist.create;
   params:=tstringlist.create;
   elements_created:=0;

@@ -43,8 +43,8 @@ const
  //both: <meta><br><hr> <col><img> <base><area><input>
   //g_myurl = 'http://valtweb.pc.helsinki.fi/cgi-shl/cgitalk.exe';
 
-  //const bucketcount=128;
-  const bucketcount=1;
+  const bucketcount=32;
+  //const bucketcount=1;
 
 type
  thashstrings = class(tobject)
@@ -446,7 +446,7 @@ begin
   except writeln('failedingethash_'+st,len);
   end;
   result := 1+(res mod bucketcount);
-  //writeln('<li>hash s:',st,'/h:',result,'/l:',len,'</li>');
+  //writeln('<li>hash s:',st,'/h:',result,'/bucs:',bucketcount,'</li>');
 end;
 
 constructor thashstrings.create;
@@ -578,30 +578,6 @@ begin
    end;
 
 end;
-function thashstrings.findobject(vari:string):ttag;
-    var hs:byte;hit:integer;elelist:tlist;
-begin
-  try
-  vari:=trim(vari);
-  result:=nil;
- hs:=gethash(vari);
- except writeln('failedtogethashnum:forobj_'+vari);
- end;
- try
-  hit:=tstringlist(buckets[hs]).indexof(vari);
-  if hit>-1 then
-  begin
-   //result:=ttag(tstringlist(buckets[hs]).objects[hit]);
-    elelist:=tlist(tstringlist(buckets[hs]).objects[hit]);
-    result:=ttag(elelist[0]);
-   if pos('s1_1',vari)>0 then     writeln('foundidi:',vari,'/',elelist.count,'/hash:',hs,'/hit:',hit,'!'+result.vari,'!','!'+result.vali,'!');
-    end;
-      // ------------------Getid_0_0!64#-1Â¤Â¤Â¤#
-  //if    result<>nil then writeln('<li>------------------Getid_',vari,'!hash:',hs,'#',hit,'¤¤¤',tstringlist(buckets[hs]).text,'#',result.xmlis,'!!!</li>')
-  //else writeln('<li>noid',hit,vari,'#',hs,'#</li>'+'!'+tstringlist(buckets[hs])[0]+'!/noid');
- except writeln('failedtogetst_obj:forobj_'+vari,result=nil);
- end;
-end;
 procedure thashstrings.addobject(t:ttag;vari:string);
 var hs:byte;hit:integer;ellist:tlist;
 begin
@@ -637,9 +613,8 @@ begin
 
 end;
 
-
-function thashstrings.findobjects(vari:string):tlist;
-    var hs:byte;hit:integer;elelist:tlist;
+function thashstrings.findobject(vari:string):ttag;
+    var hs:byte;hit:integer;elelist:tlist;i:word;
 begin
   try
   vari:=trim(vari);
@@ -648,7 +623,39 @@ begin
  except writeln('failedtogethashnum:forobj_'+vari);
  end;
  try
+  //writeln('/abuc:',tstringlist(buckets[hs]).text);
   hit:=tstringlist(buckets[hs]).indexof(vari);
+  //writeln('<li>hash[',vari,']',hs,'=',hit,'//inbuc:');
+  if hit>-1 then
+  begin
+   //result:=ttag(tstringlist(buckets[hs]).objects[hit]);
+    elelist:=tlist(tstringlist(buckets[hs]).objects[hit]);
+    result:=ttag(elelist[0]);
+   //if pos('s1_1',vari)>0 then
+   //writeln('foundidi:',vari,'/',elelist.count,'/hash:',hs,'/hit:',hit,'!'+result.vari,'!','!'+result.vali,'!');
+    end;// else begin writeln('<li>NOTFOUNDID:<b>',vari,'::</b> ');    for i:=0 to tstringlist(buckets[hs]).Count-1 do write('/',tstringlist(buckets[hs])[i],'!');  end;
+      // ------------------Getid_0_0!64#-1Â¤Â¤Â¤#
+  //if    result<>nil then writeln('<li>------------------Getid_',vari,'!hash:',hs,'#',hit,'¤¤¤',tstringlist(buckets[hs]).text,'#',result.xmlis,'!!!</li>')
+  //else writeln('<li>noid',hit,vari,'#',hs,'#</li>'+'!'+tstringlist(buckets[hs])[0]+'!/noid');
+ except writeln('failedtogetst_obj:forobj_'+vari,result=nil);
+ end;
+end;
+
+function thashstrings.findobjects(vari:string):tlist;
+    var hs:byte;hit:integer;elelist:tlist;i:word;
+begin
+ result:=nil;
+  try
+  vari:=trim(vari);
+  result:=nil;
+ hs:=gethash(vari);
+ except writeln('failedtogethashnum:forobj_'+vari);
+ end;
+ try
+  hit:=tstringlist(buckets[hs]).indexof(vari);
+ //if hit<0 then exit;
+  //writeln('<li>hash[',vari,']',hs,'=',hit,'//buc:');
+  for i:=0 to tstringlist(buckets[hs]).Count-1 do write(tstringlist(buckets[hs])[i],'=',gethash(tstringlist(buckets[hs])[i]),'!!!');
   if hit>-1 then
    //result:=ttag(tstringlist(buckets[hs]).objects[hit]);
     result:=tlist(tstringlist(buckets[hs]).objects[hit]);

@@ -4,8 +4,8 @@ xseus
      sudo cat /var/log/upstart/xseus.log
      sudo nano /etc/init/xseus.conf 
  
-    #port: 8001
-    port: 443
+    port: 8001
+    #port: 443
     threadcount: 10
     test: testii
     xproxyport: 5000
@@ -53,7 +53,7 @@ xseus
     chunked: false
     defaultheaders
         transfer-encoding: chunked
-        content-type: text/html
+        content-type: text/html; charset=utf-8
         connection: close
         pragma: no-cache
         #connection: keep-alive

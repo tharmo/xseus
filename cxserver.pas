@@ -1061,7 +1061,7 @@ begin
         logwrite('inited xseus'+timetostr(now)+' ('+inttostr(id)+') for:'+uri);
         //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         try
-         //WRITELN('HELÃ–LO');
+         //WRITELN('HELÖLO');
         txseus(myxseus).dosubelements;
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');
         logwrite(uri+'!'+ext+'did:'+uri+'/mymem:'+inttostr(GetFPCHeapStatus.CurrHeapUsed));

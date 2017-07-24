@@ -1,0 +1,984 @@
+program gut;
+
+{$mode objfpc}{$H+}
+
+uses
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  cthreads,
+  {$ENDIF}{$ENDIF}
+  Classes, SysUtils, CustApp, gutu,strutils,math
+  { you can add units after this };
+function hyphenate:tstringlist;forward;
+
+type
+
+  { tgut }
+
+  tgut = class(TCustomApplication)
+  protected
+    procedure DoRun; override;
+  public
+    instr:tfilestream;
+    endpar:boolean;
+    function readline:string;
+    procedure cleanfile(fn:string);
+    constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure WriteHelp; virtual;
+  end;
+type tletterarray=array[1..32] of ansichar;
+//const letters:array[1..32] of ansichar=('a','i','t','n','e','s','l','o','k','u',#228,'m','v','r','j','h','y','p','d',#246,'g','b','f','c','w',#229,'x','z',',','-','#','_');
+  const letters:array[1..32] of ansichar=('a','i','t','n','e','s','l','o','k','u',#228,'m','v','r','j','h','y','p','d',#246,'g','b','f','c','w',#229,'x','z','q','_','_','_');
+ chrciphs:array[0..255] of ansichar=(#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#32,#0,#0,#35,#0,#0,#0,#0,#0,#0,#0,#0,#44,#45,#46,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#65,#66,#67,#68,#69,#70,#71,#72,#73,#74,#75,#76,#77,#78,#79,#80,#0,#82,#83,#84,#85,#86,#87,#0,#89,#0,#0,#0,#0,#0,#0,#0,#97,#98,#99,#100,#101,#102,#103,#104,#105,#106,#107,#108,#109,#110,#111,#112,#0,#114,#115,#116,#117,#118,#119,#0,#121,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#196,#197,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#214,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#228,#229,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#0,#246,#0,#0,#0,#0,#0,#0,#0,#0,#0);
+ //chrcodes:array[0..255] of byte=(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,27,0,0,31,0,0,0,0,0,0,0,0,29,30,28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,22,24,19,5,23,21,16,2,15,9,7,12,4,8,18,0,14,6,3,10,13,25,0,17,0,0,0,0,0,0,0,1,22,24,19,5,23,21,16,2,15,9,7,12,4,8,18,0,14,6,3,10,13,25,0,17,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,26,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,11,26,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0);
+   chrcodes:array[0..255] of byte=(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0, 0,0,0,0,0,0,0,0,0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,22,24,19,5,23,21,16,2,15,9,7,12,4,8,18,29,14,6,3,10,13,25,27,17,28,0,0,0,0,0,0,1,22,24,19,5,23,21,16,2,15,9,7,12,4,8,18,29,14,6,3,10,13,25,0,17,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,26,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,11,26,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0);
+ //0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0,0,35,0,0,0,0,0,0,0,0,44,45,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,0,82,83,84,85,86,87,0,89,0,0,0,0,0,0,0,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,0,114,115,116,117,118,119,0,121,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,196,197,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,0,0,0,0,0,0,0,0,0,0,0,0,0,228,229,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,246,0,0,0,0,0,0,0,0,0);
+//type letters=(a,i,t,n,e,s,l,o,k,u,ä,m,v,r,j,h,y,p,d,ö,g,b,f,c,w,å);
+VAR wordlists:tlist;
+ // separ lists for words of each length 1..16 and for each starting char
+TYPE tWORDLIST=class(tobject)
+  len,count:integer;
+  words:^ansichar;
+  function add(p:tletterarray):word;
+  constructor create(l:integer);
+  procedure list;
+end;
+type tshortnode=class(tobject)
+   prefix:word; //pseudopointer to list of prefixes - to allow leaving of non-branching, n0n-word nodes
+   haschild:word;//binary, each bit telling if it's corresponding letter forms a continuation
+   childnodes:word; //pseudopointer to list of continuation nodes (each 32
+   nextnode:word;   //pseudopoiner
+end;
+var  wordbuckets:array[1..32,1..16,1..4] of word;     //sizeof alphabet, lengths
+type tlentiles=class(tobject)
+    //emptyspace:array[1..65536,1..65536] of longint;
+    //subbuckets:array[1..3] of tlentiles;
+
+  //  levels array[i:
+    constructor create;
+end;
+type w16=array[0..15] of byte;
+ w32=array[0..31] of byte;
+var debugst:string;
+
+  procedure cipher(st:string;var w:w32;var len:byte);
+   var i:byte;ch:byte;
+   begin
+     len:=min(length(st),32);
+    //debugst:='';
+      fillchar(w,32,0);
+     for i:=1 to len do
+     begin
+        ch:=byte(st[i]);
+        w[i-1]:=chrcodes[ch];
+   end;
+   end;
+
+type  children=array[1..64] of byte;
+type threebytes=array[0..2] of byte;
+//type uint24 = 0..16777215;//unsigned
+
+type tstrie=class(tobject)
+  stack:pointer;
+  stacktop:longword;
+  fst:tfilestream;
+  curword:w32;
+  cwlen:byte;
+  function read:boolean;
+
+  function findadd:word;//(st:w32;len:byte):word;
+  procedure list;
+   //slots:tlist;
+   //function createslot:pointer;
+   constructor create(size:cardinal);
+ end;
+function tstrie.read:boolean;
+var ch:byte;
+begin
+ //write('read');
+  //debugst:='';
+  fillchar(curword,32,0);
+  cwlen:=0;
+  result:=true;
+  try
+  while fst.read(ch,1)=1 do
+  begin
+    //write(ch);
+    //continue;
+   //debugst:=debugst+letters[chrcodes[ch]]+inttostr(chrcodes[ch]);
+    if fst.size<fst.position+2 then begin result:=false;break;end;
+    if (ch=10) then begin exit;end;
+    if ch=13 then continue;  //skip CR
+    if cwlen>31 then continue;
+    if chrcodes[ch]<1 then exit;
+    if chrcodes[ch]>32 then exit;
+    //write(letters[chrcodes[ch]]);//,'/',chrcodes[ch]);
+    curword[cwlen]:=chrcodes[ch];
+    cwlen:=cwlen+1;
+    //write('_',letters[chrcodes[ch]],'/');
+    //writeln(ch,chrcodes[ch],letters[chrcodes[ch]]);
+  end; finally  // writeln(cwlen);
+  end;
+end;
+
+function tstrie.findadd:word;
+var found:boolean;curnode:pointer;tpoint,tmp:^byte;tval:longword;i,j:word;//upoint:^threebytes;u:threebytes;t1,t2,t3:byte;
+begin
+    //writeln('tryfind');
+    //for i:=0 to 31 do begin tpoint:=stack+i*2;write(tpoint^,'/');end;
+    curnode:=stack;
+    i:=0;
+    //for i:=0 to cwlen-1 do
+    //for i:=cwlen-1 downto 0 do
+    while i<cwlen-1 do //last letter handled separately
+    begin
+     tpoint:=curnode+3*(curword[i]-1);
+     //tval:=byte((tpoint+1)^)+;
+     tval:=tpoint^;
+     //tval:=tval div 256;
+     //if tval=0 then //no prev continuation, create new node
+     if ((tpoint+2)^=0) and ((tpoint+1)^=0)and ((tpoint)^=0) then //create new branch
+     begin
+       stacktop:=stacktop+1;
+       //write('+',letters[curword[i]]);
+       //curnode:=pointer(stack+(stacktop*64));
+       curnode:=pointer(stack+(stacktop*128));
+       tmp:=@stacktop;
+       //f j:=2 downto 0 do
+       //:=((tmp+2)^*256*256)+(upoint+1)^*256+(upoint)^;
+        //     uus:=((upoint+2)^*256*256)+(upoint+1)^*256+(upoint)^;
+
+        tpoint^:=tmp^;
+       (tpoint+1)^:=(tmp+1)^;
+       (tpoint+2)^:=(tmp+2)^;
+ //       writeln('/',(tpoint)^,'/',(tpoint+1)^,'/',(tpoint+2)^,'//',stacktop,letters[curword[i]]);
+       //stacktop;
+     end else  //jump to existing branch
+     begin //curnode:=pointer(stack+tval*96);
+      tmp:=tpoint;
+      curnode:=pointer(stack+128*(tmp^ +256*(tmp+1)^+256*256*(tmp+2)^));
+      //uus:=((upoint+2)^*256*256)+(upoint+1)^*256+(upoint)^;
+   //   writeln('+',letters[curword[i]],(curnode-stack) div 128);
+      //write('_',letters[curword[i]]);
+     end;
+     i:=i+1;
+     //write('(',tval,')');
+    end;
+    //last letter:
+    tmp:=curnode+96+curword[i]-1;
+    tmp^:=1;
+    //writeln('*',letters[curword[i]],'!',cwlen,'!');
+end;
+type trienode=record
+ w: array[0..31] of array[0..2] of byte;
+ iis: array[0..31] of byte;
+ end;
+type  tstack=array[0..(65535*64)-1] of trienode;
+
+procedure tstrie.list;
+ var nex:longint;tr:^tstack;ns:integer;nn:trienode;np:^trienode;
+   nsingles:integer;
+   words,nodes,tails:array[0..32] of integer;
+ procedure listnode(n:trienode;ind:string);
+  var i,j:integer;//db:string;
+    wrd,nds,tls:integer;
+ begin
+   //if iis[
+   //writeln(ind);//exit;
+ //db:='';
+// for i:=0 to 31 do writeln('?',letters[i+1],n[i][0]+(256*n[i][1])+256*256*(n[i][2]));
+   tls:=0;nds:=0;
+   //writeln;
+   //write('!',ind);
+ for i:=0 to 31 do  if (n.w[i][0]>0) or (n.w[i][1]>0) or (n.w[i][2]>0)then nds:=nds+1;
+ for i:=0 to 31 do
+ begin
+    if (n.w[i][0]>0) or (n.w[i][1]>0) or (n.w[i][2]>0)then     //not all zeroes
+    begin
+      nex:=n.w[i][0]+(256*n.w[i][1])+256*256*(n.w[i][2]);
+      if nds>1 then
+        listnode(tr^[nex],ind+letters[i+1])
+      else if nds=1 then begin nsingles:=nsingles+1;listnode(tr^[nex],ind+ansiuppercase(letters[i+1]));end;
+      //db:=db+(letters[i+1]);
+    end; //else writeln('-',letters[i+1],n[i][0]+(256*n[i][1])+256*256*(n[i][2]));
+    if n.iis[I]=1 THEN  //if nds=1 then
+    writeln(ind,letters[i+1]) else
+    //writeln(ind,'_',ansiuppercase(letters[i+1]));
+ end;
+ //writeln;
+ if nds>0 then nodes[nds-1]:=nodes[nds-1]+1;
+end;
+      var i:integer;
+begin
+  nsingles:=0;
+  for i:=1 to 32 do words[i]:=0;
+  for i:=1 to 32 do nodes[i]:=0;
+  tr:=stack;
+  np:=stack;
+  nn:=np^;
+  writeln(sizeof(nn),'table');//,tr^[0][0][0],'/',tr^[0][1][0]);
+  listnode(nn,'');
+  for i:=0 to 32 do writeln(i+1,'=',nodes[i]);
+   writeln('singles:',nsingles);
+end;
+
+constructor tstrie.create(size:cardinal);
+begin
+    fst:=tfilestream.create('/home/t/turku/isosanat.lst',fmopenread);
+    //fst:=tfilestream.create('/home/t/turku/pienb.txt',fmopenread);
+    getmem(stack,size*32*4);
+    fillchar(stack^,size*32*4,0);
+    stacktop:=0;
+    //writeln('stackat:',tstrie. instancesize);
+  end;
+function lines(fs:tfilestream):string;
+var ch:byte;ok:boolean;st:string;
+begin
+  while fs.read(ch,1)=1 do
+  begin
+  if (ch=10) then begin if ok and (length(st)>1) then writeln(st);ok:=true;st:='';continue;end;
+  if ch=13 then continue;  //skip CR
+  if chrcodes[ch]=0 then ok:=false else st:=st+chr(ch);
+
+  end;
+end;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+PROCEDURE DOIT;
+var strie:tstrie;w:w32;len:byte;fst:tfilestream;i,j,luku,uus:integer;x1:byte;x3:threebytes;upoint:^byte;//threebytes;
+
+  begin
+    // fst:=tfilestream.create('/home/t/turku/freq.txt',fmopenread);
+    // lines(fst);
+    //exit;
+    strie:=tstrie.create(65535*32);
+    //strie:=tstrie.create(65535*64);
+    writeln('gogo');
+    for i:=0 to 18000000 do
+    begin
+      if strie.read then
+      begin  //write('-',strie.cwlen);
+        if strie.cwlen>1 then if strie.cwlen<32 then
+        begin
+         strie.findadd;
+        end;
+      end else break;
+
+    end;
+    writeln(strie.stacktop,'_');
+    writeln('created');
+    strie.fst.free;
+
+    strie.list;
+    {cipher('aamu',w,len);
+    //writeln('ciphered',len,w[0]);
+    strie.findadd(w,len);
+    cipher('aatu',w,len);
+    //writeln('ciphered',len,w[0]);
+    strie.findadd(w,len);
+    cipher('aatami',w,len);
+    //writeln('ciphered',len,w[0]);
+    strie.findadd(w,len);
+    }
+end;
+{for i:=1 to 32 do
+begin
+  write(letters[i],',');
+end;
+writeln;writeln;
+writeln('codes');writeln;
+for i:=0 to 255 do
+begin
+  write(chrcodes[i]:4);
+end;
+writeln;writeln;
+writeln;writeln('letters');;
+for i:=0 to 255 do
+begin
+  if chrcodes[i]=0 then write('____') else
+  write(letters[chrcodes[i]],'   ');
+end;
+writeln;writeln;
+writeln;writeln('letters');;
+for i:=0 to 255 do
+begin
+  if chrcodes[i]>0 then //write('____ 0') else
+  writeln(i,' ',letters[chrcodes[i]],' ',chrcodes[i]);
+end;
+exit;
+}
+function readlen(var w:w16;fs:tfilestream):byte;
+ var len:byte;ch:byte;cch:byte;
+ begin
+   len:=0;
+  //debugst:='';
+   //for i:=0 to 7 do w[i]:=0;
+   result:=0;
+ while fs.read(ch,1)=1 do
+ begin
+   if (ch=10) then begin exit;end;
+   if fs.size<fs.position+1 then break;
+   if ch=13 then continue;  //skip CR
+   //debugst:=debugst+chr(ch);
+   if result>14 then continue;
+   {if (chrcodes[ch]>31) or (chrcodes[ch]=0) then
+    w[result]:=31
+   else}
+   w[result]:=chrcodes[ch];
+   result:=result+1;
+   //writeln(i,w[i],'_',ch,letters[w[i]],'  ');
+   //if ch<>0 then
+   //if (pos(ch,^J+' ,.?!%&-;_''")(*}]{[1234567890')>0)  then  begin fs.read(ch,1);if ch=^j then continue;end;
+  // cch:=chrcodes[ord(ch)];
+   //if cch<>#0 then begin w[i]:=cch;i:=i+1;end;
+   //result:=result+ch;
+   //len:=len+1;
+ end;
+ end;
+{ item:
+  2 bytes for: 0)no children 1)
+
+
+}
+
+type
+ ptiers=^ttiers;
+
+ ttier=class(tobject)
+    tiers:ptiers;
+    myslot:pointer;
+    arrays:array[1..4] of integer;   //really short pointers
+
+    constructor create(size:cardinal);
+end;
+
+ ttiers=class(tobject)      //memory manager
+    muistot:pointer;
+    slots:tlist;
+    function createslot:pointer;
+    constructor create(size:cardinal);
+end;
+
+ constructor ttier.create(size:cardinal);
+ begin
+   //myslot:=
+ end;
+ constructor ttiers.create(size:cardinal);
+ begin
+   getmem(muistot,size);
+
+ end;
+function ttiers.createslot:pointer;
+begin
+
+end;
+
+function readciphered(fst:tfilestream):w16;
+var aw:w16;i,len:byte;p:pointer;
+  begin
+   //:=0;
+   getmem(p,65535*4);
+   while fst.Size>fst.position+1  do
+   begin
+     //c:=c+1;if c>100000 then break;
+     len:=readlen(aw,fst);
+     if len>14 then
+     begin
+       //write(len,'    ');
+       for i:=0 to len-1 do if (aw[i]<1) or (aw[i]>31) then write('_') else write(letters[aw[i]]);
+       //writeln('  !',length(debugst),debugst,' ',aw[len-1]);
+       writeln;
+
+     end;
+   end;
+ end;
+
+constructor tlentiles.create;
+begin
+  writeln(tlentiles.instancesize);
+end;
+
+type ttrielevelbig=class(tobject)
+  //a,b:char;
+  is_a_word:boolean; //or pointer to the completed word?
+  //nextoffsets: array[0..32] of word;
+  haswords,
+  haslevels
+  : cardinal; //bitwise for each following letter - has or has not
+
+  wordscount, //how many unprosessed longer words -max 16 (?), then process and produce levels
+  levscount
+  : byte;
+  //nextoffsets: array[0..32] of byte;  //64 BITS - pointers  to the children (be they words of levels)
+  //maybe a pointer to a list containing the sublevels
+  pointerlist:pointer;
+  constructor create;
+
+end;
+constructor ttrielevelbig.create;
+begin
+  inherited create;
+  writeln('MY SIZE IS:', ttrielevelbig.instancesize);
+end;
+{$s+}
+
+
+procedure lentab;forward;
+PROCEDURE xDOIT;
+var i,j:byte;hmem,smem:cardinal;//biggie:
+  chb:byte;
+  ch:ansichar;
+  fst:tfilestream;
+ //letcodes:array[1..32] of byte;
+  //array[1..147483647] of byte;
+
+
+BEGIN
+   fst:=tfilestream.create('/home/t/turku/iso.wrd',fmopenread);
+
+  readciphered(fst);
+  fst.free;
+  {for i:=0 to 255 do
+   begin
+   begin
+     ch:=(letters[chrcodes[i]]);
+   end;
+
+  end; }
+exit;
+  smem:=getheapstatus.totalfree;
+  //hmem:=getstackstatus.totalallocated;
+  writeln('mem:',smem);
+  exit;
+  tlentiles.create;
+  writeln('memlost:'+floattostr(getheapstatus.totalallocated-smem));
+  //wordlists:=tlist.create;
+  //for i:=0 to 16 do wordlists.add(twordlist.create(i));
+END;
+
+procedure twordlist.list;
+begin
+  // while i<count write...chrcode[i] if mod ... writeln
+end;
+
+constructor twordlist.create(l:integer);
+begin
+    getmem(words,sizeof(byte) div l);
+end;
+
+function twordlist.add(p:tletterarray):word;
+var i:integer;wp:^ansichar;
+begin
+   wp:=words+count*len;
+   for i:=0 to len-1 do (wp+i)^:=p[i]; //wasting 3 bits for every char
+   count:=count+1;
+end;
+
+function _hash(st:string):longword;//longword;
+var i,len:integer;
+begin
+  result:=0;
+  len:=length(st);
+  for i := 1 to len do begin
+    if st[i]=' ' then break;
+    result := ord(st[i])+result*31;
+  end;
+end;
+const konsonantit ='bcdfghjklmnpqrstvxz'; vokaalit='aeiouyäö';
+ diftongit='ai,au,ei,eu,ey,ie,iu,oi,ou,äi,öi,äy,öy,ui,yi,iy,uo,yö';   //+7*.. =25
+ function _hyphenfi(w:string):string;
+ function diftong(a,b:char):boolean;
+ begin
+      case a of
+       'a':  result:=pos(b,'aiu')>0;
+       'e':  result:=pos(b,'eiuy')>0;
+       'i':  result:=pos(b,'ieuy')>0;
+       'o':  result:=pos(b,'oiu')>0;
+       'u':  result:=pos(b,'uoi')>0;
+       'y':  result:=pos(b,'yiö')>0;
+       #228:  result:=pos(b,'äiy')>0;
+       #246:  result:=pos(b,'öiy')>0;
+       //'':  result:=pos(b,'')<=0;
+       else result:=false;
+
+      end;
+
+ end;
+
+ var i,j,len,tavuraja,vows:integer;hy:string;ch,chprev:char;lasthyp:string;vow,prvow:boolean;
+
+ begin
+  vows:=0;
+  vow:=false;
+  len:=length(w);
+  result:='';//w[len];
+  hy:=w[len];
+  chprev:='_';
+  prvow:=false;
+  tavuraja:=1;
+  for i:=1 to len do
+  begin
+     prvow:=vow;
+     chprev:=ch;
+     ch:=w[i];//chn:=w[i+1]; pankkrotti mins-tra
+     vow:=(pos(ch,vokaalit)>0);
+     //write(chprev,ch,prvow,vow,'!');
+     if (not prvow) and (vow) then //vokaali konsonantin jälkeen
+     begin
+     if tavuraja>1 then result:=result+'-';
+     for j:=tavuraja to i-2 do result:=result+w[j];
+     for j:=tavuraja to i-2 do write(w[j]);
+     writeln;
+     tavuraja:=i-1;continue;
+     end
+     else
+     if (prvow) and (vow) then //vokaali vokaalin jälkeen
+      if not(diftong(chprev,ch)) then
+      begin
+      result:=result+'+';
+      for j:=tavuraja to i-1 do result:=result+w[j];
+      for j:=tavuraja to i-1 do write(w[j]);
+      writeln;
+      tavuraja:=i;
+      end;
+
+  end;
+  //writeln('***',
+  result:=result+'!';
+  for j:=tavuraja to len do result:=result+w[j];
+  for j:=tavuraja to len do write(w[j]);
+  writeln
+
+ end;
+
+function _hyphenfi2(w:string):string;
+var i,j,len,vpos,vows:integer;hy:string;ch,chprev:char;lasthyp:string;vow,pvow:boolean;
+begin
+ vows:=0;
+ len:=length(w);
+ result:='';//w[len];
+ hy:=w[len];
+ chprev:='_';
+ pvow:=false;
+ for i:=len downto 1 do
+ begin
+    ch:=w[i];//chn:=w[i+1]; pankkrotti mins-tra
+    vow:=(pos(ch,vokaalit)>0);
+    // write('*',ch,vows);
+    if vow then vows:=vows+1
+    else
+    if vows>0 then
+    begin
+           for j:=vows downto 1 do
+           result:=w[i+j]+result;
+           result:='-'+ch+result;
+           vows:=0;
+           //hy:='';
+    end ELSE begin vows:=vows+1; end;
+      {  case chn of
+        'a':  if pos(ch,'aiu')<=0 then hy:=ch+'+'+hy else hy:=ch+hy;
+        'e':  if pos(ch,'eiyu')<=0 then hy:=ch+'+'+hy else hy:=ch+hy;
+        'i':  if pos(ch,'eiyu')<=0 then hy:=ch+'+'+hy else hy:=ch+hy;
+        else hy:=ch+hy;
+
+       end;
+       }
+      {  vaieta karaoke
+
+        case ch of
+        'a':  if pos(chn,'aiu')<=0 then hy:=ch+'+'+hy else hy:=ch+hy;
+        'e':  if pos(chn,'eiyu')<=0 then hy:=ch+'+'+hy else hy:=ch+hy;
+        'i':  if pos(chn,'eiyu')<=0 then hy:=ch+'+'+hy else hy:=ch+hy;
+        else hy:=ch+hy;
+       end;
+       }
+ // end else  //no vowels
+ //  result:=ch+result;
+   // HY:=ch+hy;
+ end;
+
+ //if hy<>'' then
+//  if pos(hy[1],vokaalit)>0 then result:=hy+'-'+result
+//  else result:=hy+result;
+
+end;
+
+function readword(fs:tfilestream):string;
+ var ch:char;len:integer;
+begin
+  len:=0;result:='';
+  while fs.read(ch,1)=1 do
+  begin
+    if (ch=^J) then begin exit;end;
+    if fs.size<fs.position then break;
+    if ch=^m then continue;  //skip CR
+    if (pos(ch,^J+' ,.?!%&-;_''")(*}]{[1234567890')>0)  then  begin fs.read(ch,1);if ch=^j then continue;end;
+    result:=result+ch;
+    len:=len+1;
+  end;
+end;
+
+procedure lentab;
+var fstr:tfilestream;words:tstringlist;i,j,wc,hits,nhits:integer;hasi:longword;//longword;
+ //pairs:^word;
+  t:tdatetime; hashlist:tstringlist;
+  shash:word; //not used,, was there for debugging. short for shorthash
+  istr:string;
+  store:pointer;
+  aword:w16;
+  begin
+   getmem(store,65535*1);
+   writeln('go');
+    //for i:=0 to files.count-1 do begin fstr:=tfilestream.create(files[i],fmopenread);
+    //fstr:=tfilestream.create('/find2048.lst',fmopenread);
+    fstr:=tfilestream.create('more ',fmopenread);
+    repeat
+       if fstr.size-fstr.position<1 then break;
+       //if fstr.position>1000 then break;
+      //readciphered(aword,fstr);
+      for i:=0 to 7 do write(chrcodes[aword[i]]);
+      //if length(aword)=7 then
+      //writeln(aword, ':');
+
+      until false;
+  end;
+
+//function readline(fs:tfilestream):string;
+function hyphenate:tstringlist;//(files:tstringlist;wlistfile:string):pointer;
+var fstr:tfilestream;words:tstringlist;i,j,wc,hits,nhits:integer;hasi:longword;//longword;
+ pairs:^word;
+ aword:string;//isin:boolean;
+  t:tdatetime; hashlist:tstringlist;
+  shash:word; //not used,, was there for debugging. short for shorthash
+  istr:string;
+  begin
+   writeln('go');
+    //for i:=0 to files.count-1 do begin fstr:=tfilestream.create(files[i],fmopenread);
+    //fstr:=tfilestream.create('/find2048.lst',fmopenread);
+    fstr:=tfilestream.create('/home/t/turku/iso.wrd',fmopenread);
+    repeat
+       if fstr.size-fstr.position<1 then break;
+       //if fstr.position>1000 then break;
+      aword:=readword(fstr);
+      //writeln(aword, ':');
+      //writeln(_hyphenfi(aword));
+      _hyphenfi(aword)
+      //writeln;
+     // _hyphenfi(aword);
+    until false;
+  end;
+
+
+function _isin(whash:longword;hlist:pointer;var shash:word):boolean;
+var midtest,curtest,nextstep:integer;curpoint:^longword;curval:longword;
+begin
+  result:=true;midtest:=1024;nextstep:=512;
+   repeat
+      curpoint:=hlist+(midtest*4);
+      curval:=curpoint^;
+      //if curval=whash then write('!!!!',midtest) else begin if curval> whash then write(' >',midtest) else write(' -',midtest);end;
+      if curval=whash then begin shash:=midtest;break end else begin if curval>whash then midtest:=midtest-nextstep else midtest:=midtest+nextstep;end;
+      if nextstep<1 then begin result:=false;break;end;
+      nextstep:=nextstep div 2;
+   until false;
+end;
+
+function Compa(P1, P2: Pointer): Integer;
+begin
+   result:=0;
+       //if p1>p2 then result:=1 else if p1=p2 then result:=-1 else result:=0;
+end;
+function compai(List: TStringList; Index1, Index2: Integer): Integer;
+var
+a, b: Integer;
+begin
+a := StrToInt(List.Strings[Index1]);
+b := StrToInt(List.Strings[Index2]);
+if a > b then
+Result := 1;
+if a = b then
+Result := 0;
+if a < b then
+Result := -1;
+end;
+
+function coocs(whashes:pointer):pointer;//(files:tstringlist;wlistfile:string):pointer;
+var fstr:tfilestream;i,j:integer;hasi:longword;//longword;
+ hasp:^longword;pairs:^longword;
+  ipoint,ip2:^longword;//longword;
+   aword:string;//isin:boolean;
+  t:tdatetime;   shash,hasha,hashb:word;
+  words_inpar:integer;
+  parag:array[1..256] of word; // 2 bytes for co-occurrence-counts, max 256 words per sentence
+begin
+  //hits:=0;nhits:=0;
+  getmem(PAIRS,2048*2048*4);
+  fillchar(pairs^,2048*2048*2,0);
+  //writeln('created matrix');
+  //for i:=0 to files.count-1 do
+  begin
+    words_inpar:=0;
+    //fstr:=tfilestream.create(files[i],fmopenread);
+    fstr:=tfilestream.create('turha.txt',fmopenread);
+    repeat
+       if fstr.size-fstr.position<1 then break;
+       //if fstr.position>300000 then break;
+       //if fstr.position>1000 then break;
+      aword:=readword(fstr);
+      //write(aword,'/',words_inpar,' ');
+      if aword='' then
+      begin
+      //writeln;
+      for i:=1 to words_inpar do
+      begin
+        for j:=1 to words_inpar do
+          begin
+            ipoint:=pairs+(parag[i]*2048)+parag[j];
+            //if ipoint^<10000 then
+            ipoint^:=ipoint^+1;
+            //write(parag[i],'/',parag[j],' ');
+          end;
+          //writeln;
+       end;
+       //writeln('w=',words_inpar);writeln;
+       //writeln;
+       words_inpar:=0;continue;
+      end;/// else if length(aword)=1 then continue else
+      if words_inpar>255 then begin writeln('longsennverä');continue;end;
+      hasi:=_hash(aword);
+      if _isin(hasi,whashes,shash) then
+      begin
+        //write('**',shash,' ');
+        words_inpar:=words_inpar+1;
+        parag[words_inpar]:=shash;
+      end;
+    until false;
+    //exit;
+      for i:=0 to 2047 do
+      begin
+        for j:=0 to 2047 do
+        begin
+           ipoint:=pairs+(i*2048)+j;
+           try
+           write(ipoint^,' ');
+
+           except write(', ');       end;
+        end;
+        {for j:=i downto 0 do
+        begin
+             ipoint:=pairs+(i*2048)+j;
+             try
+             write(ipoint^,';');
+             except write(',-');
+             end;
+         end;}
+        writeln;
+       end;
+
+    end;/// else if length(aword)=1 then continue else
+
+  end;
+type tst=class(tobject)
+  st:string;
+  constructor create(s:string);
+  end;
+  constructor tst.create(s:string);
+  begin st:=s;end;
+
+function createcommonshash:pointer;//(files:tstringlist;wlistfile:string):pointer;
+var words:tstringlist;i,j,wc:integer;
+  ip2:^longword;
+  whashes:pointer;
+  istr:string;//isin:boolean;
+  t:tdatetime; hashlist:tstringlist;
+  shash:word;    st:tst;
+begin
+  getmem(whashes,wc*4);
+  words:=tstringlist.create;
+  words.loadfromfile('find2048.lst');
+  wc:= words.count;
+  hashlist:=tstringlist.create;
+  for i:=0 to words.count-1 do //utterly inelegant, but easies i acme up with to numerically sort a few strings
+  begin
+     // later maybe usefull: words.objects[i]:=tobject(pointer(hasi));
+     istr:=inttostr(_hash(words[i]));
+     hashlist.addobject(copy('0000000000',1,12-length(istr))+istr,tst.create(words[i]));
+  end;
+  hashlist.sort;
+  getmem(whashes,2048*4);  //hardcoded 2048, q & dirty
+  fillchar(whashes^,2048*4,0);
+  ip2:=whashes;
+  for i:=0 to wc-1  do //prepare the 'matrix' of hashes of words to find
+  begin
+    ip2^:=strtointdef(hashlist[i],0);
+    ip2:=ip2+1;
+    write('''',tst(hashlist.objects[i]).st,''',');
+  end;
+  result:=whashes;
+end;
+function listcommons(whashes:pointer):tstringlist;//(files:tstringlist;wlistfile:string):pointer;
+var fstr:tfilestream;words:tstringlist;i,j,wc,hits,nhits:integer;hasi:longword;//longword;
+ pairs:^word;
+ aword:string;//isin:boolean;
+  t:tdatetime; hashlist:tstringlist;
+  shash:word; //not used,, was there for debugging. short for shorthash
+  istr:string;
+  begin
+    //for i:=0 to files.count-1 do begin fstr:=tfilestream.create(files[i],fmopenread);
+    fstr:=tfilestream.create('turha.txt',fmopenread);
+    repeat
+       if fstr.size-fstr.position<1 then break;
+       //if fstr.position>1000 then break;
+      aword:=readword(fstr);
+      if aword='' then begin writeln(^J);continue;end;/// else if length(aword)=1 then continue else
+      hasi:=_hash(aword);
+      if _isin(hasi,whashes,shash) then write(aword,' ');// else write('-',aword);
+    until false;
+  end;
+
+procedure tgut.DoRun;
+var
+  ErrorMsg: String;files:tstringlist;i,j:integer;w:string;ch:ansichar;st:string;
+  lip:^longint;  sip:^smallint;ship:^shortint;smem:carDINAL;P:POINTER;
+begin
+  // quick check parameters
+  ErrorMsg:=CheckOptions('h', 'help');
+  if ErrorMsg<>'' then begin
+    ShowException(Exception.Create(ErrorMsg));
+    Terminate;
+    Exit;
+  end;
+
+  // parse parameters
+  if HasOption('h', 'help') then begin
+    WriteHelp;
+    writeln('no help');
+    Terminate;
+    Exit;
+  end;
+   //ch:=#228;
+   //writeln(ch,ansistrupper(ch));
+  //for i:=1 to 32 do write(letters[i],'_');
+
+  //createcommonshash;
+  //listcommons(createcommonshash);
+  //coocs(createcommonshash);
+  //cleanfile('11940-8.txt');
+  DOIT;
+  terminate;
+  exit;
+  files:=tstringlist.create;
+  //files.loadfromfile('dir.lst');
+  files.loadfromfile('wrd_aa');
+
+  for i:=0 to //10 do //
+  files.count-1 do
+   //writeln(files[i]);
+   begin
+    writeln(_hash(copy(files[i],pos(' ',files[i])+1)),' ',files[i]);
+    //writeln(copy(files[i],pos(' ',files[i])+1),files[i]);
+
+   end;
+   //cleanfile(files[i]);
+  { add your program here }
+
+  // stop program loop
+  Terminate;
+end;
+
+
+function tgut.readline:string;
+var  ch:char;
+begin
+     //endpar
+    instr.read(ch,1);
+
+end;
+{ getting charcodes
+st:='';
+ for i:=0 to 255 do
+ begin
+   j:=0;
+   ch:=chr(i);
+   while j<=32 do begin j:=j+1;//writeln('i=',i,'/let32:',letters[i],'/ch:',ch);
+     if letters[j]=ansilowercase(ch) then break;end;
+   if j=33 then //writeln(i, ch,j) else
+   st:=st+'#0,'
+   //if j<33 then
+   else   st:=st+'#'+inttostr(i)+',';
+ end;
+ writeln(st);
+}
+
+procedure w(wr:string;incont:boolean);
+begin
+    if incont then write(wr);
+end;
+
+procedure tgut.cleanfile(fn:string);
+var  ch,punc:char; wor:string;mc,jc:integer; incont:boolean;
+begin
+    mc:=0;jc:=0;
+    instr:=tfilestream.create(fn,fmopenread);
+   try
+  incont:=false;
+  while instr.size>instr.position do
+  begin
+   if jc>1 then begin jc:=0;write(^j,^j);end;
+   instr.read(ch,1);
+   //if punc<>#0 then if ch in[^M ,^J,' '] then
+   //writeln(punc);
+   //punc:=#0;
+   if ch in [#65..#90,#97..#122,#196,#197,#214,#228,#229,#246] then
+   begin
+   wor:=wor+ch; jc:=0;end else
+   begin
+      if wor='GUTENBERG' then begin //writeln(incont);readln;
+      if incont then break;incont:=not incont;end;
+     //if ch in ['','','','', then write('_') else
+     //if ch='.' then writeln('.') else
+     if length(wor)>1 then
+     begin w(wor,incont);
+     if ch in ['.','?','!',',',';'] then w(ch,incont);// else punc:=' ';
+      w(' ',incont);
+     end;
+     wor:='';
+     if ch=^M then mc:=mc+1;
+     if ch=^J then jc:=jc+1;
+     //if ch=^J then writeln('****',jc);
+
+   end;
+ end;
+
+   finally
+  instr.free;
+   end;
+end;
+
+
+constructor tgut.Create(TheOwner: TComponent);
+begin
+  inherited Create(TheOwner);
+  StopOnException:=True;
+end;
+
+destructor tgut.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure tgut.WriteHelp;
+begin
+  { add your help code here }
+  writeln('Usage: ', ExeName, ' -h');
+end;
+
+var
+  Application: tgut;
+begin
+  Application:=tgut.Create(nil);
+  Application.Run;
+  Application.Free;
+end.
+

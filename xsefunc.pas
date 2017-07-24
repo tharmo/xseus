@@ -19,7 +19,7 @@ uses
  //controls,
  typinfo,strutils,
  SysUtils,variants,  xmd5,
- xsereg,dateutils,
+ xsereg,dateutils,math,
  Classes;
 
 const
@@ -99,6 +99,10 @@ public
  function f_min:string;
  function f_times:string;
  function f_format:string;
+ function f_abs:string;
+ function f_round:string;
+ function f_power:string;
+ function f_log:string;
 
 
  //floats
@@ -235,7 +239,16 @@ public
    function f_position: string;
    function f_last: string;
   //trig
-   function f_rotate:string;
+  function f_sin:string;
+  function f_cos:string;
+  function f_tan:string;
+  function f_cot:string;
+  function f_arcsin:string;
+  function f_arccos:string;
+  function f_arctan:string;
+  function f_angle:string;
+  //function f_arccot:string;
+  function f_rotate:string;
    function f_rotatex:string;
    function f_rotatey:string;
 
@@ -1540,6 +1553,7 @@ const parlist:array[0..0] of string =('file');
  sr:tsearchrec;apui,ires:integer;
   begin
   namepars(p_base,p_by,parlist,pars);
+ // writeln('/by:',strtointdef(p_by,1),'/',pars[);
    // ires:=strtointdef(svars.values[mathtag.att('var')],0)
    // +strtointdef(cut_rs(pars.values['by')),1);
     //ires:=strtointdef(svars.values[pars.values['var']],0)
@@ -1633,6 +1647,28 @@ const parlist:array[0..0] of string =('file');
     end;
     if result<>'*' then result:=inttostr(round(fres)) else result:='';
  end;
+ function tfunc.f_power:string;
+ const parlist:array[0..0] of string =('UU');
+ {D: float multiplication, multipleis all given params regardless of param name
+ }
+ var x,y:integer;
+ begin
+   try
+   x:=strtointdef(pars[0],1);y:=strtointdef(pars[1],2);
+    result:=inttostr(round(intpower(y,x)));
+    except result:='*'; end;
+ end;
+ function tfunc.f_log:string;
+ const parlist:array[0..0] of string =('UU');
+ {D: float multiplication, multipleis all given params regardless of param name
+ }
+ var x,y:integer;
+ begin
+   try
+   x:=strtointdef(pars[0],1);y:=strtointdef(pars[1],2);
+    result:=inttostr(round(logn(x,y)));
+    except result:='*'; end;
+ end;
 
  function tfunc.f_sqrt:string;
  const parlist:array[0..0] of string =('UU');
@@ -1644,6 +1680,58 @@ const parlist:array[0..0] of string =('file');
     result:=inttostr(round(sqrt(strtointdef(pars[0],1))));
     fres:=cos(1);
    except result:='*'; end;
+ end;
+ function tfunc.f_sin:string;
+  begin
+    try
+   result:=inttostr(round(1000*sin(pi*strtoint(pars[0])/180)));
+    except writeln('nosinefound');end;
+  end;
+ function tfunc.f_cos:string;
+ begin
+   try
+  result:=inttostr(round(1000*cos(pi*strtoint(pars[0])/180)));
+   except writeln('nosinefound');end;
+ end;
+ function tfunc.f_tan:string;
+ begin
+   try
+  result:=inttostr(round(1000*tan(pi*strtoint(pars[0])/180)));
+   except writeln('nosinefound');end;
+ end;
+ function tfunc.f_cot:string;
+ begin
+   try
+    result:=inttostr(round(1000*cotan(pi*strtoint(pars[0])/180)));
+   except writeln('nosinefound');end;
+ end;
+ function tfunc.f_arcsin:string;
+ begin
+   try
+  result:=inttostr(round(1000*arcsin(pi*strtoint(pars[0])/180)));
+   except writeln('nosinefound');end;
+ end;
+ function tfunc.f_arccos:string;
+ begin
+   try
+  result:=inttostr(round(1000*arccos(pi*strtoint(pars[0])/180)));
+   except writeln('nosinefound');end;
+ end;
+ function tfunc.f_arctan:string;
+ begin
+   try
+  result:=inttostr(round(1000*arctan(pi*strtoint(pars[0])/180)));
+   except writeln('nosinefound');end;
+ end;
+ function tfunc.f_angle:string;
+ var f:float;
+begin
+try
+f:=(strtointdef(pars[3],0)-strtointdef(pars[1],0)) / (strtointdef(pars[2],0)-strtointdef(pars[0],0));
+   result:=inttostr(round(180*arctan(f)/pi));
+   //zresult:=inttostr(round(1000*(f)));
+   except writeln('Noangle y2-y1/x1-x2:',strtointdef(pars[3],0),'-',strtointdef(pars[1],0), '/', (strtointdef(pars[2],0)),'-',strtointdef(pars[0],0),'=',f);
+   end;
  end;
  function tfunc.f_rotate:string;
  const parlist:array[0..0] of string =('UU');
@@ -1672,13 +1760,12 @@ const parlist:array[0..0] of string =('file');
  end;
  function tfunc.f_rotatex:string;
  const parlist:array[0..0] of string =('UU');
- {D: float multiplication, multipleis all given params regardless of param name
- }
- var i:integer;fang,fres:double; ang,cx,r:integer;
+ {D: returns x-coordinate of point at angle p1 and distance p2 from point p3(x)
+  } var i:integer;fang,fres:double; ang,cx,r:integer;
  begin
    try
    ang:=strtoint(pars[0]);
-   fang:=(ang/180)*pi;
+   fang:=pi*ang/180;
     except ang:=0;end;
     try
     r:=strtoint(pars[1]);
@@ -1686,28 +1773,19 @@ const parlist:array[0..0] of string =('file');
     try
     cx:=strtoint(pars[2]);
      except cx:=0;end;
-     //try
-     // cy:=strtoint(pars[3]);
-     //except cy:=0;end;
-   //writeln('<li>radians:',floattostr(fang));
-   //writeln('<li>r:',floattostr(r));
-   //writeln('<li>x:',floattostr(cx));
-   // writeln('<li>y:',floattostr(cy+r*sin(fang)));
-   // writeln('<div style="color:red;background:black;position: absolute;left:',floattostr(cx+r*cos(fang)),'px;top:',floattostr(cy+r*sin(fang)),'px">',floattostr(fang),'</div>');
-//    (a+rcos(?+?),b+rsin(?+?))
   result:=inttostr(round(cx+r*cos(fang)));
   //writeln('<li>RES:',result);
 
  end;
  function tfunc.f_rotatey:string;
  const parlist:array[0..0] of string =('UU');
- {D: float multiplication, multipleis all given params regardless of param name
+ {D: returns y-coordinate of point at angle p1 (degrees) and distance p2 from point p3(y)
  }
  var i:integer;fang,fres:double; ang,cy,r:integer;
  begin
    try
    ang:=strtoint(pars[0]);
-   fang:=(ang/180)*pi;
+   fang:=pi*ang/180;
     except ang:=0;end;
     try
     r:=strtoint(pars[1]);
@@ -1718,10 +1796,6 @@ const parlist:array[0..0] of string =('file');
      try
     cy:=strtoint(pars[2]);
   except cy:=0;end;
-   // writeln('<li>radians:',floattostr(cy+r*sin(fang)));
-   // writeln('<li>x:',floattostr(cx+r*cos(fang)));
-   // writeln('<li>y:',floattostr(cy+r*sin(fang)));
-    //writeln('<div style="color:red;background:black;position: absolute;left:',floattostr(cx+r*cos(fang)),'px;top:',floattostr(cy+r*sin(fang)),'px">',floattostr(fang),'</div>');
     result:=inttostr(round(cy+r*sin(fang)))
     //    (a+rcos(?+?),b+rsin(?+?))
  end;
@@ -1840,6 +1914,19 @@ end;
   fres:=fres*strtofloat((pars[i]));
   result:=floattostr(fres);
   end;
+ function tfunc.f_abs:string;
+ begin   //integers??
+   try
+     result:=inttostr(round(abs(strtofloat(pars[0]))));
+     except result:='';end;
+ end;
+ function tfunc.f_round:string;
+ begin
+ try
+   result:=inttostr(round(strtofloat(pars[0])));
+   except result:='';end;
+
+ end;
 
  function tfunc.f_div:string;
  const parlist:array[0..0] of string =('UU');
@@ -1853,7 +1940,11 @@ end;
      strtointdef((pars[1]),0)
    );
 
-  except writeln('<!--failed in division-->');//raise;
+   //if strtointdef(result,999)=999 then writeln('<li>DIV: ',pars[0], '/', pars[1], '=', result);
+  except //
+
+  //writeln('<!--failed in division-->');
+  result:='0';
    ;end;
  end;
 

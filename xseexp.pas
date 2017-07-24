@@ -272,19 +272,19 @@ begin
       begin
        try
        //NOT WORKING! or i dont remember how...
-       try
-       writeln('<li>getbookmark:',sta,'//',st,'!!!<pre>',xs.x_bookmarks.xmlis,'</pre>');
-       except writeln('<li>failbmlist:',xs.x_bookmarks.head);end;
+       //try
+       //writeln('<li>getbookmark:',sta,'//',st,'!!!<pre>',xs.x_bookmarks.xmlis,'</pre>');
+       //except writeln('<li>failbmlist:',xs.x_bookmarks.head);end;
        loc:=_uptoany(st,')',sta,sta,100);
-       writeln('<li>/:',loc,'_',sta);
+       //writeln('<li>/loc:',loc,'::::',xs.x_bookmarks.xmlis);
        if sta<length(st) then if  st[sta]='/' then sta:=sta+1; //UGLY
-       writeln('<li>bookmarx/:!!!',loc,'!!!',length(st),'!<b>',copy(st,sta,999)+'!</b></b>');
+       //writeln('<li>bookmarx/:!!!',loc,'!!!',length(st),'!<b>',copy(st,sta,999)+'!</b></b>');
         res := xs.x_bookmarks.subt(loc);
         //if (res<>nil) and (res.subtags.count>0) then res:=res.subtags[0] else res:=nil;
        if res<>nil then writeln('<li>@@@'+res.vari,res.subtags.count,'::',loc+'!<pre>'+res.xmlis+'</pre>',copy(st,sta,99)+'!</li>')
         //if res<>nil then writeln('@@@'+loc+'!'+res.vari+'!rest:',copy(st,sta,99)+'!</li>')
        else
-        writeln('NOBOOKM:',loc,'<pre>!','!</pre>');
+        writeln('NOBOOKM:',loc,'<pre>!',res.xmlis,'!</pre>');
        except   writeln(' --nononbiik--');res:=nil; end;
      end
       else
@@ -292,7 +292,7 @@ begin
       begin
         Res := xs.curtoele;
         try
-        writeln('<li>FromTo:'+res.HEAD+'/with:'+copy(st,sta,100)+'!');
+        //writeln('<li>FromTo:'+res.HEAD+'/with:'+copy(st,sta,100)+'!');
        // writeln('<li>FromTo2:'+'/UNDER'+RES.PARENT.HEAD);
         except     writeln('<li>didtryto'); end;
       end else
@@ -347,11 +347,18 @@ begin
      if st[sta]='/' then begin //writeln('GET:'+copy(st,sta,999));
        sta:=sta+1;end;  //breaks something? We don't want the leading "/" ... ever?
    end
-   else
-   if st[sta]='/' then
-   begin
-    res:=xs.xml;sta:=sta+1;
-   end else
+  else
+  if st[sta]='/' then
+  begin
+   res:=xs.xml;sta:=sta+1;
+  end else
+  if st[sta]='#' then
+  begin
+    sta:=sta+1;
+    loc:=_uptoany(st,'/',sta,sta,100);
+    res:=xs.x_ids.findobject(loc);sta:=sta+1;
+    //writeln('<li>ID::',res.xmlis);
+  end else
    if st[sta]='&' then
    begin
      res:=_getrela(xs.x_relation,st,sta);// ttag(xs.x_relation.toselected);sta:=sta+1;
@@ -698,7 +705,7 @@ var aps:ansistring;apui:integer;aput:ttag;
       else if st[sta]='/' then begin sta:=sta+0;break;end
       else aps:=aps+st[sta];
     end;
-    //writeln('<li>id_',aps,'$'+copy(st,sta,10)+'<pre>','</pre>');
+    writeln('<li>id_',aps,'$'+copy(st,sta,10)+'<pre>','</pre>');
 
     //apui:= xs.x_bookmarks.subtags.IndexOf(aps)
     //aput:=ttag(xs.x_bookmarks.subtags.objects[apui]);
