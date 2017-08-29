@@ -1224,6 +1224,7 @@ begin
         end else
 
         /////////**********************
+        writeln('<li>execute substo sapply');
         txseus(myxseus).dosubelements;
         /////////**********************
           //if Tserving(t_thisprocess).HeaderHasBeenWritten then logwrite('heaadhas') else logwrite('head has NOT');

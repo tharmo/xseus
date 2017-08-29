@@ -4486,8 +4486,8 @@ begin
               begin
                  axis.add(hitlist[j]);
               end;                //makes no sense,not used I hope
-              for j:=0 to todolist.count-1 do
-              writeln('select(.): ',ttag(todolist[j]).vari+'/');
+              //for j:=0 to todolist.count-1 do
+              //writeln('select(.): ',ttag(todolist[j]).vari+'/');
           end
           else
             if PATH.ELE = '..' then
@@ -4529,14 +4529,17 @@ begin
               if t_debug then path.list;
 
               if path.idi<>'' then
-              begin  //writeln('###:',path.idi);
+              begin
+                //if pos('n689',path.idi)>0 then writeln('###:',path.idi);
                 //txseus(t_currentxseus).x_ids.list;
                 ids:=txseus(t_currentxseus).x_ids.findobjects(path.idi);
-                if ids=nil then begin writeln('noids;',path.idi);result:=nil;exit;end;//writeln('<h1>no id='+path.idi+'</h1><xmp>'+tag.xmlis+'</xmp>!');
-                writeln('id-in-path:'+path.idi,ids.count,'////');
+                if ids=nil then begin writeln('noids;',path.idi,';');
+                  result:=nil;exit;end;//writeln('<h1>no id='+path.idi+'</h1><xmp>'+tag.xmlis+'</xmp>!');
+                hitlist.add(ids[j]);
+                //if pos('n689',path.idi)>0 then writeln('<li>id-in-path:'+path.idi,'#',ids.count,'////');
                 //path.list;
                 j:=0;
-                while j<ids.count do
+                while j+99999<ids.count do
                 begin
                  //writeln('<li>testids:',tag.vari, ' is ancesrot of '+ttag(ids[j]).vari,ids.count);
                  if ttag(ids[j]).hasancestor(tag) then
@@ -4557,6 +4560,7 @@ begin
               //logwrite('DOSE '+path.list+'!');
               if (axis<>nil) and  (axis.count>0) then
               _doselect(hitlist, axis, hitmees, pointer(path), self, oneonly, empties);
+              if path.idi<>'' then
               //if t_debug then
               //writeln('<li>GOTHITS:',hitlist.count,tag.vari, '_idi:',path.idi, '_ele:',path.ele);
 

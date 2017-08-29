@@ -562,7 +562,7 @@ begin
    hit:=tstringlist(buckets[hs]).indexof(vari);
    if hit<0 then exit;
    elelist:=tlist(tstringlist(buckets[hs]).objects[hit]);
-    if pos('s1_1',vari)>0 then   writeln('<li>DELid_',vari,'?<b>',t.xmlis,'</b>!',hs,'//</li>',hit);
+    //if pos('s1_1',vari)>0 then   writeln('<li>DELid_',vari,'?<b>',t.xmlis,'</b>!',hs,'//</li>',hit);
    except writeln('failedtofindelhash_obj',vari,hs);end;
   try
   //if hit>-1 then
@@ -607,7 +607,7 @@ begin
     //tstringlist(buckets[hs]).objects[hit]:=ellist;
    end;
    //             Setid_        ?   atag id= !1//
-   if pos('s1_1',vari)>0 then writeln('<li>DOSetid_',vari,'/hash:',hs,'//',hit,'?',t.xmlis,'?''/setid',ellist.count);//<xmp>'+ttag(tlist(tstringlist(buckets[hs]).objects[0]))[0].xmlis,'</xmp>/setid');
+   //if pos('s1_1',vari)>0 then writeln('<li>DOSetid_',vari,'/hash:',hs,'//',hit,'?',t.xmlis,'?''/setid',ellist.count);//<xmp>'+ttag(tlist(tstringlist(buckets[hs]).objects[0]))[0].xmlis,'</xmp>/setid');
    except writeln('</pre>failedtosethash_ele',vari,hs);
    end;
 
@@ -655,7 +655,7 @@ begin
   hit:=tstringlist(buckets[hs]).indexof(vari);
  //if hit<0 then exit;
   //writeln('<li>hash[',vari,']',hs,'=',hit,'//buc:');
-  for i:=0 to tstringlist(buckets[hs]).Count-1 do write(tstringlist(buckets[hs])[i],'=',gethash(tstringlist(buckets[hs])[i]),'!!!');
+  //for i:=0 to tstringlist(buckets[hs]).Count-1 do write(tstringlist(buckets[hs])[i],'=',gethash(tstringlist(buckets[hs])[i]),'!!!');
   if hit>-1 then
    //result:=ttag(tstringlist(buckets[hs]).objects[hit]);
     result:=tlist(tstringlist(buckets[hs]).objects[hit]);

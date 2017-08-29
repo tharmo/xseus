@@ -204,6 +204,7 @@ function p_selroot(st:string;xs:txseus;curtag:ttag; var sta:integer;  needtowrit
 
                    //st,       xs,       xs.CurFromEle,sta,            gottafree) else  //rememner to add remembertofree
 var
+
   res,newtag, atag: ttag;
   txt, loc,spec,apust: string;
   rl: TList;
@@ -330,7 +331,7 @@ begin
      else
      if spec = 'class' then ////***handerslers
      begin
-       //writeln('<li>getclassfrom:[');//+xs.x_handlers.head,']');
+       //writeln('<li>getclassfrom:['+xs.x_handlers.head,']');
           Res := xs.x_handlers;
        //   writeln('<li>ROOTELE:['+res.head+'/rest:',copy(st,sta,99),']');
      end else

@@ -40,7 +40,7 @@ function ReadLinejson:boolean;
 function createlevels(acom:ttag):tlist;
 function parseline(line:string):ttag;
 function getfirstword(lin: string; var curpos: integer): string;
-function next(lev,ind:integer;res:ttag): ttag;
+function snext(lev,ind:integer;res:ttag): ttag;
 end;
 
 txmlstreamer = class(tstreamer)
@@ -365,7 +365,7 @@ begin
 end;
 
 
-function tstreamer.next(lev,ind:integer;res:ttag): ttag;
+function tstreamer.snext(lev,ind:integer;res:ttag): ttag;
 var i,lim,hitind,curlinepos:integer;vari,toget:string;dbug:boolean;
   otag,subt:ttag;
 begin
@@ -711,10 +711,10 @@ intag:=false;//incomment:=false;invali:=false;
 end;
 destructor txmlstreamer.free;
 begin
-writeln('XXXXXXXXXXXXXXXXXXaXXXXXXXXXXXXXXXXXXXXXX');
+//writeln('XXXXXXXXXXXXXXXXXXaXXXXXXXXXXXXXXXXXXXXXX');
  //inherited free;
 sfile.free;
-writeln('XXXXXXXXXXXXXXXXXXbXXXXXXXXXXXXXXXXXXXXXX');
+writeln('<hr/>freeed filestream');
 end;
 
 function txmlstreamer.getlevel(par:ttag;dto:integer):boolean;
@@ -758,10 +758,10 @@ curtag:=root;
 while not eof do
  begin
   try
+  //write('val:',nextline);
   readstarttag(tagbody);
    if intag then //got the prev tags content
     begin
-    //write('val:',nextline):
       curtag.vali:=nextline;
     end else if nextline='' then continue else
     begin        p:=prevlevel;
@@ -777,18 +777,19 @@ while not eof do
         curtag:=atag;
        end else
        begin
-        //writeln('<hr/>');
-       //curtag:=atag;
-      while curlevel<p do begin //writeln('</li></ul>');
-       p:=p-1;if curtag.parent<>roottag then curtag:=curtag.parent else break;end;
-      //writeln('<li>',curtag.vari);
-       //write('<b>',curlevel,'/',prevlevel,':',nextline,'</b>');
-       //writeln('--<xmp>',root.xmlis,'</xmp>--',curtag.vari);
-      end;
+          //writeln('<hr/>');
+         //curtag:=atag;
+          while curlevel<p do
+          begin //writeln('</li></ul>');
+           p:=p-1;if curtag.parent<>roottag then curtag:=curtag.parent else break;
+          end;
+          //writeln('<li>',curtag.vari);
+           //write('<b>',curlevel,'/',prevlevel,':',nextline,'</b>');
+           //writeln('--<xmp>',root.xmlis,'</xmp>--',curtag.vari);
+        end;
      prevlevel:=curlevel;
      //writeln(curtag.vari+'@');
     end;
-
    result:=curtag;
   exit;
 

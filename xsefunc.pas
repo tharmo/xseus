@@ -993,6 +993,7 @@ begin
   while i<pars.count do
   begin
     //writeln('<li>',i,'/test',pars[i-1],'?',mat,'(',pars[i],')');
+
     if pars[i-1]=mat then
     begin
       //writeln('/found');
@@ -1000,6 +1001,8 @@ begin
       break;
    end
    else i:=i+2;
+   if i=pars.count then result:=pars[i-1];
+
   end;
   //writeln('<li>',result,'</li></ul>');
  end;
