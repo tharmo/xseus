@@ -244,8 +244,9 @@ begin
           headend:=pos(crlf,stbeg);
           if headend>0 then st:=copy(st,headend,length(st));
        end;
-       //writeln('<h1>isxml</h1>',hasheader,'<xmp>',st,'</xmp>');
        result:=tagparse(st,false,true);
+       //writeln('<h1>isxml</h1>',hasheader,'<xmp>',result.xmlis,'</xmp>');
+       //     writeln('<xmp>parsittu;',result.xmlis,'</xmp>');
     end;
 end;
 
@@ -906,7 +907,9 @@ var
 }
 
   function _uptree(tag: ttag;var tagtoclose:ttag; term: string;basetag:ttag): tlist;
+  //var dst:string;
   begin
+    //dst:=term+'\\'+tag.vari+': ';
     tagtoclose:=nil;
     Result := tlist.create;
     while tag.parent <> nil do
@@ -917,6 +920,12 @@ var
         if tag<>basetag then tagtoclose:=tag;
         exit;
       end;
+      //dst:=dst+'/'+tag.vari;
+      {if pos(tag.parent.vari,gc_voids)>0   THEN  //
+      begin       //untested, dangerous? vast some warning? (invalid xml - ignored if possibly htm5)
+        writeln('<li>move:',tag.vari, ' from ',tag.parent.vari, ' to ',tag.parent.parent.vari);
+         tag.parent:=tag.parent.parent;
+      end else}
       result.add(tag);
       //if tag.parent=nil then
       tag := tag.parent;
@@ -931,7 +940,6 @@ begin
   if cla='' then begin result:=nil;exit;end;
   try
     try
-
 
         //prop      propvars := TList.Create;
         //prop      propvaris := TStringList.Create;
@@ -996,18 +1004,20 @@ begin
         end;
         // write('*',curpos,_clean(sts[curpos])+'-');
         //if curpos=paslen then begin writeln('<li>endparse:'+tag.head+'!!!'); break;end;
-        if incdata then
+        // if (pos('CDATA',term)>0) then write('   (',intagword,term,incont,')   ');
+       if incdata then
         begin
           if (sts[curpos] = '>') and (curpos > 2) and (sts[curpos - 1] = ']') and
             (sts[curpos - 2] = ']') then
           begin
             try
               incdata := False;
-              term := copy(term, 1, length(term) - 2);
+             // term := copy(term, 1, length(term) - 2);
               if tag <> nil then
                 //prop tag.addsubprop(propvaris, 'cdata', term);
-                tag.addsubtag('cdata', term);
-
+              tag.addsubtag('CDATA!', copy(term,1,length(term)-2)+'?');
+              //tag.addsubtag('cdata', '<![CDATA['+term);
+              //writeln('<xmp>CEEDATALOPPUU:::',term,'</xmp>curtag:<xmp>',tag.xmlis,'</xmp><hr>');
               incont := True;
               term := '';
               attname := '';
@@ -1020,17 +1030,20 @@ begin
             term := term + sts[curpos];
           continue;
         end;
+        {if intagword then if pos('CDATA',term)>0 then write(' ((',term,')) ');
         if intagword then
           if ((term) = '![CDATA[') then
           begin
+             writeln('<xmp>CEEDATAALKAA;','</xmp>');
             incdata := True;
             intagword := False;
             incont := True;
             inparvar := False;
             term := sts[curpos];
+
             continue;
           end;
-
+        }
         if incomment then
         begin
           if (sts[curpos] = '>') and (curpos > 2) and (sts[curpos - 1] = '-') and
@@ -1077,6 +1090,7 @@ begin
         if intagword then
         begin
             try
+              //write('*',sts[curpos]);
               if term = '!--' then
               begin
                 continue;
@@ -1094,7 +1108,7 @@ begin
                 //prop    _newprop(tag, term);
 
                 if tag <> nil then
-                  newtag := tag.addsubtag(term, '') else writeln('<h1>ending a nil tag -please report problem</h1>');
+                  newtag := tag.addsubtag(term, '') else writeln('<h1>ending a nil tag -should not happen</h1>');
                 //writeln('<h4>Start:',curpos,_clean(term),'/under:',tag.vari,'!</h4>');
                 //if (term='head') or (term='body') then writeln('<li>starting tag:',term);
                 tag := newtag;
@@ -1104,6 +1118,7 @@ begin
                 else if sts[curpos] = '>' then
                 begin
                   incont := True;
+
                   //if curpos < paslen - 1 then
                     //if sts[curpos + 1] + sts[curpos + 2] = crlf then
                     //  skip := 2;
@@ -1145,14 +1160,16 @@ begin
                 oldtag := tag;
                 //if (term='head') or (term='body') then
                 // begin writeln('<li>ending tag:',term);
-                // writeln('<li>!closetag:'+tag.vari+'::'+term+' under:'+tag.parent.vari);
+                 //writeln('<li>!closetag:'+tag.vari+'::'+term+' under:'+tag.parent.vari);
                 // end;
                 if (ansilowercase(tag.vari) = ansilowercase(trim(term))) then
                 begin
                     if tag=basetag then break;
                     tag := tag.parent;
-                end else
+                end else //ekaks vois tutkia josko viimeksi aloittettu on html-void -tagi <br></p>  -tilanne
                 begin
+                   //if pos(tag.parent.vari,gc_voids)>0   THEN                begin                   end else
+
                   opentree:=_uptree(tag,tagtoclose,term,basetag); ////tagtoclose=the closest starttag with nae of this endtag
                   //writeln('<li>nnnmatchingend:');
                   try
@@ -1180,7 +1197,7 @@ begin
                      term:='';
                      continue;
                    end else
-                   begin
+                   begin    //lopetettiin jotain joka ei ollut viimeksi aloitettu
                      try
                       //opentree:=_intree(tag,tagtoclose,term,basetag); ////tagtoclose=the one this tag should close
                        //try
@@ -1193,22 +1210,28 @@ begin
                            atag:=ttag(opentree[j]);
                            //if (term='head') or (term='body') then
                            //   writeln('<li>autoclosing:'+atag.head+'/reason:/'+term+'/under:'+atag.parent.head+' /for:'+tagtoclose.head);
-                           if pos('<'+ansilowercase(atag.vari)+'>',gc_html5voids)>0 then
+                           //if pos('<'+ansilowercase(atag.vari)+'>',gc_html5voids)>0 then
                            begin
                              if trim(atag.vali)<>'' then tagtoclose.addsubtag('',atag.vali);
                              //writeln('<li>void-',j,',',atag.head);
                              //tagtoclose.addval(atag.vali);
                              atag.vali:='';
-                             while atag.subtags.count>0 do ttag(atag.subtags[0]).moveto(tagtoclose);
+                             while atag.subtags.count>0 do
+                             BEGIN //writeln('<li>/',tagtoclose.vari,'>',tag.vari,'\',ttag(atag.subtags[0]).vari);
+                             ttag(atag.subtags[0]).moveto(tagtoclose);
+                              //kaikki sulkemattomat siirret‰‰n ekaan joka m‰ts‰‰ nyt suljettavaan
+                             END; //ent‰ jos ollaan m‰ts‰‰m‰ttˆm‰ss‰ </lopputagissa>
                              //for k:=0 to atag.subtags.count-1 do ttag(atag.subtags[k]).moveto(tagtoclose);
                              //writeln('x3');
                            end
                            //else
                             //writeln('<li>UNSTARTED' +term+'/closeup:<b>',tagtoclose.vari+'</b>  ',tagtoclose.head,'<b>',atag.vari,' </b>',atag.head,'!!');
                          end;
+                         //  <a><b><c><c><c></b>  </a>
+
                          tag:=tagtoclose.parent;
                          //opentree.free;opentree:=nil;
-                       end;
+                       end;// else writeln('*********************************** ,eisuljetamit‰‰n:',term,'!',tag.xmlis,'!');
                         except writeln('<li>failed parse bracket endtag for : /'+term);end;
                    end;
                    finally opentree.free;opentree:=nil;end;
@@ -1344,6 +1367,20 @@ begin
 
               if (sts[curpos] = '<') then
               begin
+                //else
+                if copy(sts,curpos+1,8)='![CDATA[' then
+                begin
+                  incdata:=true;
+                  //writeln('<xmp>CEEDATAALKAA;','</xmp>');
+            //incdata := True;      intagword := False;
+            skip:=8;
+            //incont := True;
+            //inparvar := False;
+            //term := sts[curpos];
+
+            continue;
+          end;
+
                 if (paslen > curpos + 1) then  //pretty?
                   if sts[curpos + 1] = '!' then
                     if sts[curpos + 2] = '-' then
@@ -1358,6 +1395,8 @@ begin
                   //if pos(sts[i + 1], whitespace) > 0 then
                   if (sts[curpos+1]<>'/') and (not (sts[curpos+1] in gc_namechars)) then
                   begin  //was not start of a new tag after all
+                      //writeln('<li><xmp>(',term,')      (',copy(sts,curpos+1,8)='![CDATA[',copy(sts,curpos+1,8),')</xmp></li>');
+                     //   ()/</!!
                     term := term + '&lt;';
                     continue;
                   end
@@ -1386,6 +1425,7 @@ begin
                 end;
                 incont := False;
                 intagword := True;
+                //write('[[',term,']]');
                 term := '';
                 attname := '';
                 continue;
@@ -1414,10 +1454,10 @@ begin
     //propvars.Free;
     //propvaris.Free;
 
-    //if t_debug then
+    if t_debug then
     begin
      try
-      //writeln('<li>',basetag.vari,'//PARZ3<xmp>',basetag.xmlis,'</xmp><hr/><hr/>didparse', skipstart);
+      writeln('<li>',basetag.vari,'//PARZ3<xmp>',basetag.xmlis,'</xmp><hr/><hr/>didparse', skipstart);
      except writeln('<li>failed list parsed atg');end;
      try
      //if (tag<>basetag) then
@@ -2123,7 +2163,7 @@ begin
           //logwrite('#'+line+inttostr(curpos)+line[curpos]);
           startwhite:=' ';
           //if (line[curpos]=':') then startwhite:=crlf+crlf else
-          if (line[curpos]='.') then startwhite:=lf;
+          if (line[curpos]='.') then begin startwhite:=lf;end;
           if curpos>1 then  curpos := curpos+1;//2;
 
           //if line[curpos]<>' ' then startwhite:=crlf else begin startwhite:=' ';curpos:=curpos+1;end;
@@ -2133,7 +2173,7 @@ begin
             //logwrite('w:'+startwhite+'/t:'+partag.vali+'?' + startwhite+'?'+copy(line,curpos,9999)+'!');
             partag.vali := partag.vali+ startwhite+_gettextval(line, curpos, inquotedpar);
             //partag.vali := partag.vali+ startwhite+copy(line,curpos,9999);
-            //logwrite(partag.vali+ '---'+partag.xmlis+crlf);
+           // logwrite(partag.vali+ '---'+partag.xmlis+crlf);
           end
           //else      if (partag.lastsubtag.vari)='' then
           //  partag.lastsub.vali := partag.vali + startwhite+_gettextval(line, curpos, inquotedpar);
@@ -2989,8 +3029,7 @@ begin
       if noname then
         rest := vali
       else
-      if pos(',' + vari + ',',
-        ',span,strong,code,br,BR,img,em,b,i,a,strike,font,li,tr,td,dd,dt,th,dl,q,del,ins,')
+      if pos(',' + vari + ',', ',span,strong,code,br,BR,img,em,b,i,a,strike,font,li,tr,td,dd,dt,th,dl,q,del,ins,')
         > 0 then
         rest := pre + '<' + vari + ''
       else
@@ -3655,6 +3694,7 @@ begin
      //if t_debug then
      //writeln('<li>TRYCOND1');
      //writeln('<li>TRYCOND prev:',pathcon.tries,' hits:',pathcon.hits,'x:',pathcon.cond,'|',tag.vari,'</li>');
+     //pathcon.list;
       //if prevhits <= pathcon.hits then
       //  pathcon.hits := prevhits - 1;
       pathcon.tries:=pathcon.tries+1;
@@ -3913,18 +3953,20 @@ begin
           if (path.ele = '.') or (path.ele = '..') or (path.ele='*') or
             (_matches(path.ele, ttag(subtags[i]).vari)) then
           begin
+            try
             hitmees := hitmees + 1;
             //if (numcond<>-99999) and hitlist.count=
-            if ((path.con = nil)  or
+            if ((path.con = nil)  or (path.con.cond='') or
             //(_cond(path.con, ttag(subtags[i]), root,hitmees, subtags))) then
             (_cond(path.con, ttag(subtags[i]), root,hitmees, maybehits))) then
             //(_cond(path.con, ttag(subtags[i]), root,i, subtags))) then
             begin
               hitlist.add(subtags[i]);
             end;
+            except writeln('failed pth:###');end;
           end;
         except
-          writeln('doselect matching failed');
+          writeln('doselect matching failed:::','!!');//,hitlist.commatext);
           raise;
         end;
         try
